@@ -1,0 +1,66 @@
+{
+    "Spirituosenschrank": [
+        "v5"
+    ],
+    "Fleischtheke": [
+        "vA10"
+    ],
+    "Sonstiges (Kasse)": [
+        "vW1",
+        "vW2",
+        "vW3"
+    ],
+    "Obst & Gemüse": [
+        "vA6",
+        "vB6"
+    ],
+    "Fisch & Wurstwaren": [
+        "vD4",
+        "v1"
+    ],
+    "Drogerie & Haushalt": [
+        "vD5",
+        "vD6"
+    ],
+    "Kühlregal (Molkerei)": [
+        "vA9",
+        "vC3"
+    ],
+    "Kühlregal (Vegan & Käse)": [
+        "vD2",
+        "vC6"
+    ],
+    "Backwaren": [
+        "v2",
+        "v3"
+    ],
+    "Tiefkühlware": [
+        "vA4",
+        "vA9_2"
+    ],
+    "Trockensortiment & Konserven": [
+        "vB10",
+        "vC2"
+    ],
+    "Gewürze & Backzutaten": [
+        "vB7",
+        "vB2"
+    ],
+    "Getränke Alkoholfrei": [
+        "vA7",
+        "vD1"
+    ],
+    "Bier & Wein": [
+        "vC5",
+        "vC7"
+    ],
+    "Kaffee & Tee": [
+        "vA2"
+    ],
+    "Süßwaren & Snacks": [
+        "vB4"
+    ],
+    "Fitness & Sport": [
+        "vB9"
+    ]
+}
