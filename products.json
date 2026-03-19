@@ -1,55 +1,55 @@
 {
   "v5": [
     {
-      "name": "Dry Gin",
+      "name": "Wodka",
+      "brand": "Jack Daniels",
+      "category": "Spirituosenschrank",
+      "price": "16.49 €",
+      "ai_confidence": 0.825,
+      "suggested_slot": "v5",
+      "needs_review": false
+    },
+    {
+      "name": "Ginger Ale",
       "brand": "Absolut",
       "category": "Spirituosenschrank",
-      "price": "7.49 €",
-      "ai_confidence": 1.0,
+      "price": "21.89 €",
+      "ai_confidence": 0.825,
       "suggested_slot": "v5",
       "needs_review": false
     },
     {
-      "name": "Wodka",
-      "brand": "Havana Club",
-      "category": "Spirituosenschrank",
-      "price": "20.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v5",
-      "needs_review": false
-    },
-    {
-      "name": "Wodka",
+      "name": "Rum",
       "brand": "Absolut",
-      "category": "Spirituosenschrank",
-      "price": "15.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v5",
-      "needs_review": false
-    },
-    {
-      "name": "Wodka",
-      "brand": "Havana Club",
       "category": "Spirituosenschrank",
       "price": "21.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.825,
+      "suggested_slot": "v5",
+      "needs_review": false
+    },
+    {
+      "name": "Gin",
+      "brand": "Jack Daniels",
+      "category": "Spirituosenschrank",
+      "price": "7.89 €",
+      "ai_confidence": 0.825,
+      "suggested_slot": "v5",
+      "needs_review": false
+    },
+    {
+      "name": "Whisky Whiskey",
+      "brand": "Jack Daniels",
+      "category": "Spirituosenschrank",
+      "price": "11.49 €",
+      "ai_confidence": 0.825,
       "suggested_slot": "v5",
       "needs_review": false
     },
     {
       "name": "Dry Gin",
-      "brand": "Jack Daniels",
+      "brand": "Havana Club",
       "category": "Spirituosenschrank",
-      "price": "12.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v5",
-      "needs_review": false
-    },
-    {
-      "name": "Wodka",
-      "brand": "Jack Daniels",
-      "category": "Spirituosenschrank",
-      "price": "12.89 €",
+      "price": "19.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "v5",
       "needs_review": false
@@ -57,56 +57,56 @@
   ],
   "vA10": [
     {
-      "name": "Schweineschnitzel",
-      "brand": "Wiesenhof",
-      "category": "Fleischtheke",
-      "price": "9.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA10",
-      "needs_review": false
-    },
-    {
-      "name": "Rinderhackfleisch",
-      "brand": "Premium Beef",
-      "category": "Fleischtheke",
-      "price": "11.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA10",
-      "needs_review": false
-    },
-    {
-      "name": "Rinderhackfleisch",
-      "brand": "Wiesenhof",
-      "category": "Fleischtheke",
-      "price": "10.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA10",
-      "needs_review": false
-    },
-    {
-      "name": "Rinderhackfleisch",
-      "brand": "Wiesenhof",
-      "category": "Fleischtheke",
-      "price": "14.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA10",
-      "needs_review": false
-    },
-    {
-      "name": "Hähnchenbrust",
+      "name": "Hase Fleisch",
       "brand": "Metzgermeister",
       "category": "Fleischtheke",
-      "price": "9.89 €",
-      "ai_confidence": 1.0,
+      "price": "9.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA10",
       "needs_review": false
     },
     {
-      "name": "Rinderhackfleisch",
-      "brand": "Premium Beef",
+      "name": "Kalb Steak",
+      "brand": "Metzgermeister",
       "category": "Fleischtheke",
-      "price": "14.29 €",
-      "ai_confidence": 1.0,
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA10",
+      "needs_review": false
+    },
+    {
+      "name": "Pferd Fleisch",
+      "brand": "Wiesenhof",
+      "category": "Fleischtheke",
+      "price": "11.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA10",
+      "needs_review": false
+    },
+    {
+      "name": "Rind Schwein",
+      "brand": "Metzgermeister",
+      "category": "Fleischtheke",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA10",
+      "needs_review": false
+    },
+    {
+      "name": "Rind Gulasch",
+      "brand": "Wiesenhof",
+      "category": "Fleischtheke",
+      "price": "10.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA10",
+      "needs_review": false
+    },
+    {
+      "name": "Schwein Kamm",
+      "brand": "Metzgermeister",
+      "category": "Fleischtheke",
+      "price": "6.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA10",
       "needs_review": false
     }
@@ -116,7 +116,7 @@
       "name": "Wrigley's Extra",
       "brand": "Wrigley's",
       "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
+      "price": "1.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW1",
       "needs_review": false
@@ -125,7 +125,7 @@
       "name": "Tic Tac Fresh",
       "brand": "Tic Tac",
       "category": "Sonstiges (Kasse)",
-      "price": "0.99 €",
+      "price": "4.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW1",
       "needs_review": false
@@ -134,7 +134,7 @@
       "name": "Mentos Mint",
       "brand": "Mentos",
       "category": "Sonstiges (Kasse)",
-      "price": "3.89 €",
+      "price": "2.99 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW1",
       "needs_review": false
@@ -143,25 +143,7 @@
       "name": "Hubba Bubba",
       "brand": "Wrigley's",
       "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW1",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW1",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "4.29 €",
+      "price": "2.89 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW1",
       "needs_review": false
@@ -172,7 +154,7 @@
       "name": "AA Batterien 4er",
       "brand": "Varta",
       "category": "Sonstiges (Kasse)",
-      "price": "3.49 €",
+      "price": "2.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW2",
       "needs_review": false
@@ -181,7 +163,7 @@
       "name": "AAA Batterien 4er",
       "brand": "Duracell",
       "category": "Sonstiges (Kasse)",
-      "price": "2.29 €",
+      "price": "3.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW2",
       "needs_review": false
@@ -190,7 +172,7 @@
       "name": "Feuerzeug",
       "brand": "Bic",
       "category": "Sonstiges (Kasse)",
-      "price": "2.49 €",
+      "price": "3.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW2",
       "needs_review": false
@@ -199,25 +181,7 @@
       "name": "Stabfeuerzeug",
       "brand": "Bic",
       "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW2",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW2",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
+      "price": "3.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW2",
       "needs_review": false
@@ -237,7 +201,7 @@
       "name": "Mars Riegel",
       "brand": "Mars",
       "category": "Sonstiges (Kasse)",
-      "price": "2.89 €",
+      "price": "2.99 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW3",
       "needs_review": false
@@ -246,7 +210,7 @@
       "name": "Twix",
       "brand": "Mars",
       "category": "Sonstiges (Kasse)",
-      "price": "1.89 €",
+      "price": "1.99 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW3",
       "needs_review": false
@@ -255,697 +219,1071 @@
       "name": "Amazon Gutschein 25€",
       "brand": "Gutscheinkarte",
       "category": "Sonstiges (Kasse)",
-      "price": "1.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW3",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vW3",
-      "needs_review": false
-    },
-    {
-      "name": "Basic Item",
-      "brand": "JMU Basic",
-      "category": "Sonstiges (Kasse)",
-      "price": "2.99 €",
+      "price": "2.89 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vW3",
       "needs_review": false
     }
   ],
+  "v1": [
+    {
+      "name": "Banane",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    },
+    {
+      "name": "Zuckerhutsalat",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    },
+    {
+      "name": "Tomate Gesäuert",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "2.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    },
+    {
+      "name": "Batate Süßkartoffel",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    },
+    {
+      "name": "Feldsalat Rapunzel",
+      "brand": "Demeter",
+      "category": "Obst & Gemüse",
+      "price": "1.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    },
+    {
+      "name": "Apfel-Streuselkuchen",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "2.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v1",
+      "needs_review": false
+    }
+  ],
+  "v2": [
+    {
+      "name": "Kopfsalat",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "1.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    },
+    {
+      "name": "Kochbanane",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    },
+    {
+      "name": "Apfel",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    },
+    {
+      "name": "Gemüsesülze Gemüse-Mix",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    },
+    {
+      "name": "Tomate Gegrillt",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    },
+    {
+      "name": "Tomate Pulver",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v2",
+      "needs_review": false
+    }
+  ],
+  "vA2": [
+    {
+      "name": "Eisbergsalat",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    },
+    {
+      "name": "Gemüse-Meerrettich",
+      "brand": "SanLucar",
+      "category": "Obst & Gemüse",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    },
+    {
+      "name": "Kartoffel Ungeschält",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "1.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    },
+    {
+      "name": "Apfel Geschält",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "1.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    },
+    {
+      "name": "Granatapfel",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    },
+    {
+      "name": "Apfel Getrocknet",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA2",
+      "needs_review": false
+    }
+  ],
+  "vB2": [
+    {
+      "name": "Tomate",
+      "brand": "Bio-Hof",
+      "category": "Obst & Gemüse",
+      "price": "1.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    },
+    {
+      "name": "Banane Getrocknet",
+      "brand": "Demeter",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    },
+    {
+      "name": "Kartoffel-Speck-Rösti",
+      "brand": "Demeter",
+      "category": "Obst & Gemüse",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    },
+    {
+      "name": "Kochbanane Gebacken",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    },
+    {
+      "name": "Tomate Gebacken",
+      "brand": "Regional",
+      "category": "Obst & Gemüse",
+      "price": "4.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    },
+    {
+      "name": "Apfel-Quarktorte",
+      "brand": "Demeter",
+      "category": "Obst & Gemüse",
+      "price": "1.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB2",
+      "needs_review": false
+    }
+  ],
+  "v3": [
+    {
+      "name": "Nusskuchen",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "1.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    },
+    {
+      "name": "Kirschtorte",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    },
+    {
+      "name": "Lebkuchen",
+      "brand": "Backstube",
+      "category": "Backwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    },
+    {
+      "name": "Roggenbrot",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    },
+    {
+      "name": "Apfelkuchen",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    },
+    {
+      "name": "Schokobrötchen",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "v3",
+      "needs_review": false
+    }
+  ],
+  "vA4": [
+    {
+      "name": "Brownies",
+      "brand": "Backstube",
+      "category": "Backwaren",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    },
+    {
+      "name": "Käsetorte",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    },
+    {
+      "name": "Brötchen",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "1.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    },
+    {
+      "name": "Pfefferkuchen",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    },
+    {
+      "name": "Dinkelbrötchen",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    },
+    {
+      "name": "Traubentorte",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA4",
+      "needs_review": false
+    }
+  ],
+  "vB4": [
+    {
+      "name": "Mehrkornbrot",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    },
+    {
+      "name": "Herrentorte",
+      "brand": "Backstube",
+      "category": "Backwaren",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    },
+    {
+      "name": "Sachertorte",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "3.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    },
+    {
+      "name": "Trüffeltorte",
+      "brand": "Backstube",
+      "category": "Backwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    },
+    {
+      "name": "Honigkuchen",
+      "brand": "Hausbäcker",
+      "category": "Backwaren",
+      "price": "0.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    },
+    {
+      "name": "Gewürzkuchen",
+      "brand": "Oven Fresh",
+      "category": "Backwaren",
+      "price": "3.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB4",
+      "needs_review": false
+    }
+  ],
   "vD6": [
     {
-      "name": "Toilettenpapier",
-      "brand": "Zewa",
-      "category": "Drogerie & Haushalt",
-      "price": "6.89 €",
-      "ai_confidence": 1.0,
+      "name": "Wildlachs",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "5.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     },
     {
-      "name": "Zahnpasta",
-      "brand": "Zewa",
-      "category": "Drogerie & Haushalt",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Erbswurst",
+      "brand": "Herta",
+      "category": "Fisch & Wurstwaren",
+      "price": "4.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     },
     {
-      "name": "Duschgel",
-      "brand": "Balea",
-      "category": "Drogerie & Haushalt",
-      "price": "6.49 €",
-      "ai_confidence": 1.0,
+      "name": "Salami Ia",
+      "brand": "Herta",
+      "category": "Fisch & Wurstwaren",
+      "price": "4.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     },
     {
-      "name": "Duschgel",
-      "brand": "Ariel",
-      "category": "Drogerie & Haushalt",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
+      "name": "Königslachs",
+      "brand": "Herta",
+      "category": "Fisch & Wurstwaren",
+      "price": "5.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     },
     {
-      "name": "Duschgel",
-      "brand": "Nivea",
-      "category": "Drogerie & Haushalt",
-      "price": "3.99 €",
-      "ai_confidence": 1.0,
+      "name": "Touristenwurst",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "5.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     },
     {
-      "name": "Toilettenpapier",
-      "brand": "Nivea",
-      "category": "Drogerie & Haushalt",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Fleischwurst",
+      "brand": "Rügenwalder",
+      "category": "Fisch & Wurstwaren",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD6",
       "needs_review": false
     }
   ],
   "vD5": [
     {
-      "name": "Toilettenpapier",
-      "brand": "Ariel",
-      "category": "Drogerie & Haushalt",
+      "name": "Kaffee",
+      "brand": "Teekanne",
+      "category": "Kaffee & Tee",
+      "price": "3.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD5",
+      "needs_review": false
+    },
+    {
+      "name": "Kräutertee",
+      "brand": "Jacobs",
+      "category": "Kaffee & Tee",
+      "price": "5.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD5",
+      "needs_review": false
+    },
+    {
+      "name": "Schwarztee",
+      "brand": "Teekanne",
+      "category": "Kaffee & Tee",
+      "price": "4.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD5",
+      "needs_review": false
+    },
+    {
+      "name": "Eistee",
+      "brand": "Jacobs",
+      "category": "Kaffee & Tee",
+      "price": "8.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD5",
+      "needs_review": false
+    },
+    {
+      "name": "Mate-Tee",
+      "brand": "Tchibo",
+      "category": "Kaffee & Tee",
+      "price": "8.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD5",
+      "needs_review": false
+    },
+    {
+      "name": "Grüntee",
+      "brand": "Tchibo",
+      "category": "Kaffee & Tee",
       "price": "5.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD5",
-      "needs_review": false
-    },
-    {
-      "name": "Duschgel",
-      "brand": "Nivea",
-      "category": "Drogerie & Haushalt",
-      "price": "8.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD5",
-      "needs_review": false
-    },
-    {
-      "name": "Toilettenpapier",
-      "brand": "Zewa",
-      "category": "Drogerie & Haushalt",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD5",
-      "needs_review": false
-    },
-    {
-      "name": "Toilettenpapier",
-      "brand": "Ariel",
-      "category": "Drogerie & Haushalt",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD5",
-      "needs_review": false
-    },
-    {
-      "name": "Toilettenpapier",
-      "brand": "Balea",
-      "category": "Drogerie & Haushalt",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD5",
-      "needs_review": false
-    },
-    {
-      "name": "Duschgel",
-      "brand": "Balea",
-      "category": "Drogerie & Haushalt",
-      "price": "9.99 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vD5",
       "needs_review": false
     }
   ],
   "vD4": [
     {
-      "name": "Salami",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Tofu",
+      "brand": "Veggie-Life",
+      "category": "Kühlregal (Vegan & Käse)",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD4",
       "needs_review": false
     },
     {
-      "name": "Lachsfilet",
-      "brand": "Nordsee",
-      "category": "Fisch & Wurstwaren",
-      "price": "6.99 €",
-      "ai_confidence": 1.0,
+      "name": "Bergkäse",
+      "brand": "Milram",
+      "category": "Kühlregal (Vegan & Käse)",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD4",
       "needs_review": false
     },
     {
-      "name": "Lachsfilet",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "6.49 €",
-      "ai_confidence": 1.0,
+      "name": "Frischkäse",
+      "brand": "Milram",
+      "category": "Kühlregal (Vegan & Käse)",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD4",
       "needs_review": false
     },
     {
-      "name": "Fischstäbchen",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "5.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD4",
-      "needs_review": false
-    },
-    {
-      "name": "Salami",
-      "brand": "Rügenwalder",
-      "category": "Fisch & Wurstwaren",
+      "name": "Edelpilzkäse",
+      "brand": "Simply V",
+      "category": "Kühlregal (Vegan & Käse)",
       "price": "4.89 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vD4",
       "needs_review": false
     },
     {
-      "name": "Salami",
-      "brand": "Nordsee",
-      "category": "Fisch & Wurstwaren",
-      "price": "6.49 €",
-      "ai_confidence": 1.0,
+      "name": "Kochkäse",
+      "brand": "Milram",
+      "category": "Kühlregal (Vegan & Käse)",
+      "price": "3.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD4",
+      "needs_review": false
+    },
+    {
+      "name": "Schichtkäse",
+      "brand": "Milram",
+      "category": "Kühlregal (Vegan & Käse)",
+      "price": "4.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD4",
       "needs_review": false
     }
   ],
   "vD2": [
     {
-      "name": "Emmentaler",
-      "brand": "Veggie-Life",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "5.89 €",
-      "ai_confidence": 1.0,
+      "name": "Sojaöl",
+      "brand": "Ostmann",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD2",
       "needs_review": false
     },
     {
-      "name": "Tofu",
-      "brand": "Veggie-Life",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "4.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD2",
-      "needs_review": false
-    },
-    {
-      "name": "Tofu",
-      "brand": "Simply V",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "1.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD2",
-      "needs_review": false
-    },
-    {
-      "name": "Gouda",
-      "brand": "Simply V",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vD2",
-      "needs_review": false
-    },
-    {
-      "name": "Tofu",
-      "brand": "Milram",
-      "category": "Kühlregal (Vegan & Käse)",
+      "name": "Erdnussöl",
+      "brand": "Dr. Oetker",
+      "category": "Gewürze & Backzutaten",
       "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vD2",
       "needs_review": false
     },
     {
-      "name": "Camembert",
-      "brand": "Veggie-Life",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
+      "name": "Meersalz",
+      "brand": "Ostmann",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD2",
+      "needs_review": false
+    },
+    {
+      "name": "Sesamöl",
+      "brand": "Dr. Oetker",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD2",
+      "needs_review": false
+    },
+    {
+      "name": "Lupinenmehl",
+      "brand": "Bertolli",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vD2",
+      "needs_review": false
+    },
+    {
+      "name": "Nitritpökelsalz",
+      "brand": "Dr. Oetker",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD2",
       "needs_review": false
     }
   ],
   "vD1": [
     {
-      "name": "Cola",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
-      "price": "3.99 €",
-      "ai_confidence": 1.0,
+      "name": "Sekt",
+      "brand": "Krombacher",
+      "category": "Bier & Wein",
+      "price": "5.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD1",
       "needs_review": false
     },
     {
-      "name": "Apfelschorle",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
+      "name": "Portwein",
+      "brand": "Paulaner",
+      "category": "Bier & Wein",
       "price": "1.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vD1",
       "needs_review": false
     },
     {
-      "name": "Mineralwasser",
-      "brand": "Gerolsteiner",
-      "category": "Getränke Alkoholfrei",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
+      "name": "Eiswein",
+      "brand": "Paulaner",
+      "category": "Bier & Wein",
+      "price": "1.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD1",
       "needs_review": false
     },
     {
-      "name": "Mineralwasser",
-      "brand": "Vio",
-      "category": "Getränke Alkoholfrei",
-      "price": "1.29 €",
-      "ai_confidence": 1.0,
+      "name": "Rotweinpunsch",
+      "brand": "Paulaner",
+      "category": "Bier & Wein",
+      "price": "8.49 €",
+      "ai_confidence": 0.394,
       "suggested_slot": "vD1",
       "needs_review": false
     },
     {
-      "name": "Cola",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
+      "name": "Bier",
+      "brand": "Dornfelder",
+      "category": "Bier & Wein",
+      "price": "5.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD1",
       "needs_review": false
     },
     {
-      "name": "Apfelschorle",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
-      "price": "1.29 €",
-      "ai_confidence": 1.0,
+      "name": "Weizen-Radler",
+      "brand": "Krombacher",
+      "category": "Bier & Wein",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vD1",
       "needs_review": false
     }
   ],
   "vC7": [
     {
-      "name": "Pilsener",
-      "brand": "Dornfelder",
-      "category": "Bier & Wein",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
+      "name": "Paranuss",
+      "brand": "Funny Frisch",
+      "category": "Süßwaren & Snacks",
+      "price": "4.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     },
     {
-      "name": "Rotwein",
-      "brand": "Krombacher",
-      "category": "Bier & Wein",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
+      "name": "Pekannuss",
+      "brand": "Haribo",
+      "category": "Süßwaren & Snacks",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     },
     {
-      "name": "Weißbier",
-      "brand": "Dornfelder",
-      "category": "Bier & Wein",
-      "price": "4.29 €",
-      "ai_confidence": 1.0,
+      "name": "Müslikekse",
+      "brand": "Funny Frisch",
+      "category": "Süßwaren & Snacks",
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     },
     {
-      "name": "Rotwein",
-      "brand": "Paulaner",
-      "category": "Bier & Wein",
-      "price": "3.49 €",
-      "ai_confidence": 1.0,
+      "name": "Macadamianuss",
+      "brand": "Haribo",
+      "category": "Süßwaren & Snacks",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     },
     {
-      "name": "Weißbier",
-      "brand": "Paulaner",
-      "category": "Bier & Wein",
-      "price": "5.99 €",
-      "ai_confidence": 1.0,
+      "name": "Lamm Nuss",
+      "brand": "Milka",
+      "category": "Süßwaren & Snacks",
+      "price": "1.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     },
     {
-      "name": "Rotwein",
-      "brand": "Dornfelder",
-      "category": "Bier & Wein",
-      "price": "7.29 €",
-      "ai_confidence": 1.0,
+      "name": "Friesenkekse",
+      "brand": "Haribo",
+      "category": "Süßwaren & Snacks",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC7",
       "needs_review": false
     }
   ],
   "vC6": [
     {
-      "name": "Camembert",
-      "brand": "Milram",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "3.99 €",
-      "ai_confidence": 1.0,
+      "name": "Limonade",
+      "brand": "Gerolsteiner",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.29 €",
+      "ai_confidence": 0.259,
       "suggested_slot": "vC6",
       "needs_review": false
     },
     {
-      "name": "Camembert",
-      "brand": "Milram",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "5.49 €",
-      "ai_confidence": 1.0,
+      "name": "Kakisaft",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC6",
       "needs_review": false
     },
     {
-      "name": "Emmentaler",
-      "brand": "Veggie-Life",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Cocktail",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.99 €",
+      "ai_confidence": 0.259,
       "suggested_slot": "vC6",
       "needs_review": false
     },
     {
-      "name": "Emmentaler",
-      "brand": "Veggie-Life",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
+      "name": "Kalte Ente",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.29 €",
+      "ai_confidence": 0.259,
       "suggested_slot": "vC6",
       "needs_review": false
     },
     {
-      "name": "Tofu",
-      "brand": "Milram",
-      "category": "Kühlregal (Vegan & Käse)",
+      "name": "Cognac",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.99 €",
+      "ai_confidence": 0.259,
+      "suggested_slot": "vC6",
+      "needs_review": false
+    },
+    {
+      "name": "Brause",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
       "price": "1.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC6",
-      "needs_review": false
-    },
-    {
-      "name": "Camembert",
-      "brand": "Milram",
-      "category": "Kühlregal (Vegan & Käse)",
-      "price": "1.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.259,
       "suggested_slot": "vC6",
       "needs_review": false
     }
   ],
   "vC5": [
     {
-      "name": "Weißbier",
-      "brand": "Paulaner",
-      "category": "Bier & Wein",
-      "price": "4.89 €",
-      "ai_confidence": 1.0,
+      "name": "Reis Mehl",
+      "brand": "Mutti",
+      "category": "Trockensortiment & Konserven",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC5",
       "needs_review": false
     },
     {
-      "name": "Weißbier",
-      "brand": "Dornfelder",
-      "category": "Bier & Wein",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
+      "name": "Reis Grieß",
+      "brand": "Uncle Bens",
+      "category": "Trockensortiment & Konserven",
+      "price": "1.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC5",
       "needs_review": false
     },
     {
-      "name": "Weißbier",
-      "brand": "Paulaner",
-      "category": "Bier & Wein",
-      "price": "4.49 €",
-      "ai_confidence": 1.0,
+      "name": "Wildreis",
+      "brand": "Erasco",
+      "category": "Trockensortiment & Konserven",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC5",
       "needs_review": false
     },
     {
-      "name": "Pilsener",
-      "brand": "Krombacher",
-      "category": "Bier & Wein",
-      "price": "0.89 €",
-      "ai_confidence": 1.0,
+      "name": "Gemüsecremesuppe",
+      "brand": "Barilla",
+      "category": "Trockensortiment & Konserven",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC5",
       "needs_review": false
     },
     {
-      "name": "Pilsener",
-      "brand": "Paulaner",
-      "category": "Bier & Wein",
-      "price": "7.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC5",
-      "needs_review": false
-    },
-    {
-      "name": "Rotwein",
-      "brand": "Krombacher",
-      "category": "Bier & Wein",
+      "name": "Glasnudeln",
+      "brand": "Erasco",
+      "category": "Trockensortiment & Konserven",
       "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC5",
+      "needs_review": false
+    },
+    {
+      "name": "Reis Kleie",
+      "brand": "Erasco",
+      "category": "Trockensortiment & Konserven",
+      "price": "3.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC5",
       "needs_review": false
     }
   ],
   "vC3": [
     {
-      "name": "Fettarme Milch",
-      "brand": "Weihenstephan",
-      "category": "Kühlregal (Molkerei)",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Presswurst",
+      "brand": "Rügenwalder",
+      "category": "Fisch & Wurstwaren",
+      "price": "5.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC3",
       "needs_review": false
     },
     {
-      "name": "Fettarme Milch",
-      "brand": "Alpenmilch",
-      "category": "Kühlregal (Molkerei)",
+      "name": "Mettwurst",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "3.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC3",
+      "needs_review": false
+    },
+    {
+      "name": "Bierschinken",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "6.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC3",
+      "needs_review": false
+    },
+    {
+      "name": "Buckellachs",
+      "brand": "Rügenwalder",
+      "category": "Fisch & Wurstwaren",
+      "price": "4.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC3",
+      "needs_review": false
+    },
+    {
+      "name": "Kümmelwurst",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
       "price": "1.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vC3",
       "needs_review": false
     },
     {
-      "name": "Vollmilch",
-      "brand": "Alpenmilch",
-      "category": "Kühlregal (Molkerei)",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC3",
-      "needs_review": false
-    },
-    {
-      "name": "Naturjoghurt",
-      "brand": "Bärenmarke",
-      "category": "Kühlregal (Molkerei)",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC3",
-      "needs_review": false
-    },
-    {
-      "name": "Vollmilch",
-      "brand": "Alpenmilch",
-      "category": "Kühlregal (Molkerei)",
+      "name": "Knoblauchwurst",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
       "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC3",
-      "needs_review": false
-    },
-    {
-      "name": "Fettarme Milch",
-      "brand": "Alpenmilch",
-      "category": "Kühlregal (Molkerei)",
-      "price": "4.99 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vC3",
       "needs_review": false
     }
   ],
   "vC2": [
     {
-      "name": "Penne",
-      "brand": "Mutti",
-      "category": "Trockensortiment & Konserven",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
+      "name": "Hanföl",
+      "brand": "Bertolli",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC2",
       "needs_review": false
     },
     {
-      "name": "Spaghetti",
-      "brand": "Uncle Bens",
-      "category": "Trockensortiment & Konserven",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC2",
-      "needs_review": false
-    },
-    {
-      "name": "Spaghetti",
-      "brand": "Uncle Bens",
-      "category": "Trockensortiment & Konserven",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC2",
-      "needs_review": false
-    },
-    {
-      "name": "Passierte Tomaten",
-      "brand": "Erasco",
-      "category": "Trockensortiment & Konserven",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC2",
-      "needs_review": false
-    },
-    {
-      "name": "Passierte Tomaten",
-      "brand": "Uncle Bens",
-      "category": "Trockensortiment & Konserven",
-      "price": "1.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vC2",
-      "needs_review": false
-    },
-    {
-      "name": "Passierte Tomaten",
-      "brand": "Mutti",
-      "category": "Trockensortiment & Konserven",
+      "name": "Mohnöl",
+      "brand": "Dr. Oetker",
+      "category": "Gewürze & Backzutaten",
       "price": "3.99 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC2",
+      "needs_review": false
+    },
+    {
+      "name": "Mandelöl",
+      "brand": "Bertolli",
+      "category": "Gewürze & Backzutaten",
+      "price": "1.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC2",
+      "needs_review": false
+    },
+    {
+      "name": "Haselnussöl",
+      "brand": "Bertolli",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC2",
+      "needs_review": false
+    },
+    {
+      "name": "Erbsenmehl",
+      "brand": "Dr. Oetker",
+      "category": "Gewürze & Backzutaten",
+      "price": "0.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vC2",
+      "needs_review": false
+    },
+    {
+      "name": "Weinessig",
+      "brand": "Ostmann",
+      "category": "Gewürze & Backzutaten",
+      "price": "2.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vC2",
       "needs_review": false
     }
   ],
   "vB10": [
     {
-      "name": "Spaghetti",
-      "brand": "Erasco",
-      "category": "Trockensortiment & Konserven",
-      "price": "0.29 €",
-      "ai_confidence": 1.0,
+      "name": "Radler",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "1.29 €",
+      "ai_confidence": 0.259,
       "suggested_slot": "vB10",
       "needs_review": false
     },
     {
-      "name": "Spaghetti",
-      "brand": "Erasco",
-      "category": "Trockensortiment & Konserven",
-      "price": "1.49 €",
-      "ai_confidence": 1.0,
+      "name": "Rucola",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB10",
       "needs_review": false
     },
     {
-      "name": "Spaghetti",
-      "brand": "Erasco",
-      "category": "Trockensortiment & Konserven",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
+      "name": "Apfelsaft",
+      "brand": "Gerolsteiner",
+      "category": "Getränke Alkoholfrei",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB10",
       "needs_review": false
     },
     {
-      "name": "Penne",
-      "brand": "Mutti",
-      "category": "Trockensortiment & Konserven",
+      "name": "Arrak",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
       "price": "3.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.259,
       "suggested_slot": "vB10",
       "needs_review": false
     },
     {
-      "name": "Penne",
-      "brand": "Uncle Bens",
-      "category": "Trockensortiment & Konserven",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
+      "name": "Sanddornsaft",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB10",
       "needs_review": false
     },
     {
-      "name": "Passierte Tomaten",
-      "brand": "Erasco",
-      "category": "Trockensortiment & Konserven",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
+      "name": "Federweißer",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.49 €",
+      "ai_confidence": 0.259,
       "suggested_slot": "vB10",
       "needs_review": false
     }
   ],
   "vB9": [
     {
-      "name": "High Protein Pudding",
-      "brand": "PowerBar",
+      "name": "Riegel",
+      "brand": "Red Bull",
       "category": "Fitness & Sport",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB9",
       "needs_review": false
     },
     {
-      "name": "Proteinriegel",
-      "brand": "PowerBar",
-      "category": "Fitness & Sport",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB9",
-      "needs_review": false
-    },
-    {
-      "name": "High Protein Pudding",
-      "brand": "PowerBar",
-      "category": "Fitness & Sport",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB9",
-      "needs_review": false
-    },
-    {
-      "name": "Proteinriegel",
+      "name": "Müsli-Riegel",
       "brand": "ESN",
       "category": "Fitness & Sport",
       "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB9",
+      "needs_review": false
+    },
+    {
+      "name": "Energieriegel Angereichert",
+      "brand": "ESN",
+      "category": "Fitness & Sport",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB9",
+      "needs_review": false
+    },
+    {
+      "name": "Proteinriegel",
+      "brand": "Red Bull",
+      "category": "Fitness & Sport",
+      "price": "1.99 €",
+      "ai_confidence": 1.0,
+      "suggested_slot": "vB9",
+      "needs_review": false
+    },
+    {
+      "name": "High Protein Pudding",
+      "brand": "PowerBar",
+      "category": "Fitness & Sport",
+      "price": "2.99 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vB9",
       "needs_review": false
     },
     {
       "name": "Energy Drink",
-      "brand": "ESN",
-      "category": "Fitness & Sport",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB9",
-      "needs_review": false
-    },
-    {
-      "name": "High Protein Pudding",
       "brand": "PowerBar",
       "category": "Fitness & Sport",
-      "price": "1.89 €",
+      "price": "2.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vB9",
       "needs_review": false
@@ -953,391 +1291,279 @@
   ],
   "vB7": [
     {
-      "name": "Olivenöl",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
-      "price": "1.99 €",
-      "ai_confidence": 1.0,
+      "name": "Fruchteis",
+      "brand": "Frosta",
+      "category": "Tiefkühlware",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB7",
       "needs_review": false
     },
     {
-      "name": "Salz",
-      "brand": "Bertolli",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
+      "name": "Karamelleis",
+      "brand": "Iglo",
+      "category": "Tiefkühlware",
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB7",
       "needs_review": false
     },
     {
-      "name": "Salz",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
-      "price": "3.49 €",
-      "ai_confidence": 1.0,
+      "name": "Frucht-Sorbet",
+      "brand": "Iglo",
+      "category": "Tiefkühlware",
+      "price": "4.99 €",
+      "ai_confidence": 0.411,
       "suggested_slot": "vB7",
       "needs_review": false
     },
     {
-      "name": "Salz",
+      "name": "Joghurteis",
+      "brand": "Wagner",
+      "category": "Tiefkühlware",
+      "price": "4.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB7",
+      "needs_review": false
+    },
+    {
+      "name": "Kaffeeeis",
+      "brand": "Frosta",
+      "category": "Tiefkühlware",
+      "price": "5.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB7",
+      "needs_review": false
+    },
+    {
+      "name": "Vanilleeis",
       "brand": "Dr. Oetker",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB7",
-      "needs_review": false
-    },
-    {
-      "name": "Salz",
-      "brand": "Bertolli",
-      "category": "Gewürze & Backzutaten",
-      "price": "4.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB7",
-      "needs_review": false
-    },
-    {
-      "name": "Olivenöl",
-      "brand": "Bertolli",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
+      "category": "Tiefkühlware",
+      "price": "4.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vB7",
       "needs_review": false
     }
   ],
   "vB6": [
     {
-      "name": "Äpfel",
-      "brand": "SanLucar",
-      "category": "Obst & Gemüse",
-      "price": "1.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    },
-    {
-      "name": "Tomaten",
-      "brand": "SanLucar",
-      "category": "Obst & Gemüse",
-      "price": "1.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    },
-    {
-      "name": "Tomaten",
-      "brand": "Demeter",
-      "category": "Obst & Gemüse",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    },
-    {
-      "name": "Bananen",
-      "brand": "Bio-Hof",
-      "category": "Obst & Gemüse",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    },
-    {
-      "name": "Äpfel",
-      "brand": "Regional",
-      "category": "Obst & Gemüse",
-      "price": "3.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    },
-    {
-      "name": "Bananen",
-      "brand": "Bio-Hof",
-      "category": "Obst & Gemüse",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB6",
-      "needs_review": false
-    }
-  ],
-  "vB4": [
-    {
-      "name": "Gummibärchen",
-      "brand": "Funny Frisch",
-      "category": "Süßwaren & Snacks",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    },
-    {
-      "name": "Chips",
-      "brand": "Milka",
-      "category": "Süßwaren & Snacks",
-      "price": "0.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    },
-    {
-      "name": "Gummibärchen",
-      "brand": "Haribo",
-      "category": "Süßwaren & Snacks",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    },
-    {
-      "name": "Gummibärchen",
-      "brand": "Funny Frisch",
-      "category": "Süßwaren & Snacks",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    },
-    {
-      "name": "Chips",
-      "brand": "Haribo",
-      "category": "Süßwaren & Snacks",
-      "price": "4.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    },
-    {
-      "name": "Chips",
-      "brand": "Milka",
-      "category": "Süßwaren & Snacks",
-      "price": "1.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB4",
-      "needs_review": false
-    }
-  ],
-  "vB2": [
-    {
-      "name": "Salz",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
-      "needs_review": false
-    },
-    {
-      "name": "Pfeffer",
-      "brand": "Bertolli",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
-      "needs_review": false
-    },
-    {
-      "name": "Salz",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
-      "needs_review": false
-    },
-    {
-      "name": "Salz",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
+      "name": "Bockbier",
+      "brand": "Paulaner",
+      "category": "Bier & Wein",
       "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
       "needs_review": false
     },
     {
-      "name": "Pfeffer",
-      "brand": "Ostmann",
-      "category": "Gewürze & Backzutaten",
-      "price": "4.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
+      "name": "Apfelwein",
+      "brand": "Dornfelder",
+      "category": "Bier & Wein",
+      "price": "6.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
       "needs_review": false
     },
     {
-      "name": "Salz",
-      "brand": "Dr. Oetker",
-      "category": "Gewürze & Backzutaten",
-      "price": "0.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vB2",
+      "name": "Rotwein Süß",
+      "brand": "Krombacher",
+      "category": "Bier & Wein",
+      "price": "7.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
+      "needs_review": false
+    },
+    {
+      "name": "Weizen Gepufft",
+      "brand": "Dornfelder",
+      "category": "Bier & Wein",
+      "price": "6.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
+      "needs_review": false
+    },
+    {
+      "name": "Weizenbier",
+      "brand": "Dornfelder",
+      "category": "Bier & Wein",
+      "price": "6.49 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
+      "needs_review": false
+    },
+    {
+      "name": "Glühwein",
+      "brand": "Paulaner",
+      "category": "Bier & Wein",
+      "price": "3.89 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vB6",
       "needs_review": false
     }
   ],
   "vA9_2": [
     {
-      "name": "TK Pizza Salami",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "1.99 €",
-      "ai_confidence": 1.0,
+      "name": "Bratwurst",
+      "brand": "Rügenwalder",
+      "category": "Fisch & Wurstwaren",
+      "price": "2.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     },
     {
-      "name": "TK Pizza Salami",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
+      "name": "Stockfisch",
+      "brand": "Herta",
+      "category": "Fisch & Wurstwaren",
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     },
     {
-      "name": "Rahmspinat",
-      "brand": "Frosta",
-      "category": "Tiefkühlware",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "name": "Thunfisch",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "4.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     },
     {
-      "name": "Pommes Frites",
-      "brand": "Wagner",
-      "category": "Tiefkühlware",
-      "price": "5.99 €",
-      "ai_confidence": 1.0,
+      "name": "Kochsalami",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "6.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     },
     {
-      "name": "TK Pizza Salami",
-      "brand": "Dr. Oetker",
-      "category": "Tiefkühlware",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
+      "name": "Hirschsalami",
+      "brand": "Herta",
+      "category": "Fisch & Wurstwaren",
+      "price": "4.29 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     },
     {
-      "name": "Rahmspinat",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
+      "name": "Graved Lachs",
+      "brand": "Nordsee",
+      "category": "Fisch & Wurstwaren",
+      "price": "5.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9_2",
       "needs_review": false
     }
   ],
   "vA9": [
     {
-      "name": "Naturjoghurt",
+      "name": "Joghurt",
       "brand": "Alpenmilch",
       "category": "Kühlregal (Molkerei)",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
+      "price": "0.99 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     },
     {
-      "name": "Vollmilch",
-      "brand": "Weihenstephan",
+      "name": "Joghurt Fettarm",
+      "brand": "Bärenmarke",
       "category": "Kühlregal (Molkerei)",
-      "price": "0.29 €",
-      "ai_confidence": 1.0,
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     },
     {
-      "name": "Naturjoghurt",
+      "name": "Milch Fettarm",
       "brand": "Weihenstephan",
       "category": "Kühlregal (Molkerei)",
       "price": "3.99 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     },
     {
-      "name": "Naturjoghurt",
-      "brand": "Bärenmarke",
+      "name": "Süßrahmbutter",
+      "brand": "Alpenmilch",
       "category": "Kühlregal (Molkerei)",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
+      "price": "2.89 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     },
     {
-      "name": "Fettarme Milch",
-      "brand": "Weihenstephan",
+      "name": "Kondensmilch",
+      "brand": "Alpenmilch",
       "category": "Kühlregal (Molkerei)",
       "price": "2.49 €",
-      "ai_confidence": 1.0,
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     },
     {
-      "name": "Vollmilch",
-      "brand": "Bärenmarke",
+      "name": "Butter",
+      "brand": "Weihenstephan",
       "category": "Kühlregal (Molkerei)",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
+      "price": "1.49 €",
+      "ai_confidence": 0.99,
       "suggested_slot": "vA9",
       "needs_review": false
     }
   ],
   "vA7": [
     {
-      "name": "Apfelschorle",
-      "brand": "Vio",
-      "category": "Getränke Alkoholfrei",
-      "price": "1.89 €",
+      "name": "Zahnpasta",
+      "brand": "Nivea",
+      "category": "Drogerie & Haushalt",
+      "price": "4.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
     },
     {
-      "name": "Mineralwasser",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
-      "price": "2.49 €",
+      "name": "Duschgel",
+      "brand": "Nivea",
+      "category": "Drogerie & Haushalt",
+      "price": "2.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
     },
     {
-      "name": "Cola",
-      "brand": "Vio",
-      "category": "Getränke Alkoholfrei",
-      "price": "3.29 €",
+      "name": "Zahnpasta",
+      "brand": "Ariel",
+      "category": "Drogerie & Haushalt",
+      "price": "2.29 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
     },
     {
-      "name": "Apfelschorle",
-      "brand": "Vio",
-      "category": "Getränke Alkoholfrei",
-      "price": "4.29 €",
+      "name": "Zahnpasta",
+      "brand": "Zewa",
+      "category": "Drogerie & Haushalt",
+      "price": "5.49 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
     },
     {
-      "name": "Cola",
-      "brand": "Vio",
-      "category": "Getränke Alkoholfrei",
-      "price": "3.49 €",
+      "name": "Zahnpasta",
+      "brand": "Nivea",
+      "category": "Drogerie & Haushalt",
+      "price": "1.99 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
     },
     {
-      "name": "Mineralwasser",
-      "brand": "Coca Cola",
-      "category": "Getränke Alkoholfrei",
-      "price": "3.49 €",
+      "name": "Duschgel",
+      "brand": "Zewa",
+      "category": "Drogerie & Haushalt",
+      "price": "2.89 €",
       "ai_confidence": 1.0,
       "suggested_slot": "vA7",
       "needs_review": false
@@ -1345,337 +1571,57 @@
   ],
   "vA6": [
     {
-      "name": "Äpfel",
-      "brand": "Regional",
-      "category": "Obst & Gemüse",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    },
-    {
-      "name": "Bananen",
-      "brand": "Bio-Hof",
-      "category": "Obst & Gemüse",
-      "price": "3.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    },
-    {
-      "name": "Bananen",
-      "brand": "Demeter",
-      "category": "Obst & Gemüse",
-      "price": "4.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    },
-    {
-      "name": "Bananen",
-      "brand": "Demeter",
-      "category": "Obst & Gemüse",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    },
-    {
-      "name": "Äpfel",
-      "brand": "Bio-Hof",
-      "category": "Obst & Gemüse",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    },
-    {
-      "name": "Tomaten",
-      "brand": "SanLucar",
-      "category": "Obst & Gemüse",
-      "price": "0.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA6",
-      "needs_review": false
-    }
-  ],
-  "vA4": [
-    {
-      "name": "TK Pizza Salami",
-      "brand": "Frosta",
-      "category": "Tiefkühlware",
-      "price": "5.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    },
-    {
-      "name": "Rahmspinat",
-      "brand": "Frosta",
-      "category": "Tiefkühlware",
-      "price": "5.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    },
-    {
-      "name": "Rahmspinat",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "1.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    },
-    {
-      "name": "Pommes Frites",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    },
-    {
-      "name": "TK Pizza Salami",
-      "brand": "Frosta",
-      "category": "Tiefkühlware",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    },
-    {
-      "name": "TK Pizza Salami",
-      "brand": "Iglo",
-      "category": "Tiefkühlware",
-      "price": "5.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA4",
-      "needs_review": false
-    }
-  ],
-  "vA2": [
-    {
-      "name": "Kamillentee",
-      "brand": "Jacobs",
-      "category": "Kaffee & Tee",
-      "price": "6.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    },
-    {
-      "name": "Filterkaffee",
-      "brand": "Jacobs",
-      "category": "Kaffee & Tee",
-      "price": "3.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    },
-    {
-      "name": "Filterkaffee",
-      "brand": "Jacobs",
-      "category": "Kaffee & Tee",
-      "price": "5.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    },
-    {
-      "name": "Kaffeebohnen",
-      "brand": "Jacobs",
-      "category": "Kaffee & Tee",
-      "price": "12.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    },
-    {
-      "name": "Kaffeebohnen",
-      "brand": "Teekanne",
-      "category": "Kaffee & Tee",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    },
-    {
-      "name": "Kamillentee",
-      "brand": "Tchibo",
-      "category": "Kaffee & Tee",
-      "price": "4.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "vA2",
-      "needs_review": false
-    }
-  ],
-  "v1": [
-    {
-      "name": "Salami",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "5.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    },
-    {
-      "name": "Lachsfilet",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "5.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    },
-    {
-      "name": "Salami",
-      "brand": "Nordsee",
-      "category": "Fisch & Wurstwaren",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    },
-    {
-      "name": "Fischstäbchen",
-      "brand": "Rügenwalder",
-      "category": "Fisch & Wurstwaren",
-      "price": "5.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    },
-    {
-      "name": "Salami",
-      "brand": "Nordsee",
-      "category": "Fisch & Wurstwaren",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    },
-    {
-      "name": "Fischstäbchen",
-      "brand": "Herta",
-      "category": "Fisch & Wurstwaren",
-      "price": "7.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v1",
-      "needs_review": false
-    }
-  ],
-  "v2": [
-    {
-      "name": "Kaiserbrötchen",
-      "brand": "Hausbäcker",
-      "category": "Backwaren",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    },
-    {
-      "name": "Laugenbrezel",
-      "brand": "Backstube",
-      "category": "Backwaren",
-      "price": "4.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    },
-    {
-      "name": "Toastbrot",
-      "brand": "Hausbäcker",
-      "category": "Backwaren",
-      "price": "1.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    },
-    {
-      "name": "Laugenbrezel",
-      "brand": "Oven Fresh",
-      "category": "Backwaren",
-      "price": "3.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    },
-    {
-      "name": "Toastbrot",
-      "brand": "Backstube",
-      "category": "Backwaren",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    },
-    {
-      "name": "Kaiserbrötchen",
-      "brand": "Backstube",
-      "category": "Backwaren",
-      "price": "2.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v2",
-      "needs_review": false
-    }
-  ],
-  "v3": [
-    {
-      "name": "Laugenbrezel",
-      "brand": "Oven Fresh",
-      "category": "Backwaren",
-      "price": "2.49 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
-      "needs_review": false
-    },
-    {
-      "name": "Toastbrot",
-      "brand": "Oven Fresh",
-      "category": "Backwaren",
-      "price": "3.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
-      "needs_review": false
-    },
-    {
-      "name": "Kaiserbrötchen",
-      "brand": "Oven Fresh",
-      "category": "Backwaren",
-      "price": "2.29 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
-      "needs_review": false
-    },
-    {
-      "name": "Kaiserbrötchen",
-      "brand": "Backstube",
-      "category": "Backwaren",
-      "price": "2.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
-      "needs_review": false
-    },
-    {
-      "name": "Laugenbrezel",
-      "brand": "Backstube",
-      "category": "Backwaren",
+      "name": "Most",
+      "brand": "Gerolsteiner",
+      "category": "Getränke Alkoholfrei",
       "price": "1.99 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
+      "ai_confidence": 0.259,
+      "suggested_slot": "vA6",
       "needs_review": false
     },
     {
-      "name": "Laugenbrezel",
-      "brand": "Hausbäcker",
-      "category": "Backwaren",
-      "price": "3.89 €",
-      "ai_confidence": 1.0,
-      "suggested_slot": "v3",
+      "name": "Stout",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "0.49 €",
+      "ai_confidence": 0.259,
+      "suggested_slot": "vA6",
+      "needs_review": false
+    },
+    {
+      "name": "Birnensaft",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
+      "price": "3.99 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA6",
+      "needs_review": false
+    },
+    {
+      "name": "Limettensaft",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "1.29 €",
+      "ai_confidence": 0.99,
+      "suggested_slot": "vA6",
+      "needs_review": false
+    },
+    {
+      "name": "Doppelbock",
+      "brand": "Coca Cola",
+      "category": "Getränke Alkoholfrei",
+      "price": "2.49 €",
+      "ai_confidence": 0.259,
+      "suggested_slot": "vA6",
+      "needs_review": false
+    },
+    {
+      "name": "Apfelkorn",
+      "brand": "Vio",
+      "category": "Getränke Alkoholfrei",
+      "price": "1.49 €",
+      "ai_confidence": 0.259,
+      "suggested_slot": "vA6",
       "needs_review": false
     }
   ]

@@ -1,0 +1,2066 @@
+Product_Name,Supermarket_Category
+Hafer ganzes Korn,Backwaren
+Hafer Flocken,Backwaren
+Gerste ganzes Korn,Backwaren
+Gerste Mehl,Gewürze & Backzutaten
+Mais,Backwaren
+Mais Mehl,Gewürze & Backzutaten
+Reis poliert,Trockensortiment & Konserven
+Reis parboiled,Trockensortiment & Konserven
+Teigwaren eifrei,Trockensortiment & Konserven
+Vollkornteigwaren eifrei,Trockensortiment & Konserven
+Erdbeere,Obst & Gemüse
+Himbeere,Obst & Gemüse
+Maulbeere,Obst & Gemüse
+Rucola,Obst & Gemüse
+Stielmus Rübstiel,Obst & Gemüse
+Gemüsepaprika grün,Obst & Gemüse
+Gemüsepaprika rot,Obst & Gemüse
+Kohlrübe Steckrübe,Obst & Gemüse
+Knollensellerie,Obst & Gemüse
+Alfalfasprossen Alfalfakeimlinge,Backwaren
+Linsensprossen Linsenkeimlinge,Backwaren
+Tofu,Kühlregal (Vegan & Käse)
+Seidentofu,Kühlregal (Vegan & Käse)
+Roquefort,Kühlregal (Molkerei)
+Gorgonzola,Kühlregal (Molkerei)
+Milchpulver,Kühlregal (Molkerei)
+Vollmilchpulver,Kühlregal (Molkerei)
+Buttermilchpulver,Kühlregal (Molkerei)
+Kaffeeersatzpulver,Getränke Alkoholfrei
+Zichorienkaffeepulver,Getränke Alkoholfrei
+Apfelwein,Bier & Wein
+Obstbrand Obstwasser,Bier & Wein
+Wodka,Bier & Wein
+Rum,Bier & Wein
+Honig,Süßwaren & Snacks
+Blütenhonig,Süßwaren & Snacks
+Hering,Fisch & Wurstwaren
+Bückling,Fisch & Wurstwaren
+Sprotte,Fisch & Wurstwaren
+Steinbutt,Fisch & Wurstwaren
+Heilbutt Weißer Heilbutt,Fisch & Wurstwaren
+Karpfen,Fisch & Wurstwaren
+Blei Brachsen Brasse,Fisch & Wurstwaren
+Barsch Flussbarsch,Fisch & Wurstwaren
+Rotbarsch Goldbarsch,Fisch & Wurstwaren
+Hummer,Fisch & Wurstwaren
+Garnele Granat Krabbe,Fisch & Wurstwaren
+Europäische Auster,Fisch & Wurstwaren
+Miesmuschel,Fisch & Wurstwaren
+Schaf Brust,Fleischtheke
+Schaf Bug Schulter,Fleischtheke
+Schaf Hinterhaxe,Fleischtheke
+Kaninchen Fleisch,Fleischtheke
+Hase Fleisch,Fleischtheke
+Hafer Schrot,Backwaren
+Hafer Grütze,Backwaren
+Hafer Mehl,Gewürze & Backzutaten
+Hafer Kleie,Backwaren
+Gerste Graupen,Backwaren
+Gerste Schrot,Backwaren
+Gerste Grütze,Backwaren
+Gerste Flocken,Backwaren
+Gerste Grieß,Backwaren
+Mais Stärke,Gewürze & Backzutaten
+Reis Mehl,Trockensortiment & Konserven
+Reis unpoliert,Trockensortiment & Konserven
+Mais Grieß,Backwaren
+Mais Grütze,Backwaren
+Eierteigwaren,Trockensortiment & Konserven
+Wald-Erdbeere,Obst & Gemüse
+Loganbeere,Obst & Gemüse
+Brombeere,Obst & Gemüse
+Moltebeere,Obst & Gemüse
+Johannisbeere rot,Obst & Gemüse
+Boysenbeere,Obst & Gemüse
+Heidelbeere,Obst & Gemüse
+Wald-Himbeere,Obst & Gemüse
+Pfefferschote grün,Gewürze & Backzutaten
+Gemüsepaprika gelb,Obst & Gemüse
+Pfefferschote rot,Gewürze & Backzutaten
+Mungbohnensprossen Mungbohnenkeimlinge,Backwaren
+Sojabohnensprossen Sojabohnenkeimlinge,Kühlregal (Vegan & Käse)
+Feta,Kühlregal (Molkerei)
+Edelpilzkäse,Kühlregal (Molkerei)
+Süßmolkenpulver,Kühlregal (Molkerei)
+Fruchtwein,Bier & Wein
+Most,Bier & Wein
+Whisky Whiskey,Bier & Wein
+Arrak,Bier & Wein
+Agavenbrand,Bier & Wein
+Brand,Bier & Wein
+Calvados,Bier & Wein
+Spirituosen,Bier & Wein
+Obstgeist,Bier & Wein
+Honigtauhonig,Süßwaren & Snacks
+Sardine,Fisch & Wurstwaren
+Schillerlocken,Fisch & Wurstwaren
+Goldbutt Scholle,Fisch & Wurstwaren
+Schwarzer Heilbutt,Fisch & Wurstwaren
+Katfisch Steinbeißer,Fisch & Wurstwaren
+Schleie,Fisch & Wurstwaren
+Wels,Fisch & Wurstwaren
+Pangasius Schlankwels,Fisch & Wurstwaren
+Zander,Fisch & Wurstwaren
+Meeräsche,Fisch & Wurstwaren
+Schafskopf,Fisch & Wurstwaren
+Edelkrebs Flusskrebs,Fisch & Wurstwaren
+Languste,Fisch & Wurstwaren
+Große Sandklaffmuschel,Fisch & Wurstwaren
+Venusmuschel,Fisch & Wurstwaren
+Pilgermuschel Jakobsmuschel,Fisch & Wurstwaren
+Schwein Rückenspeck,Fleischtheke
+Schwein Speck,Fleischtheke
+Schaf Kochfleisch,Fleischtheke
+Hammel Brust,Fleischtheke
+Lamm Brust,Fleischtheke
+Lamm Bug Schulter,Fleischtheke
+Schaf Gulasch,Fleischtheke
+Schaf Bratenfleisch,Fleischtheke
+Schaf Keule,Fleischtheke
+Schaf Vorderhaxe,Fleischtheke
+Wildkaninchen Fleisch,Fleischtheke
+Hafer Grieß,Backwaren
+Wildreis,Trockensortiment & Konserven
+Glasnudeln,Trockensortiment & Konserven
+Weizen Stärke,Gewürze & Backzutaten
+Kartoffelstärke,Gewürze & Backzutaten
+Reis Stärke,Trockensortiment & Konserven
+Reis Grieß,Trockensortiment & Konserven
+Reisnudeln,Trockensortiment & Konserven
+Eierteigwaren Tortellini getrocknet,Trockensortiment & Konserven
+Eierteigwaren Tortelloni getrocknet,Trockensortiment & Konserven
+Wald-Brombeere,Obst & Gemüse
+Moosbeere,Obst & Gemüse
+Preiselbeere,Trockensortiment & Konserven
+Johannisbeere weiß,Obst & Gemüse
+Johannisbeere schwarz,Obst & Gemüse
+Salzlakenkäse,Kühlregal (Molkerei)
+Danablu,Kühlregal (Molkerei)
+Getreidebrand,Bier & Wein
+Weinbrand Brandy,Bier & Wein
+Gin,Bier & Wein
+Stint,Fisch & Wurstwaren
+Sardelle,Fisch & Wurstwaren
+Seeteufel,Fisch & Wurstwaren
+Flunder,Fisch & Wurstwaren
+Meerbarbe,Fisch & Wurstwaren
+Tintenfisch,Fisch & Wurstwaren
+Schwein Speck Rückenspeck,Fleischtheke
+Hammel Bug Schulter,Fleischtheke
+Ziege Fleisch,Fleischtheke
+Schaf Schnitzel,Fleischtheke
+Schlehe,Obst & Gemüse
+Holunderbeere,Obst & Gemüse
+Tapioka Tapiokastärke,Gewürze & Backzutaten
+Kartoffelpüree Instantpulver,Obst & Gemüse
+Pfeilwurzelmehl Marantastärke,Gewürze & Backzutaten
+Cognac,Bier & Wein
+Schnecken,Fleischtheke
+Hammel Keule,Fleischtheke
+Kartoffelkloß Trockenprodukt,Obst & Gemüse
+Roggenvollkornbrot,Backwaren
+Roggenmischbrot,Backwaren
+Weizenbrot Weißbrot,Backwaren
+Weizenbrötchen,Backwaren
+Weizen Keim,Backwaren
+Quinoa weiß,Backwaren
+Weizen Vollkornmehl,Gewürze & Backzutaten
+Weizen Backschrot,Backwaren
+Weizen Mehl,Gewürze & Backzutaten
+Weizen Kleie,Backwaren
+Roggen Mehl,Gewürze & Backzutaten
+Dinkel Vollkornmehl,Gewürze & Backzutaten
+Buchweizen,Backwaren
+Hirse,Backwaren
+Cornflakes gesüßt,Süßwaren & Snacks
+Cornflakes,Süßwaren & Snacks
+Reiswaffeln ungesalzen,Trockensortiment & Konserven
+Maiswaffeln,Gewürze & Backzutaten
+Cerealien extrudiert,Backwaren
+Weizenpops Weizen gepufft,Backwaren
+Cerealien,Backwaren
+Reisdrink,Trockensortiment & Konserven
+Haferdrink,Backwaren
+Zwieback eifrei,Backwaren
+Erdnuss geröstet,Backwaren
+Salzbrezeln Salzstangen,Süßwaren & Snacks
+Butterkekse Butterplätzchen,Backwaren
+Hühnerei,Kühlregal (Molkerei)
+Hühnerei Pulver,Kühlregal (Molkerei)
+Hühnerei Eigelb,Kühlregal (Molkerei)
+Hühnerei Eiklar,Kühlregal (Molkerei)
+Rhabarber,Obst & Gemüse
+Apfel,Obst & Gemüse
+Apfel getrocknet,Obst & Gemüse
+Aprikose,Obst & Gemüse
+Aprikose getrocknet,Obst & Gemüse
+Pfirsich,Trockensortiment & Konserven
+Sauerkirsche,Trockensortiment & Konserven
+Pflaume getrocknet,Obst & Gemüse
+Hagebutte,Obst & Gemüse
+Sanddornbeere,Obst & Gemüse
+Cranberries getrocknet,Obst & Gemüse
+Ananas,Trockensortiment & Konserven
+Avocado,Obst & Gemüse
+Banane,Obst & Gemüse
+Dattel getrocknet,Obst & Gemüse
+Feige,Obst & Gemüse
+Feige getrocknet,Obst & Gemüse
+Granatapfel,Obst & Gemüse
+Kaki,Obst & Gemüse
+Maracuja Passionsfrucht,Obst & Gemüse
+Acerola,Obst & Gemüse
+Kiwi,Obst & Gemüse
+Litschi,Obst & Gemüse
+Mango,Obst & Gemüse
+Papaya,Obst & Gemüse
+Brotfrucht,Backwaren
+Netzmelone Cantaloupmelone,Obst & Gemüse
+Jackfrucht,Obst & Gemüse
+Karambole Sternfrucht,Obst & Gemüse
+Kaktusfeige,Obst & Gemüse
+Feijoa Ananas-Guave,Obst & Gemüse
+Orangensaft,Obst & Gemüse
+Mandarine,Trockensortiment & Konserven
+Bananenchips frittiert,Süßwaren & Snacks
+Basilikum,Obst & Gemüse
+Schnittlauch,Obst & Gemüse
+Schnittlauch getrocknet,Obst & Gemüse
+Feldsalat Rapunzel,Obst & Gemüse
+Kopfsalat,Obst & Gemüse
+Radicchio,Obst & Gemüse
+Römischer Salat Romanasalat,Obst & Gemüse
+Spinat,Obst & Gemüse
+Petersilienblatt getrocknet,Obst & Gemüse
+Brennnessel,Obst & Gemüse
+Löwenzahn,Obst & Gemüse
+Sauerampfer,Obst & Gemüse
+Gartenkresse,Obst & Gemüse
+Blumenkohl,Obst & Gemüse
+Broccoli,Obst & Gemüse
+Rotkohl,Obst & Gemüse
+Rotkohlgemüse,Trockensortiment & Konserven
+Weißkohl,Obst & Gemüse
+Sauerkraut,Trockensortiment & Konserven
+Fenchelblatt Bologneser Fenchel,Obst & Gemüse
+Spargel,Obst & Gemüse
+Porree Lauch,Obst & Gemüse
+Okra,Obst & Gemüse
+Tomate,Obst & Gemüse
+Zuckermais,Obst & Gemüse
+Kürbis Pumpkin,Obst & Gemüse
+Zucchini,Obst & Gemüse
+Karotte Möhre,Obst & Gemüse
+Salzgurke Salzdillgurke,Kühlregal (Molkerei)
+Nori-Blatt geröstet,Obst & Gemüse
+Sojalecithin,Kühlregal (Vegan & Käse)
+Erdnussbutter Erdnusscreme,Backwaren
+Haselnuss,Backwaren
+Kokos Fruchtfleisch,Backwaren
+Kokoswasser,Backwaren
+Cashewkern,Backwaren
+Paranuss,Backwaren
+Edelkastanie Marone,Backwaren
+Pistazie geröstet,Backwaren
+Kürbiskern,Backwaren
+Gartenbohne reif,Backwaren
+Sojaschnetzel Sojagranulat,Kühlregal (Vegan & Käse)
+Mungbohne reif,Backwaren
+Mandeldrink,Backwaren
+Dessert Puddingalternative,Backwaren
+Soja-Joghurtalternative,Kühlregal (Vegan & Käse)
+Sojakochcreme,Kühlregal (Vegan & Käse)
+Miso Sojabohnenpaste,Kühlregal (Vegan & Käse)
+Sonnenblumenkernaufstrich,Backwaren
+Vegetarische Bratwurst,Kühlregal (Vegan & Käse)
+Veganes Schnitzel,Kühlregal (Vegan & Käse)
+Veganer Aufschnitt,Kühlregal (Vegan & Käse)
+Vegetarischer Aufschnitt,Kühlregal (Vegan & Käse)
+Kartoffel geschält,Obst & Gemüse
+Kartoffelchips Stapelchips,Süßwaren & Snacks
+Maniok Cassava,Obst & Gemüse
+Batate Süßkartoffel,Obst & Gemüse
+Topinambur Erdartischocke,Obst & Gemüse
+Yamswurzel,Obst & Gemüse
+Champignon,Obst & Gemüse
+Morchel,Obst & Gemüse
+Pfifferling,Obst & Gemüse
+Shiitakepilz,Obst & Gemüse
+Austernpilz,Obst & Gemüse
+Vegetarische Pastete,Backwaren
+Milch fettarm,Kühlregal (Molkerei)
+Vollmilch frisch,Kühlregal (Molkerei)
+Rohmilch Vorzugsmilch,Kühlregal (Molkerei)
+H-Milch fettarm,Kühlregal (Molkerei)
+H-Vollmilch,Kühlregal (Molkerei)
+Joghurt mild,Kühlregal (Molkerei)
+Schlagsahne,Kühlregal (Molkerei)
+Kondensmagermilch max.,Kühlregal (Molkerei)
+Kondensmilch,Kühlregal (Molkerei)
+Emmentaler,Kühlregal (Molkerei)
+Schnittkäse,Kühlregal (Molkerei)
+Gouda .,Kühlregal (Molkerei)
+Schnittkäse halbfest,Kühlregal (Molkerei)
+Brie,Kühlregal (Molkerei)
+Camembert,Kühlregal (Molkerei)
+Limburger,Kühlregal (Molkerei)
+Weichkäse,Kühlregal (Molkerei)
+Frischkäsezubereitung Natur,Kühlregal (Molkerei)
+Speisequark Magerstufe,Kühlregal (Molkerei)
+Frischkäse,Kühlregal (Molkerei)
+Schmelzkäsezubereitung - .,Kühlregal (Molkerei)
+Frischkäsezubereitung,Kühlregal (Molkerei)
+Eistee,Getränke Alkoholfrei
+Trinkwasser,Getränke Alkoholfrei
+Kaffee,Kaffee & Tee
+Instantkaffeepulver,Kaffee & Tee
+Cappuccino Instantpulver,Getränke Alkoholfrei
+Grüntee,Getränke Alkoholfrei
+Schwarztee,Getränke Alkoholfrei
+Malzgetränk,Bier & Wein
+Weizenbier kristallklar,Bier & Wein
+Hefeweizen Weizenbier,Gewürze & Backzutaten
+Export hell,Bier & Wein
+Pilsner Bier,Bier & Wein
+Schwarzbier,Bier & Wein
+Weißwein trocken,Bier & Wein
+Weißwein halbtrocken,Bier & Wein
+Rotwein halbtrocken,Bier & Wein
+Rotwein trocken,Bier & Wein
+Qualitätsschaumwein,Bier & Wein
+Rosewein lieblich,Bier & Wein
+Haselnussöl,Gewürze & Backzutaten
+Mandelöl,Gewürze & Backzutaten
+Kürbiskernöl,Gewürze & Backzutaten
+Butter mild gesäuert,Gewürze & Backzutaten
+Rinderfett Rindertalg,Gewürze & Backzutaten
+Tahin,Gewürze & Backzutaten
+Speisesalz Siedesalz Tafelsalz,Gewürze & Backzutaten
+Nitritpökelsalz,Gewürze & Backzutaten
+Nitritpökelsalz jodiert,Gewürze & Backzutaten
+Apfelessig,Gewürze & Backzutaten
+Senf mittelscharf,Gewürze & Backzutaten
+Tomatenketchup,Gewürze & Backzutaten
+Sojasauce Sojasoße,Kühlregal (Vegan & Käse)
+Feinkostsauce Grillsauce,Gewürze & Backzutaten
+Glutamat Mononatriumglutamat Natriumglutamat,Gewürze & Backzutaten
+Basilikum getrocknet,Gewürze & Backzutaten
+Pfeffer schwarz,Gewürze & Backzutaten
+Backpulver,Gewürze & Backzutaten
+Backhefe getrocknet,Gewürze & Backzutaten
+Backhefe frisch,Gewürze & Backzutaten
+Apfelpektin getrocknet,Gewürze & Backzutaten
+Zucker weiß,Süßwaren & Snacks
+Zucker braun,Süßwaren & Snacks
+Traubenzucker,Süßwaren & Snacks
+Milchzucker,Kühlregal (Molkerei)
+Malzzucker,Süßwaren & Snacks
+Fruchtzucker,Süßwaren & Snacks
+Nuss-Nougat-Creme,Süßwaren & Snacks
+Glukosesirup maltosehaltig,Süßwaren & Snacks
+Sorbit Pulver,Süßwaren & Snacks
+Xylit Pulver,Süßwaren & Snacks
+Mannit Pulver,Süßwaren & Snacks
+Tafelsüße Tabletten,Süßwaren & Snacks
+Tafelsüße Flüssigsüße,Süßwaren & Snacks
+Schokoladeneis,Tiefkühlware
+Walnusseis,Tiefkühlware
+Lakritze,Süßwaren & Snacks
+Milchschokoladen-Riegel gefüllt,Kühlregal (Molkerei)
+Schokoladen-Schaumkuss,Süßwaren & Snacks
+Vollmilchschokoladen-Riegel gefüllt,Kühlregal (Molkerei)
+Kakaopulver schwach entölt,Gewürze & Backzutaten
+Aal,Fisch & Wurstwaren
+Hornfisch Hornhecht,Fisch & Wurstwaren
+Kabeljaurogen,Fisch & Wurstwaren
+Makrele,Fisch & Wurstwaren
+Dorsch Kabeljau,Fisch & Wurstwaren
+Köhler Seelachs,Fisch & Wurstwaren
+Lachs,Fisch & Wurstwaren
+Forelle,Fisch & Wurstwaren
+Matjesfilet nordische Art,Fisch & Wurstwaren
+Heringsfilet,Trockensortiment & Konserven
+Surimi,Fisch & Wurstwaren
+Tintenfischringe paniert,Tiefkühlware
+Schwein Hackfleisch,Fleischtheke
+Rind Keule,Fleischtheke
+Schwein Fettbacke,Fleischtheke
+Schwein Maske,Fleischtheke
+Schwein Wamme,Fleischtheke
+Schwein Schwarte,Fleischtheke
+Schwein Filet Lende,Fleischtheke
+Schwein Kotelett,Fleischtheke
+Schwein Bauch,Fleischtheke
+Schwein Brustspitze,Fleischtheke
+Schwein Dicker Bug,Fleischtheke
+Schwein Dünner Bug,Fleischtheke
+Schwein Restbug,Fleischtheke
+Schwein Vordereisbein Vorderhaxe,Trockensortiment & Konserven
+Schwein Rohschinken,Fisch & Wurstwaren
+Schwein Nuss,Fleischtheke
+Schwein Hüfte Schinkenspeck,Fisch & Wurstwaren
+Schwein Unterschale,Fleischtheke
+Schwein Oberschale,Fleischtheke
+Schwein Hintereisbein Hinterhaxe,Trockensortiment & Konserven
+Schaf Rücken,Fleischtheke
+Hähnchen ganz,Fleischtheke
+Streichmettwurst Streichmettwurst,Fisch & Wurstwaren
+Geflügelsalami,Fisch & Wurstwaren
+Wiener Würstchen,Fleischtheke
+Lyoner Lyoner Wurst,Fisch & Wurstwaren
+Bierwurst Blasenwurst,Fisch & Wurstwaren
+Mettwurst,Fisch & Wurstwaren
+Lachsschinken,Fisch & Wurstwaren
+Lebkuchen schokoliert,Backwaren
+Leinsamen,Backwaren
+Walnuss,Backwaren
+Vanilleeis,Tiefkühlware
+Sesam,Backwaren
+Sonnenblumenkern,Backwaren
+Mohn,Backwaren
+Oliven grün,Trockensortiment & Konserven
+Bambussprossen,Backwaren
+Buttermilch,Kühlregal (Molkerei)
+Petersilienblatt,Obst & Gemüse
+Rosenkohl,Obst & Gemüse
+Speisezwiebel,Obst & Gemüse
+Aubergine,Obst & Gemüse
+Gurke,Obst & Gemüse
+Pastinake,Obst & Gemüse
+Bohne grün,Obst & Gemüse
+Dicke Bohne unreif,Obst & Gemüse
+Erbse grün,Obst & Gemüse
+Zuckererbse,Obst & Gemüse
+Vegetarische Wiener Würstchen,Kühlregal (Vegan & Käse)
+Schwein Kamm,Fleischtheke
+Roggenvollkornschrotbrot,Backwaren
+Weizentortilla,Backwaren
+Weizentoastbrot Buttertoastbrot,Backwaren
+Amaranth gepufft,Backwaren
+Amaranth,Backwaren
+Quinoa tricolore,Backwaren
+Quinoa gepufft,Backwaren
+Hartweizen Vollkornmehl,Gewürze & Backzutaten
+Einkorn Vollkornmehl,Gewürze & Backzutaten
+Weizen gepufft,Backwaren
+Emmer Vollkornmehl,Gewürze & Backzutaten
+Weizen ganzes Korn,Backwaren
+Hartweizen Grieß,Backwaren
+Weizen Dunst,Backwaren
+Weichweizen Grieß,Backwaren
+Roggen Grieß,Backwaren
+Roggen Vollkornmehl,Gewürze & Backzutaten
+Roggen Backschrot,Backwaren
+Dinkel Grieß,Backwaren
+Dinkel ganzes Korn,Backwaren
+Dinkel Vollkornschrot,Backwaren
+Dinkel Mehl,Gewürze & Backzutaten
+Grünkern ganzes Korn,Backwaren
+Dinkel Kleie,Backwaren
+Buchweizen Vollkornmehl,Gewürze & Backzutaten
+Buchweizen Mehl,Gewürze & Backzutaten
+Buchweizen Schrot,Backwaren
+Buchweizen Grütze,Backwaren
+Hirse Schrot,Backwaren
+Hirse Flocken,Backwaren
+Hirse Mehl,Gewürze & Backzutaten
+Reis gepufft,Trockensortiment & Konserven
+Popcorn,Backwaren
+Tortillachips,Backwaren
+Doppelkekse,Backwaren
+Gänseei,Kühlregal (Molkerei)
+Wachtelei,Kühlregal (Molkerei)
+Putenei,Kühlregal (Molkerei)
+Quitte,Obst & Gemüse
+Birne,Obst & Gemüse
+Apfelkompott Apfelmark,Trockensortiment & Konserven
+Apfel geschält,Obst & Gemüse
+Eberesche süß,Obst & Gemüse
+Japanische Wollmispel Loquat,Obst & Gemüse
+Mispel,Obst & Gemüse
+Pflaume,Obst & Gemüse
+Nektarine,Obst & Gemüse
+Pfirsich getrocknet,Obst & Gemüse
+Kochbanane,Obst & Gemüse
+Cherimoya,Obst & Gemüse
+Rosine Sultanine,Obst & Gemüse
+Tamarillo,Obst & Gemüse
+Kapstachelbeere Physalis,Obst & Gemüse
+Mangostane,Obst & Gemüse
+Rambutan,Obst & Gemüse
+Honigmelone,Obst & Gemüse
+Wassermelone,Obst & Gemüse
+Guave,Obst & Gemüse
+Maracujasaft Passionsfruchtsaft,Obst & Gemüse
+Orange,Obst & Gemüse
+Grapefruitsaft,Obst & Gemüse
+Mandarinensaft,Obst & Gemüse
+Apfelsaft,Obst & Gemüse
+Endivie Escariol,Obst & Gemüse
+Chicoree,Obst & Gemüse
+Schnittsalat Pflücksalat,Obst & Gemüse
+Portulak,Obst & Gemüse
+Bleichsellerie,Obst & Gemüse
+Eisbergsalat,Obst & Gemüse
+Mangold,Obst & Gemüse
+Gemüseamaranth,Obst & Gemüse
+Neuseeländer Spinat,Obst & Gemüse
+Artischocke,Obst & Gemüse
+Romanesco,Obst & Gemüse
+Grünkohl,Obst & Gemüse
+Wirsing,Obst & Gemüse
+Spitzkohl,Obst & Gemüse
+Chinakohl,Obst & Gemüse
+Kohlrabi,Obst & Gemüse
+Frühlingszwiebel Lauchzwiebel,Obst & Gemüse
+Knoblauch,Obst & Gemüse
+Silberzwiebel,Obst & Gemüse
+Perlzwiebel,Obst & Gemüse
+Schalotte,Obst & Gemüse
+Tomate geschält,Trockensortiment & Konserven
+Kürbis Hokkaido,Obst & Gemüse
+Chayote,Obst & Gemüse
+Schwarzwurzel,Obst & Gemüse
+Wurzelpetersilie,Obst & Gemüse
+Meerrettich,Obst & Gemüse
+Wachsbohne,Obst & Gemüse
+Sojabohne unreif,Kühlregal (Vegan & Käse)
+Gurke gesäuert,Trockensortiment & Konserven
+Erdnussmus,Backwaren
+Pekannuss,Backwaren
+Cashewnussmus,Obst & Gemüse
+Pinienkern,Backwaren
+Mandel süß,Backwaren
+Macadamianuss geröstet,Backwaren
+Pistazie,Backwaren
+Chia-Samen,Backwaren
+Oliven geschwärzt,Trockensortiment & Konserven
+Augenbohne reif,Backwaren
+Dicke Bohne reif,Backwaren
+Kidneybohne reif,Backwaren
+Sojamehl vollfett,Kühlregal (Vegan & Käse)
+Hefe Flocken Nährhefe,Gewürze & Backzutaten
+Linse reif,Backwaren
+Erbse reif,Obst & Gemüse
+Sojabohne reif,Kühlregal (Vegan & Käse)
+Kichererbse reif,Obst & Gemüse
+Limabohne reif,Obst & Gemüse
+Sojadrink,Kühlregal (Vegan & Käse)
+Pommes frites,Tiefkühlware
+Kartoffel ungeschält,Obst & Gemüse
+Kartoffelchips energiereduziert,Süßwaren & Snacks
+Kartoffelsticks,Obst & Gemüse
+Edel-Reizker,Obst & Gemüse
+Steinpilz,Obst & Gemüse
+Hallimasch,Obst & Gemüse
+Trüffel,Obst & Gemüse
+Milch entrahmt,Kühlregal (Molkerei)
+Sahneersatz,Kühlregal (Molkerei)
+Vollmilch,Kühlregal (Molkerei)
+Ziegenmilch,Kühlregal (Molkerei)
+Schafmilch,Kühlregal (Molkerei)
+Joghurt fettarm,Kühlregal (Molkerei)
+Kondensmilch teilentrahmt,Kühlregal (Molkerei)
+Joghurt,Kühlregal (Molkerei)
+Dickmilch Sauermilch,Kühlregal (Molkerei)
+Sahnejoghurt,Kühlregal (Molkerei)
+Kefir,Kühlregal (Molkerei)
+Schafjoghurt,Kühlregal (Molkerei)
+Süßmolke,Kühlregal (Molkerei)
+Kaffeesahne,Kühlregal (Molkerei)
+Trinkjoghurt,Kühlregal (Molkerei)
+Chester,Kühlregal (Molkerei)
+Bergkäse,Kühlregal (Molkerei)
+Provolone,Kühlregal (Molkerei)
+Hartkäse,Kühlregal (Molkerei)
+Jarlsberg,Kühlregal (Molkerei)
+Tilsiter,Kühlregal (Molkerei)
+Wilstermarschkäse,Kühlregal (Molkerei)
+Fontina,Kühlregal (Molkerei)
+Raclettekäse,Kühlregal (Molkerei)
+Edamer,Kühlregal (Molkerei)
+Danbo,Kühlregal (Molkerei)
+Halloumi Grillkäse,Kühlregal (Molkerei)
+Butterkäse,Kühlregal (Molkerei)
+Esrom,Kühlregal (Molkerei)
+Steinbuscher,Kühlregal (Molkerei)
+Weißlacker,Kühlregal (Molkerei)
+Trappistenkäse,Kühlregal (Molkerei)
+Weinkäse,Kühlregal (Molkerei)
+Münster,Kühlregal (Molkerei)
+Romadur,Kühlregal (Molkerei)
+Brotaufstrich,Backwaren
+Speisequark Rahmstufe,Kühlregal (Molkerei)
+Mozzarella,Kühlregal (Molkerei)
+Sauerrahm Creme fraiche,Kühlregal (Molkerei)
+Schmelzkäse,Kühlregal (Molkerei)
+Kochkäse < .,Kühlregal (Molkerei)
+Körniger Frischkäse,Kühlregal (Molkerei)
+Schichtkäse,Kühlregal (Molkerei)
+Speisequark Viertelfettstufe,Kühlregal (Molkerei)
+Speisequark Halbfettstufe,Kühlregal (Molkerei)
+Sauermilchkäse < .,Kühlregal (Molkerei)
+Skyr,Kühlregal (Molkerei)
+Schmelzkäse schnittfest,Kühlregal (Molkerei)
+Schmelzkäsezubereitung,Kühlregal (Molkerei)
+Limonade chininhaltig,Getränke Alkoholfrei
+Zitronenlimonade,Getränke Alkoholfrei
+Ginger Ale,Getränke Alkoholfrei
+Natürliches Mineralwasser still,Getränke Alkoholfrei
+Natürliches Mineralwasser,Getränke Alkoholfrei
+Quellwasser,Getränke Alkoholfrei
+Türkischer Mokka,Kaffee & Tee
+Kaffee entkoffeiniert,Kaffee & Tee
+Espresso,Kaffee & Tee
+Kaffee koffeinreduziert,Kaffee & Tee
+Instantkaffeepulver entkoffeiniert,Kaffee & Tee
+Mate-Tee,Getränke Alkoholfrei
+Kräutertee,Getränke Alkoholfrei
+Roibusch- Rooibos- Rotbusch-Tee,Getränke Alkoholfrei
+Schwarztee entkoffeiniert,Getränke Alkoholfrei
+Lagerbier hell,Bier & Wein
+Lagerbier dunkel,Bier & Wein
+Bier kohlenhydratreduziert,Bier & Wein
+Leichtbier,Bier & Wein
+Kölsch,Gewürze & Backzutaten
+Altbier,Bier & Wein
+Bockbier,Bier & Wein
+Stout,Bier & Wein
+Doppelbock,Bier & Wein
+Eiswein,Bier & Wein
+Wein alkoholfrei,Getränke Alkoholfrei
+Aperitif alkoholfrei,Getränke Alkoholfrei
+Federweißer,Bier & Wein
+Weißwein Beerenauslese Trockenbeerenauslese,Bier & Wein
+Weißwein süß,Bier & Wein
+Weißwein lieblich,Bier & Wein
+Portwein,Bier & Wein
+Rotwein süß,Bier & Wein
+Rotwein lieblich,Bier & Wein
+Sherry medium dry,Bier & Wein
+Wermutwein trocken,Bier & Wein
+Bitterlikör,Bier & Wein
+Perlwein Perlwein,Bier & Wein
+Sekt alkoholfrei,Getränke Alkoholfrei
+Rosewein trocken,Bier & Wein
+Rosewein süß,Bier & Wein
+Rosewein halbtrocken,Bier & Wein
+Walnussöl,Gewürze & Backzutaten
+Olivenöl,Gewürze & Backzutaten
+Erdnussöl,Gewürze & Backzutaten
+Kokosöl,Gewürze & Backzutaten
+Rapsöl Rüböl,Gewürze & Backzutaten
+Maiskeimöl,Gewürze & Backzutaten
+Sojaöl,Kühlregal (Vegan & Käse)
+Sonnenblumenöl,Gewürze & Backzutaten
+Halbfettbutter,Gewürze & Backzutaten
+Butterschmalz,Gewürze & Backzutaten
+Mischfett,Kühlregal (Molkerei)
+Süßrahmbutter,Gewürze & Backzutaten
+Sauerrahmbutter,Gewürze & Backzutaten
+Schweinefett Schweineschmalz,Gewürze & Backzutaten
+Hühnerfett,Gewürze & Backzutaten
+Hammelfett Hammeltalg,Gewürze & Backzutaten
+Speisesalz jodiert Jodsalz,Gewürze & Backzutaten
+Steinsalz,Gewürze & Backzutaten
+Meersalz,Gewürze & Backzutaten
+Weinessig,Gewürze & Backzutaten
+Senf extra scharf,Gewürze & Backzutaten
+Senf scharf,Gewürze & Backzutaten
+Senf süß,Gewürze & Backzutaten
+Curry-Gewürzketchup,Gewürze & Backzutaten
+Tomaten passiert Tomatenpüree,Gewürze & Backzutaten
+Mayonnaise,Gewürze & Backzutaten
+Bratensoße Instantpulver,Gewürze & Backzutaten
+Bouillon Brühe Suppe,Gewürze & Backzutaten
+Marshmallow,Süßwaren & Snacks
+Orangeat,Gewürze & Backzutaten
+Hartkaramelle,Süßwaren & Snacks
+Invertzuckercreme,Süßwaren & Snacks
+Puderzucker,Süßwaren & Snacks
+Vanillezucker,Süßwaren & Snacks
+Fondant,Süßwaren & Snacks
+Vanillinzucker,Gewürze & Backzutaten
+Melasse,Süßwaren & Snacks
+Fruchtgummi,Süßwaren & Snacks
+Milchschokolade gefüllt,Kühlregal (Molkerei)
+Pralinen gefüllt,Süßwaren & Snacks
+Sahneschokolade,Kühlregal (Molkerei)
+Milchschokolade,Kühlregal (Molkerei)
+Schokolade weiß,Süßwaren & Snacks
+Schokolade,Süßwaren & Snacks
+Vollmilchschokolade,Kühlregal (Molkerei)
+Kakaopulver stark entölt,Gewürze & Backzutaten
+Bitterschokolade,Süßwaren & Snacks
+Hecht,Fisch & Wurstwaren
+Kaviar echt,Fisch & Wurstwaren
+Heringsrogen,Fisch & Wurstwaren
+Lachsrogen,Fisch & Wurstwaren
+Thunfisch,Fisch & Wurstwaren
+Schellfisch,Fisch & Wurstwaren
+Stockfisch,Fisch & Wurstwaren
+Merlan Wittling,Fisch & Wurstwaren
+Seehecht,Fisch & Wurstwaren
+Leng,Fisch & Wurstwaren
+Alaska-Pollack Alaska-Seelachs,Fisch & Wurstwaren
+Dornhai,Fisch & Wurstwaren
+Königslachs,Fisch & Wurstwaren
+Matjeshering mild,Gewürze & Backzutaten
+Rind Hinterhesse,Fleischtheke
+Rind Bug Schulter,Fleischtheke
+Rind Muskelfleisch,Fleischtheke
+Rind Hüfte,Fleischtheke
+Kalb Keule,Fleischtheke
+Rind Oberschale,Fleischtheke
+Schwein Filetmedaillon,Fleischtheke
+Schaf Filetsteak,Fleischtheke
+Schaf Filetmedaillon,Fleischtheke
+Schwein Fleisch,Fleischtheke
+Schwein Stielkotelett,Fleischtheke
+Schwein Lachsbraten,Fisch & Wurstwaren
+Kasseler,Fleischtheke
+Schwein Schmetterlingssteak,Fleischtheke
+Schwein Kammbraten,Fleischtheke
+Schwein Kammsteak,Fleischtheke
+Wildschwein Fleisch,Fleischtheke
+Schwein Ladenbauch,Fleischtheke
+Schwein Kochfleisch,Fleischtheke
+Schwein Grillbauch,Fleischtheke
+Schwein Dicke Rippe,Fleischtheke
+Schwein Bratenfleisch,Fleischtheke
+Schwein Gulasch,Fleischtheke
+Parmaschinken,Fisch & Wurstwaren
+Schwarzwälder Schinken,Fisch & Wurstwaren
+Schwein Schnitzel,Fleischtheke
+Schwein Muskelfleisch,Fleischtheke
+Schwein Schwartenbraten,Fleischtheke
+Schwein Roulade,Fleischtheke
+Schaf Muskelfleisch,Fleischtheke
+Hammel Kotelett,Fleischtheke
+Lamm Kotelett,Fleischtheke
+Lamm Nuss,Fleischtheke
+Hammel Filet Lende,Fleischtheke
+Schaf Filet Lende,Fleischtheke
+Suppenhuhn Fleisch,Fleischtheke
+Hähnchen Brustfilet,Fleischtheke
+Hähnchen Flügel,Fleischtheke
+Wildente Fleisch,Fleischtheke
+Poularde Fleisch,Fleischtheke
+Hähnchen Fleisch,Fleischtheke
+Pute Fleisch,Fleischtheke
+Rebhuhn Fleisch,Fleischtheke
+Salami,Fisch & Wurstwaren
+Geflügelmortadella,Fleischtheke
+Cocktailwürstchen,Trockensortiment & Konserven
+Geflügel-Wiener Würstchen,Fleischtheke
+Lyoner weiß,Fleischtheke
+Lyoner grob,Fleischtheke
+Fleischwurst,Fisch & Wurstwaren
+Gelbwurst,Fisch & Wurstwaren
+Schwein Kochschinken,Fisch & Wurstwaren
+Weizen Vollkornschrot,Backwaren
+Weizen Flocken,Backwaren
+Hartweizen Vollkorngrieß,Backwaren
+Hartweizen ganzes Korn,Backwaren
+Bulgur,Backwaren
+Couscous,Backwaren
+Weizen Grütze,Backwaren
+Roggen ganzes Korn,Backwaren
+Dinkel Flocken,Backwaren
+Reis Kleie,Trockensortiment & Konserven
+Emmer ganzes Korn,Backwaren
+Emmer Flocken,Backwaren
+Einkorn Flocken,Backwaren
+Einkorn ganzes Korn,Backwaren
+Grünkern Vollkornmehl,Gewürze & Backzutaten
+Grünkern Vollkornschrot,Backwaren
+Grünkern Grütze,Backwaren
+Buchweizen Grieß,Backwaren
+Braunhirse Mehl,Gewürze & Backzutaten
+Entenei,Kühlregal (Molkerei)
+Apfelsaft angereichert,Obst & Gemüse
+Traubensaft,Obst & Gemüse
+Ananassaft,Obst & Gemüse
+Zwetschge,Obst & Gemüse
+Süßkirsche,Obst & Gemüse
+Weintraube,Obst & Gemüse
+Reineclaude,Obst & Gemüse
+Mirabelle,Obst & Gemüse
+Stachelbeere,Obst & Gemüse
+Zitrone,Obst & Gemüse
+Pampelmuse Pomelo,Obst & Gemüse
+Clementine,Obst & Gemüse
+Grapefruit,Obst & Gemüse
+Lulo Naranjilla,Obst & Gemüse
+Korinthe,Obst & Gemüse
+Zuckerhutsalat,Obst & Gemüse
+Gemüsefenchel,Obst & Gemüse
+Pak Choi,Obst & Gemüse
+Rettich,Obst & Gemüse
+Radieschen,Obst & Gemüse
+Gemüseartischocke Kardone,Obst & Gemüse
+Bärlauch,Obst & Gemüse
+Kapern gesäuert,Trockensortiment & Konserven
+Ingwer Ingwerwurzel,Gewürze & Backzutaten
+Wasabi,Obst & Gemüse
+Lupinenmehl,Gewürze & Backzutaten
+Erbsenmehl,Gewürze & Backzutaten
+Kichererbsenmehl,Gewürze & Backzutaten
+Pekannuss geröstet,Backwaren
+Macadamianuss,Backwaren
+Mandel bitter,Backwaren
+Linse rot reif,Backwaren
+Butterpilz,Obst & Gemüse
+Birkenpilz,Obst & Gemüse
+Rotkappe,Obst & Gemüse
+H-Milch entrahmt,Kühlregal (Molkerei)
+Sahnekefir,Kühlregal (Molkerei)
+Kefir fettarm,Kühlregal (Molkerei)
+Sahnedickmilch Sahnesauermilch,Kühlregal (Molkerei)
+Sauerrahm Saure Sahne,Kühlregal (Molkerei)
+Sauermolke,Kühlregal (Molkerei)
+Sauerrahm Schmand,Kühlregal (Molkerei)
+Appenzeller,Kühlregal (Molkerei)
+Greyerzer,Kühlregal (Molkerei)
+Parmesan,Kühlregal (Molkerei)
+Gouda,Kühlregal (Molkerei)
+Havarti,Kühlregal (Molkerei)
+Bel Paese,Kühlregal (Molkerei)
+Steppenkäse,Kühlregal (Molkerei)
+Speisequark Fettstufe,Kühlregal (Molkerei)
+Kochkäse,Kühlregal (Molkerei)
+Frischkäsezubereitung < .,Kühlregal (Molkerei)
+Orangenlimonade,Getränke Alkoholfrei
+Colagetränk koffeinhaltig,Getränke Alkoholfrei
+Brause,Getränke Alkoholfrei
+Limonade,Getränke Alkoholfrei
+Früchtetee,Getränke Alkoholfrei
+Pfefferminztee,Gewürze & Backzutaten
+Export dunkel,Bier & Wein
+Rotling trocken,Bier & Wein
+Wermutwein süß,Bier & Wein
+Madeirawein,Bier & Wein
+Fruchtsaftlikör,Bier & Wein
+Sherry dry,Bier & Wein
+Sherry cream,Bier & Wein
+Traubenkernöl,Gewürze & Backzutaten
+Distelöl Safloröl,Gewürze & Backzutaten
+Leinöl,Gewürze & Backzutaten
+Hanföl,Gewürze & Backzutaten
+Sesamöl,Gewürze & Backzutaten
+Weizenkeimöl,Gewürze & Backzutaten
+Mohnöl,Gewürze & Backzutaten
+Bratöl Frittieröl,Gewürze & Backzutaten
+Palmfett Palmöl,Gewürze & Backzutaten
+Palmfett gehärtet,Gewürze & Backzutaten
+Kakaobutter,Gewürze & Backzutaten
+Sheabutter,Gewürze & Backzutaten
+Kokosfett gehärtet,Gewürze & Backzutaten
+Kokosöl desodoriert,Gewürze & Backzutaten
+Entenfett,Gewürze & Backzutaten
+Gänsefett Gänseschmalz,Gewürze & Backzutaten
+Branntweinessig,Gewürze & Backzutaten
+Balsamicoessig,Gewürze & Backzutaten
+Tomatenmark,Gewürze & Backzutaten
+Zitronat Sukkade,Gewürze & Backzutaten
+Ahornsirup,Süßwaren & Snacks
+Fondantkonfekt,Süßwaren & Snacks
+Fondantcreme,Süßwaren & Snacks
+Trinkschokoladenpulver,Süßwaren & Snacks
+Getränkepulver kakaohaltig,Süßwaren & Snacks
+Schokoladen-Dekor,Süßwaren & Snacks
+Pralinen,Süßwaren & Snacks
+Sahnepralinen,Kühlregal (Molkerei)
+Zartbitter- Halbbitterschokolade,Süßwaren & Snacks
+Toffee Sahnetoffee,Kühlregal (Molkerei)
+Gelbflossen-Thun,Fisch & Wurstwaren
+Weißer Thun,Fisch & Wurstwaren
+Pelamide,Fisch & Wurstwaren
+Brosme Lumb,Fisch & Wurstwaren
+Buckellachs,Fisch & Wurstwaren
+Wildlachs,Fisch & Wurstwaren
+Forelle Regenbogenforellen-Filet,Fisch & Wurstwaren
+Meerforelle,Fisch & Wurstwaren
+Rentier Fleisch,Fleischtheke
+Rind Fleisch,Fleischtheke
+Kalb Bug Schulter,Fleischtheke
+Rind Gulasch,Fleischtheke
+Rind Bratenfleisch,Fleischtheke
+Rind Kochfleisch,Fleischtheke
+Rind Vorderhesse,Fleischtheke
+Rind Filet Lende,Fleischtheke
+Rind Roulade,Fleischtheke
+Rind Bindegewebe,Fleischtheke
+Rind Ochsenschwanz,Fleischtheke
+Kalb Unterschale Schwanzstück,Fleischtheke
+Kalb Roulade,Fleischtheke
+Kalb Schnitzel,Fleischtheke
+Kalb Kugel Nuss,Fleischtheke
+Schaf Kotelett,Fleischtheke
+Hammel Muskelfleisch,Fleischtheke
+Lamm Muskelfleisch,Fleischtheke
+Ente Fleisch,Fleischtheke
+Wildente Schenkel,Fleischtheke
+Hähnchen Brust,Fleischtheke
+Pute Brust,Fleischtheke
+Pute Flügel,Fleischtheke
+Hähnchen Oberschenkel,Fleischtheke
+Hähnchen Unterschenkel,Fleischtheke
+Suppenhuhn Schenkel,Fleischtheke
+Perlhuhn Fleisch,Fleischtheke
+Gans Fleisch,Fleischtheke
+Baby-Pute Fleisch,Fleischtheke
+Pute Keule,Fleischtheke
+Taube Fleisch,Fleischtheke
+Roggen Flocken,Backwaren
+Roggen Vollkornschrot,Backwaren
+Weintraube rot,Obst & Gemüse
+Dattel,Obst & Gemüse
+Weintraube weiß,Obst & Gemüse
+Traubensaft angereichert,Obst & Gemüse
+Limette,Obst & Gemüse
+Kumquat,Obst & Gemüse
+Tangerine,Obst & Gemüse
+Satsuma,Obst & Gemüse
+Mandelmus,Backwaren
+Mascarpone,Kühlregal (Molkerei)
+Ricotta,Kühlregal (Molkerei)
+Colagetränk koffeinfrei,Getränke Alkoholfrei
+Kaffeelikör Kakaolikör,Bier & Wein
+Bitterlikör Kräuterlikör Gewürzlikör,Bier & Wein
+Sonnenblumenmargarine Vollfett,Gewürze & Backzutaten
+Pflanzenmargarine Dreiviertelfett,Gewürze & Backzutaten
+Pflanzliches Streichfett,Gewürze & Backzutaten
+Rapsölmargarine Vollfett,Gewürze & Backzutaten
+Pflanzenmargarine Vollfett,Gewürze & Backzutaten
+Pflanzenmargarine Halbfett,Gewürze & Backzutaten
+Ziehmargarine,Gewürze & Backzutaten
+Backmargarine,Gewürze & Backzutaten
+Palmkernfett Palmkernöl,Gewürze & Backzutaten
+Weichkaramelle,Süßwaren & Snacks
+Zartbitter- Halbbitter-Kuvertüre,Süßwaren & Snacks
+Schildmakrele Stöcker,Fisch & Wurstwaren
+Grenadier,Fisch & Wurstwaren
+Bachsaibling,Fisch & Wurstwaren
+Rind Filetsteak,Fleischtheke
+Kalb Filetsteak,Fleischtheke
+Rind Tatar Schabefleisch,Fleischtheke
+Kalb Filet Lende,Fleischtheke
+Rind Roastbeef,Fleischtheke
+Kalb Gulasch,Fleischtheke
+Kalb Bratenfleisch,Fleischtheke
+Hirsch Fleisch,Fleischtheke
+Fasan Fleisch,Fleischtheke
+Putenbrust,Fleischtheke
+Ente Schenkel,Fleischtheke
+Gans Schenkel,Fleischtheke
+Mandellikör,Bier & Wein
+Schwertfisch,Fisch & Wurstwaren
+Rind Hochrippe,Fleischtheke
+Rind Steak,Fleischtheke
+Rind Rostbraten,Fleischtheke
+Rind Kotelett,Fleischtheke
+Kalb Rücken,Fleischtheke
+Hirsch Rücken,Fleischtheke
+Pferd Fleisch,Fleischtheke
+Reh Keule,Fleischtheke
+Reh Rücken,Fleischtheke
+Wachtel Fleisch,Fleischtheke
+Rind Brustkern Mittelbrust,Fleischtheke
+Kalb Muskelfleisch,Fleischtheke
+Kalb Steak,Fleischtheke
+Kalb Kotelett,Fleischtheke
+Kalb Kochfleisch,Fleischtheke
+Kalb Brust,Fleischtheke
+Kalb Fleisch,Fleischtheke
+Buchweizen-Wasserbiskuitboden,Backwaren
+Käsealternative,Kühlregal (Vegan & Käse)
+Speiseeis Vanille,Tiefkühlware
+Brownies,Backwaren
+Mehrkornknusperbrot angereichert,Backwaren
+Vollkornbrot,Backwaren
+Dinkelvollkornknäckebrot,Backwaren
+Knuspermüslimischung,Süßwaren & Snacks
+Rhabarber-Streuselkuchen,Gewürze & Backzutaten
+Weizenmischbrötchen,Backwaren
+Roggenvollkornknäckebrot,Backwaren
+Rind Pökelfleisch,Fleischtheke
+Mehrkornvollkornknäckebrot,Backwaren
+Thüringer Obstkuchen,Gewürze & Backzutaten
+Sauerteigbrot,Backwaren
+Kokoskuchen,Backwaren
+Roggenbrötchen,Backwaren
+Käse-Schinken-Hörnchen,Kühlregal (Molkerei)
+Vanillefondant,Süßwaren & Snacks
+Apfelkuchen,Backwaren
+Anisplätzchen,Backwaren
+Zwetschgen-Streuselkuchen,Gewürze & Backzutaten
+Apfelstrudel,Backwaren
+Springerle,Backwaren
+Mandelbiskuitboden,Backwaren
+Schwein Bauch Rohpökelware,Fleischtheke
+Braune Lebkuchen unglasiert,Backwaren
+Schokoladen-Haselnuss-Cookies,Backwaren
+Banane getrocknet,Obst & Gemüse
+Eiweißbrot Proteinbrot,Backwaren
+Getreideflakes gesüßt,Backwaren
+Himbeersaft,Obst & Gemüse
+Schwein Schnitzel gegrillt,Fleischtheke
+Nussbiskuitboden,Backwaren
+Pfeffernüsse,Gewürze & Backzutaten
+Weizenvollkornknäckebrot,Backwaren
+Kathrinchen,Backwaren
+Fleischersatz glutenhaltig,Kühlregal (Vegan & Käse)
+Mehrkornbrötchen,Backwaren
+Brötchen glutenfrei,Backwaren
+Möhren-Nuss-Kuchen,Backwaren
+Ottilienkuchen,Backwaren
+Eiweißbrötchen Proteinbrötchen,Backwaren
+Weizenvollkornbrot,Backwaren
+Napfkuchen,Backwaren
+Haferbrötchen,Backwaren
+Zwetschgenkuchen,Kühlregal (Molkerei)
+Wiener Tortenboden kakaohaltig,Backwaren
+Schwein Kotelett Kochpökelware,Fleischtheke
+Mandelkuchen,Gewürze & Backzutaten
+Käsewaffeln salzig,Kühlregal (Molkerei)
+Speisequarkzubereitung,Kühlregal (Molkerei)
+Haselnusszopf,Backwaren
+Semmelknödel getrocknet,Trockensortiment & Konserven
+Schokobiskuitrolle Schokobiskuitroulade,Backwaren
+Roggenbrot,Backwaren
+Weizenvollkornbrötchen,Backwaren
+Mandelboden,Backwaren
+Kokosmilch Kokosnussmilch,Kühlregal (Molkerei)
+Honigkuchen,Backwaren
+Buttergebäck kakaohaltig,Backwaren
+Getreidechips umhüllt,Kühlregal (Molkerei)
+Ingwer kandiert,Süßwaren & Snacks
+Sahnelikör,Kühlregal (Molkerei)
+Vollkornhefeteig süß,Gewürze & Backzutaten
+Kokos-Praline,Süßwaren & Snacks
+Birnenkraut,Süßwaren & Snacks
+Mandelgebäck,Backwaren
+Bratensoße,Gewürze & Backzutaten
+Fleischsalat-Grundmasse,Fleischtheke
+Sacherguss Schokoladenglasur,Gewürze & Backzutaten
+Graved Lachs,Fisch & Wurstwaren
+Cocktail,Bier & Wein
+Apfeltaschen,Gewürze & Backzutaten
+Fruchtmischung,Obst & Gemüse
+Brombeersaft,Obst & Gemüse
+Weizenmischbrot,Backwaren
+Französische Schokoladentorte,Backwaren
+Früchtekuchen,Backwaren
+Blätterteig eifrei,Backwaren
+Dinkelvollkornbrötchen,Backwaren
+Meeresfrüchtemischung,Fisch & Wurstwaren
+Fleischkäse fettreduziert,Kühlregal (Molkerei)
+Müslimischung Bircher Art,Süßwaren & Snacks
+Currybratwurst,Fisch & Wurstwaren
+Dinkelbrot,Backwaren
+Raspeli,Backwaren
+Englischer Kuchen,Backwaren
+Suppengrün Suppenkraut,Obst & Gemüse
+Dinkeleierteigwaren,Trockensortiment & Konserven
+Aprikosensaft,Obst & Gemüse
+Johannisbeertorte,Backwaren
+Schokoladenbaiser,Backwaren
+Makronenkuchen,Backwaren
+Hamburger Rauchfleisch Rohpökelware,Fleischtheke
+Kekse Plätzchen,Backwaren
+Quicheboden,Backwaren
+Gemüsemischung asiatische Art,Obst & Gemüse
+Vollkornbrot glutenfrei,Backwaren
+Rehrücken gebacken,Backwaren
+Geflügelbockwurst,Fisch & Wurstwaren
+Croissant,Gewürze & Backzutaten
+Rotweinkuchen,Backwaren
+Zimtschnecken,Gewürze & Backzutaten
+Gemüsemischung Leipziger Allerlei,Tiefkühlware
+Frankfurter Würstchen Schinkenwürstchen,Fisch & Wurstwaren
+Stachelbeerkuchen,Backwaren
+Maracujanektar Passionsfruchtnektar,Obst & Gemüse
+Friesenkekse,Backwaren
+Quarkstollen,Kühlregal (Molkerei)
+Kiwisaft,Obst & Gemüse
+Schneckennudeln Rosenkuchen,Trockensortiment & Konserven
+Hefeteig gebacken,Gewürze & Backzutaten
+Bitterschokolade gefüllt,Süßwaren & Snacks
+Bauernbratwurst Westfälinger,Fisch & Wurstwaren
+Gänsezervelatwurst,Fisch & Wurstwaren
+Gugelhupf,Gewürze & Backzutaten
+Salami Ungarische Art,Fisch & Wurstwaren
+Katenrauchwurst,Fisch & Wurstwaren
+Nuss-Spritzgebäck,Backwaren
+Streuselkuchen,Gewürze & Backzutaten
+Weichkaramelle gefüllt,Süßwaren & Snacks
+Glühwein,Bier & Wein
+Lammfleisch-Zervelatwurst,Fisch & Wurstwaren
+Weizenfladenbrot,Backwaren
+Knoblauch gebacken,Obst & Gemüse
+Makrele gegrillt,Fisch & Wurstwaren
+Englische Muffins Toasties,Backwaren
+Teewurst fettreduziert,Fisch & Wurstwaren
+Vollkornbrötchen,Backwaren
+Heidesand,Backwaren
+Mischpilze,Obst & Gemüse
+Schokozwieback,Backwaren
+Laugengebäck,Gewürze & Backzutaten
+Geflügelfleischkäse,Kühlregal (Molkerei)
+Käsewindbeutel salzig ungefüllt,Kühlregal (Molkerei)
+Heidelbeer-Muffins,Backwaren
+Konfitüre extra,Süßwaren & Snacks
+Kaffeeeis,Tiefkühlware
+Eiswaffeln Waffelhörnchen,Backwaren
+Apfel-Streuselkuchen,Backwaren
+Rosinenbrötchen,Backwaren
+Orangennektar,Obst & Gemüse
+Böhmische Knödel,Trockensortiment & Konserven
+Studentenfutter,Backwaren
+Roggenvollkornbrötchen,Backwaren
+Buttergebäck,Backwaren
+Apfelkraut,Süßwaren & Snacks
+Reiswaffeln schokoliert,Trockensortiment & Konserven
+Pflanzenfett Frittierfett,Gewürze & Backzutaten
+Vollmilchschokolade gefüllt,Kühlregal (Molkerei)
+Kokosflocken,Süßwaren & Snacks
+Kuchenboden Tortenboden,Backwaren
+Apfelkuchen gedeckt,Backwaren
+Salatcreme,Gewürze & Backzutaten
+Tangerinensaft,Obst & Gemüse
+Göttinger Schinkenwurst,Fisch & Wurstwaren
+Cookies,Backwaren
+Kolbacz,Fleischtheke
+Schmierwurst fettreich,Fisch & Wurstwaren
+Vollkornplunderteig,Backwaren
+Getränkepulver malzhaltig,Süßwaren & Snacks
+Schokoladen-Mandel-Cookies vegan,Kühlregal (Vegan & Käse)
+Schokoladentorte,Backwaren
+Pampelmusensaft Pomelosaft,Obst & Gemüse
+Wasserbiskuitboden,Backwaren
+Weizenbaguettebrötchen,Backwaren
+Joghurteis,Tiefkühlware
+Milchbrötchen,Backwaren
+Croissant gefüllt,Gewürze & Backzutaten
+Sirupkuchen,Backwaren
+Honigkuchenhäufchen,Backwaren
+Kaviarcreme Kaviarpaste,Fisch & Wurstwaren
+Karamellbonbon zuckerfrei,Süßwaren & Snacks
+Weinbrand-Bohnen,Süßwaren & Snacks
+Sprühsahne Schlagsahne,Kühlregal (Molkerei)
+Fruchtsoße,Trockensortiment & Konserven
+Kirsche kandiert,Süßwaren & Snacks
+Knäckebrot glutenfrei,Backwaren
+Schokokekse glutenfrei,Backwaren
+Sandmasse Sandteig,Backwaren
+Haferflockenplätzchen,Süßwaren & Snacks
+Zitronenkekse glutenfrei,Backwaren
+Rehrücken,Backwaren
+Weizentoastbrot,Backwaren
+Steinpilz getrocknet,Obst & Gemüse
+Toastbrot glutenfrei,Backwaren
+Polenta,Gewürze & Backzutaten
+Sauerteigbrot glutenfrei,Backwaren
+Dinkelbrötchen,Backwaren
+Kürbis-Mandel-Kuchen,Backwaren
+Cappuccino,Kaffee & Tee
+Grapefruitsaftschorle,Getränke Alkoholfrei
+Kirschtorte,Backwaren
+Knollensellerie gebacken,Obst & Gemüse
+Eier-Frischteigwaren,Trockensortiment & Konserven
+Maiskekse glutenfrei,Backwaren
+Rote Grütze,Trockensortiment & Konserven
+Lammfleisch-Salami,Fisch & Wurstwaren
+Mehrkorntoastbrot,Backwaren
+Kokosschnitten,Backwaren
+Stollen,Gewürze & Backzutaten
+Gemüsesaft,Obst & Gemüse
+Schwarz-Weiß-Gebäck,Backwaren
+Fruchtgummi zuckerfrei,Süßwaren & Snacks
+Weißwein-Schorle,Bier & Wein
+Schinkenwurst Krakauer Art,Fisch & Wurstwaren
+Hirsebrot glutenfrei,Backwaren
+Marmelade,Süßwaren & Snacks
+Butterkuchen Zuckerkuchen,Gewürze & Backzutaten
+Feiner Honigkuchen,Backwaren
+Mettwurst luftgetrocknet,Fisch & Wurstwaren
+Trockenfrüchte,Kühlregal (Molkerei)
+Russisch-Brot,Backwaren
+Tintenfisch gegrillt,Fisch & Wurstwaren
+Waffelkekse,Backwaren
+Ostpreußischer Honigkuchen,Backwaren
+Romanesco gebacken,Obst & Gemüse
+Dinkelknusperbrot,Backwaren
+Marmorkuchen,Backwaren
+Johannisbeersaft schwarz,Obst & Gemüse
+Nonpareille,Süßwaren & Snacks
+Kalb Schnitzel gegrillt,Fleischtheke
+Schokoladenfondant,Süßwaren & Snacks
+Schinkenhörnchen,Kühlregal (Molkerei)
+Schinkenwurst,Fisch & Wurstwaren
+Eiserkuchen,Backwaren
+Schinkentorte,Fisch & Wurstwaren
+Milchmischgetränk,Kühlregal (Molkerei)
+Nusskuchen,Backwaren
+Nusskranz,Kühlregal (Molkerei)
+Schokobrötchen,Backwaren
+Colabier,Bier & Wein
+Basler Leckerli,Backwaren
+Mehrkornbrot,Backwaren
+Fruchtsaftgetränk Apfel,Getränke Alkoholfrei
+Butterzwieback,Backwaren
+Braunschweiger Mettwurst,Fisch & Wurstwaren
+Rheinische Bratwurst,Fisch & Wurstwaren
+Quarktaschen,Kühlregal (Molkerei)
+Vollkorncroissant,Backwaren
+Rind Hackfleisch,Fleischtheke
+Spargel gebacken,Obst & Gemüse
+Erdbeerbowle,Bier & Wein
+Rosinen-Mandel-Schnecken,Gewürze & Backzutaten
+Buchteln,Gewürze & Backzutaten
+Mandelhörnchen,Backwaren
+Fleischersatz gluten,Kühlregal (Vegan & Käse)
+Nährzwieback,Backwaren
+Schokoladenbrezeln,Backwaren
+Dinkelzwieback,Backwaren
+Speiseeis gemischt,Tiefkühlware
+Wespennester,Trockensortiment & Konserven
+Teegebäck,Backwaren
+Trüffel-Pralinen,Süßwaren & Snacks
+Sahneschokolade gefüllt,Kühlregal (Molkerei)
+Eierteigwaren glutenfrei,Trockensortiment & Konserven
+Kräuteressig,Gewürze & Backzutaten
+Schwein Frikadelle,Fleischtheke
+Rumkugeln,Süßwaren & Snacks
+Alkopops,Bier & Wein
+Haselnuss-Dreispitz,Trockensortiment & Konserven
+Schinkenmettwurst,Fisch & Wurstwaren
+Buchweizenbrot glutenfrei,Backwaren
+Rostbratwurst,Fisch & Wurstwaren
+Schwarzwälder Bauernwürstle,Fleischtheke
+Sahne-Meerrettich,Kühlregal (Molkerei)
+Baiser,Backwaren
+Weizenknusperbrot,Backwaren
+Nusshörnchen,Gewürze & Backzutaten
+Schokoladen-Muffins,Backwaren
+Rhabarberkuchen,Backwaren
+Perlzwiebel gebacken,Obst & Gemüse
+Puddingpulver Vanille,Gewürze & Backzutaten
+Sahnewaffeln,Kühlregal (Molkerei)
+Weinbrand-Kirschen,Süßwaren & Snacks
+Mandelkränzchen,Backwaren
+Haferflocken-Nussplätzchen,Süßwaren & Snacks
+Remoulade,Gewürze & Backzutaten
+Pflaumenmus,Süßwaren & Snacks
+Leiterchen Rippchen Schälrippchen,Fleischtheke
+Spirituose,Bier & Wein
+Vollkornknusperbrot,Backwaren
+Käseknusperchen salzig,Kühlregal (Molkerei)
+Speisequarkzubereitung < .,Kühlregal (Molkerei)
+Baguette glutenfrei,Backwaren
+Cracker,Backwaren
+Grießklößchen,Trockensortiment & Konserven
+Weizenvollkorntoastbrot,Backwaren
+Weizenbaguette,Backwaren
+Gemüsemischung Erbsen-Karotten,Obst & Gemüse
+Nussprinten schokoliert,Backwaren
+Pfifferling getrocknet,Obst & Gemüse
+Käsegebäck salzig,Kühlregal (Molkerei)
+Brioches ungefüllt,Gewürze & Backzutaten
+Apfelwaffeln,Backwaren
+Fleischwurst fettreduziert,Fisch & Wurstwaren
+Fruchtsaftschorle Weintraube,Getränke Alkoholfrei
+Radler,Bier & Wein
+Mousse au chocolat,Kühlregal (Molkerei)
+Weißbrot glutenfrei,Backwaren
+Mehlmischung eiweißarm,Gewürze & Backzutaten
+Sachertortenboden,Backwaren
+Zimtsterne,Backwaren
+Altbierbowle,Bier & Wein
+Champignon gebacken,Obst & Gemüse
+Rührmasse Rührteig,Backwaren
+Blätterteig gebacken,Backwaren
+Biskuitboden,Backwaren
+Nuss-Wasserbiskuitboden,Backwaren
+Schwein Schinkenspeck,Fisch & Wurstwaren
+Nusskuchen vegan,Kühlregal (Vegan & Käse)
+Vollkornmürbeteig süß,Backwaren
+Kaffeeersatz,Getränke Alkoholfrei
+Rosenkohl gebacken,Obst & Gemüse
+Bier,Bier & Wein
+Eierlikör,Bier & Wein
+Milchshake,Kühlregal (Molkerei)
+Plunderteig,Backwaren
+Waffeln glutenfrei,Backwaren
+Grobe Mettwurst,Fisch & Wurstwaren
+Schwein Bauchspeck,Fleischtheke
+Kalter Hund,Backwaren
+Kokoszwieback,Backwaren
+Weizenvollkornbaguette,Backwaren
+Preiselbeersaft,Trockensortiment & Konserven
+Komprimate,Süßwaren & Snacks
+Cremeeis Kremeis,Tiefkühlware
+Hirschsalami,Fisch & Wurstwaren
+Haferbrot,Backwaren
+Rahmeis Sahneeis,Tiefkühlware
+Cashewkern geröstet,Backwaren
+Fruchtaufstrich,Süßwaren & Snacks
+Honigkuchenplätzchen,Backwaren
+Puddingpulver Schokolade,Gewürze & Backzutaten
+Acerolasaft,Obst & Gemüse
+Milchmischgetränk <,Kühlregal (Molkerei)
+Apfelkorn,Bier & Wein
+Scones,Backwaren
+Zuckerperlen,Süßwaren & Snacks
+Paniermehl Semmelbrösel Semmelmehl,Gewürze & Backzutaten
+Linsenmehl,Gewürze & Backzutaten
+Backerbsen,Backwaren
+Biskuitrolle Biskuitroulade,Backwaren
+Löffelbiskuits glutenfrei,Backwaren
+Baklava,Backwaren
+Wirsing gebacken,Obst & Gemüse
+Butterpilz getrocknet,Obst & Gemüse
+Ausbackteig gesüßt,Kühlregal (Molkerei)
+Schwein Kotelett gegrillt,Fleischtheke
+Baumkuchen Grillkuchen Schichtkuchen,Backwaren
+Quarkstrudel,Kühlregal (Molkerei)
+Nusstaler,Backwaren
+Zwieback glutenfrei,Backwaren
+Roggenknusperbrot,Backwaren
+Trüffel getrocknet,Obst & Gemüse
+Schoko-Nuss-Creme,Süßwaren & Snacks
+Sardine gegrillt,Fisch & Wurstwaren
+Aubergine gegrillt,Obst & Gemüse
+Weizenknäckebrot,Backwaren
+Schoko-Mandelbiskuitboden,Backwaren
+Dicker Honigkuchen,Backwaren
+Vollkorneierteigwaren,Trockensortiment & Konserven
+Butterkekse Butterplätzchen schokoliert,Backwaren
+Haselnussmus,Backwaren
+Mehrkornflocken,Backwaren
+Knusperbrot glutenfrei,Backwaren
+Westfälische grobe Mettwurst,Fisch & Wurstwaren
+Kasseler Kamm,Fleischtheke
+Karamelleis,Tiefkühlware
+Zuckermais gebacken,Obst & Gemüse
+Tofu gebacken,Kühlregal (Vegan & Käse)
+Fruchtsahnelikör,Kühlregal (Molkerei)
+Frischteigwaren eifrei,Trockensortiment & Konserven
+Teigschnitte gefüllt,Kühlregal (Molkerei)
+Quarknapfkuchen,Kühlregal (Molkerei)
+Dresdner Stollen,Gewürze & Backzutaten
+Kapstachelbeersaft Physalissaft,Obst & Gemüse
+Fruchtsaftschorle Orange,Getränke Alkoholfrei
+Rind Kotelett gegrillt,Fleischtheke
+Obatzter Obazda,Kühlregal (Molkerei)
+Erdnussplätzchen,Backwaren
+Löffelbiskuits,Backwaren
+Landjäger,Fleischtheke
+Salami Italienische Art,Fisch & Wurstwaren
+Müslikekse glutenfrei,Süßwaren & Snacks
+Walnuss geröstet,Backwaren
+Haselnuss gemahlen,Backwaren
+Wiener Tortenboden,Backwaren
+Apfeldicksaft,Süßwaren & Snacks
+Zuckerlis,Backwaren
+Lachs gegrillt,Fisch & Wurstwaren
+Rind Roastbeef Rohpökelware,Fleischtheke
+Dinkelvollkornbaguette,Backwaren
+Ausbackteig,Backwaren
+Zichorienkaffee,Getränke Alkoholfrei
+Printen,Backwaren
+Spekulatius,Backwaren
+Zuckermais gegrillt,Obst & Gemüse
+Brandmasse Brandteig,Backwaren
+Erdnussflips,Süßwaren & Snacks
+Käseplätzchen salzig,Kühlregal (Molkerei)
+Apfelnektar,Obst & Gemüse
+Mischpilze getrocknet,Obst & Gemüse
+Haselnussplätzchen glutenfrei,Backwaren
+Müslikekse,Süßwaren & Snacks
+Vollkornzwieback,Backwaren
+Florentiner,Backwaren
+Sesam-Krokant,Süßwaren & Snacks
+Salatmayonnaise,Gewürze & Backzutaten
+Pflastersteine,Backwaren
+Kürbis Hokkaido gebacken,Obst & Gemüse
+Gelee-Früchte,Süßwaren & Snacks
+Kasseler Rippenspeer,Fleischtheke
+Streuselschnecken,Gewürze & Backzutaten
+Backoblaten,Backwaren
+Hefezopf,Gewürze & Backzutaten
+Mangold gebacken,Obst & Gemüse
+Dragee-Streusel,Süßwaren & Snacks
+Speisezwiebel gebacken,Obst & Gemüse
+Tafel-Meerrettich,Trockensortiment & Konserven
+Paniermehl glutenfrei,Gewürze & Backzutaten
+Gurke gebacken,Obst & Gemüse
+Kaviarersatz,Fisch & Wurstwaren
+Schwein Frühstücksspeck,Fleischtheke
+Morchel getrocknet,Obst & Gemüse
+Weiße Schokolade,Trockensortiment & Konserven
+Stockwurst Münchner Stockwurst,Fisch & Wurstwaren
+Zucchini gegrillt,Obst & Gemüse
+Vanillecreme Vanilleflammeri,Gewürze & Backzutaten
+Geflügelteewurst,Fisch & Wurstwaren
+Schwein Speck Rohpökelware,Fleischtheke
+Blumenkohl gebacken,Obst & Gemüse
+Weinsauerkraut,Obst & Gemüse
+Shiitakepilz getrocknet,Obst & Gemüse
+Schoko-Wasserbiskuitboden,Backwaren
+Beerenmischung,Obst & Gemüse
+Fruchtmischung getrocknet,Obst & Gemüse
+Knusperpraline,Kühlregal (Molkerei)
+Weizenmischtoastbrot,Backwaren
+Speiseeis Schokolade,Tiefkühlware
+Mango getrocknet,Obst & Gemüse
+Grobe Mettwurst fettreduziert,Fisch & Wurstwaren
+Geflügelbratwurst,Fisch & Wurstwaren
+Sahnekaramelle,Kühlregal (Molkerei)
+Gemüsemischung Kaisergemüse,Obst & Gemüse
+Pastinake gebacken,Obst & Gemüse
+Sekt,Bier & Wein
+Kohlrabi gebacken,Obst & Gemüse
+Wurzelpetersilie getrocknet,Obst & Gemüse
+Tomate gegrillt,Obst & Gemüse
+Braunschweiger Mettwurst Ia,Fisch & Wurstwaren
+Fruchtsaftschorle Apfel,Getränke Alkoholfrei
+Kastanienmehl,Gewürze & Backzutaten
+Speiseeis durchzogen,Tiefkühlware
+Aubergine gebacken,Obst & Gemüse
+Kalb Haxe,Fleischtheke
+Marmorwaffeln,Backwaren
+Ayran,Kühlregal (Molkerei)
+Zitronensaft,Obst & Gemüse
+Ananasbowle,Bier & Wein
+Leinsamen geröstet,Backwaren
+Haselnuss geröstet,Backwaren
+Pizzateig,Gewürze & Backzutaten
+Kalb Kotelett gegrillt,Fleischtheke
+Sushi Ingwer,Trockensortiment & Konserven
+Deutsche Salami Schinkensalami,Fisch & Wurstwaren
+Speisezwiebel getrocknet,Obst & Gemüse
+Reismischung,Trockensortiment & Konserven
+Birnensaft,Obst & Gemüse
+Sonnenblumenkern geröstet,Backwaren
+Erdbeere getrocknet,Obst & Gemüse
+Ganache Canache,Gewürze & Backzutaten
+Thunfisch gegrillt,Fisch & Wurstwaren
+Gewürzplätzchen glutenfrei,Backwaren
+Gemüse-Meerrettich,Trockensortiment & Konserven
+Paranuss geröstet,Backwaren
+Rind Steak gegrillt,Fleischtheke
+Ente Brust,Fleischtheke
+Wurzelpetersilie gebacken,Obst & Gemüse
+Schinkenwaffeln,Fisch & Wurstwaren
+Bratwurst,Fisch & Wurstwaren
+Pinienkern geröstet,Backwaren
+Spinat gebacken,Obst & Gemüse
+Mehlmischung glutenfrei,Gewürze & Backzutaten
+Pumpernickel,Gewürze & Backzutaten
+Reiswaffeln,Trockensortiment & Konserven
+Kaffeelikör Schokoladenlikör,Kühlregal (Molkerei)
+Mehrkornschrot,Backwaren
+Biskuitplätzchen,Backwaren
+Streuselplätzchen,Backwaren
+Süßkirsche getrocknet,Obst & Gemüse
+Zander gegrillt,Fisch & Wurstwaren
+Schlehensaft,Obst & Gemüse
+Speisezwiebel gegrillt,Obst & Gemüse
+Süßkirschsaft,Obst & Gemüse
+Seidentofu gargezogen,Kühlregal (Vegan & Käse)
+Himbeere getrocknet,Obst & Gemüse
+Vollkornblätterteig eifrei,Backwaren
+Schinkenplockwurst Schinkenplockwurst luftgetrocknet,Fisch & Wurstwaren
+Linse rot,Backwaren
+Rotkohl gebacken,Obst & Gemüse
+Radler sauer,Bier & Wein
+Landmettwurst,Fisch & Wurstwaren
+Champignon getrocknet,Obst & Gemüse
+Haselnusskugeln,Backwaren
+Vanillehörnchen Vanillekipferl,Backwaren
+Joghurtbutter,Kühlregal (Molkerei)
+Butter,Gewürze & Backzutaten
+Parfait Halbgefrorenes,Tiefkühlware
+Holundersaft,Obst & Gemüse
+Grießklößchen getrocknet,Trockensortiment & Konserven
+Klippfisch trocken,Fisch & Wurstwaren
+Hartkaramelle gefüllt,Süßwaren & Snacks
+Weizen-Radler,Bier & Wein
+Ananas kandiert,Süßwaren & Snacks
+Schellfisch gegrillt,Fisch & Wurstwaren
+Soja-Bratlinge,Kühlregal (Vegan & Käse)
+Spritzgebäck,Backwaren
+Erdbeersaft,Obst & Gemüse
+Limettensaft,Obst & Gemüse
+Traubensaft weiß,Obst & Gemüse
+Dinkelvollkornteigwaren eifrei,Trockensortiment & Konserven
+Knoblauch Pulver,Obst & Gemüse
+Broccoli gebacken,Obst & Gemüse
+Dinkelvollkorneierteigwaren,Trockensortiment & Konserven
+Kürbiskern geröstet,Backwaren
+Sanddornsaft,Obst & Gemüse
+Riegel,Tiefkühlware
+Tofu gargezogen,Kühlregal (Vegan & Käse)
+Litschisaft,Obst & Gemüse
+Chicoree gebacken,Obst & Gemüse
+Hafervollkornbrot,Backwaren
+Satsumasaft,Obst & Gemüse
+Heidelbeersaft,Obst & Gemüse
+Kochbanane getrocknet,Obst & Gemüse
+Popcorn gesüßt,Backwaren
+Biskuitboden glutenfrei,Backwaren
+Colaweizen,Bier & Wein
+Johannisbeersaft rot,Obst & Gemüse
+Schokobiskuitboden,Backwaren
+Semmelknödel,Trockensortiment & Konserven
+Kakisaft,Obst & Gemüse
+Kalte Ente,Bier & Wein
+Bleichsellerie gebacken,Obst & Gemüse
+Europäische Auster gratiniert,Fisch & Wurstwaren
+Schaf Fleisch,Fleischtheke
+Chinakohl gebacken,Obst & Gemüse
+Clementinensaft,Obst & Gemüse
+Forelle gegrillt,Fisch & Wurstwaren
+Kalb Hackfleisch,Fleischtheke
+Pflaumensaft,Obst & Gemüse
+Traubensaft rot,Obst & Gemüse
+Dinkelteigwaren eifrei,Trockensortiment & Konserven
+Austernpilz getrocknet,Obst & Gemüse
+Quittensaft,Obst & Gemüse
+Walnuss gemahlen,Backwaren
+Schwein Bauch gegrillt,Fleischtheke
+Erdnuss-Krokant,Süßwaren & Snacks
+Schaf Schnitzel gegrillt,Fleischtheke
+Ananassaftschorle,Getränke Alkoholfrei
+Steinpilz gebacken,Obst & Gemüse
+Kochbanane gebacken,Obst & Gemüse
+Sardelle gegrillt,Fisch & Wurstwaren
+Ananas getrocknet,Obst & Gemüse
+Quarkblätterteig gebacken,Kühlregal (Molkerei)
+Traubendicksaft,Süßwaren & Snacks
+Geflügel-Wiener Würstchen gargezogen,Fleischtheke
+Papaya getrocknet,Obst & Gemüse
+Europäische Auster gegrillt,Fisch & Wurstwaren
+Zucchini gebacken,Obst & Gemüse
+Knoblauch getrocknet,Obst & Gemüse
+Latte macchiato,Kühlregal (Molkerei)
+Rhabarbersaft,Obst & Gemüse
+Champignon gegrillt,Obst & Gemüse
+Rind Filetsteak gegrillt,Fleischtheke
+Mangosaft,Obst & Gemüse
+Tomate getrocknet,Obst & Gemüse
+Roggenknäckebrot,Backwaren
+Mangostanesaft,Obst & Gemüse
+Tomate Pulver,Obst & Gemüse
+Rind Fleisch getrocknet,Fleischtheke
+Maulbeersaft,Obst & Gemüse
+Pfifferling gebacken,Obst & Gemüse
+Kürbis Pumpkin gebacken,Obst & Gemüse
+Speisezwiebel Pulver,Obst & Gemüse
+Mohn gemahlen,Backwaren
+Spitzkohl gebacken,Obst & Gemüse
+Gemüsefenchel gebacken,Obst & Gemüse
+Brombeere getrocknet,Obst & Gemüse
+Weißkohl gebacken,Obst & Gemüse
+Sesam geröstet,Backwaren
+Birne getrocknet,Obst & Gemüse
+Yamswurzel gebacken,Obst & Gemüse
+Tomate gebacken,Obst & Gemüse
+Sauerkirschsaft,Obst & Gemüse
+Geflügel Dönerfleisch,Fleischtheke
+Leinsamen geschrotet,Backwaren
+Hühnerei gebacken,Kühlregal (Molkerei)
+Frühlingszwiebel Lauchzwiebel gebacken,Obst & Gemüse
+Honigmelonensaft,Obst & Gemüse
+Kalb Steak gegrillt,Fleischtheke
+Kirschstrudel,Backwaren
+Helle Soße Instantpulver,Gewürze & Backzutaten
+Fruchtsaftgetränk Johannisbeere,Getränke Alkoholfrei
+Käsekuchen Quarkkuchen,Kühlregal (Molkerei)
+Alaska-Seelachs im Backteig,Tiefkühlware
+Fruchteis,Tiefkühlware
+Apfeltasche,Backwaren
+Speiseeis Nuss,Tiefkühlware
+Kartoffelhörnchen,Backwaren
+Mehrfruchtsaft angereichert,Obst & Gemüse
+Schinkenröllchen,Fisch & Wurstwaren
+Soja-Streichwurstalternative,Kühlregal (Vegan & Käse)
+Debrecziner,Fleischtheke
+Geselchte,Fleischtheke
+Roter Mehrfruchtsaft,Obst & Gemüse
+Schwedischer Mandel-Marzipan-Kuchen Mazarinkuchen,Backwaren
+Knoblauchbutter Kräuterbutter,Gewürze & Backzutaten
+Kartoffelwurst,Fisch & Wurstwaren
+Smoothie purpur,Obst & Gemüse
+Müsli-Riegel,Süßwaren & Snacks
+Geflügelbierwurst,Fisch & Wurstwaren
+Energieriegel angereichert,Süßwaren & Snacks
+Müslimischung,Süßwaren & Snacks
+Nuss-Schnecken,Gewürze & Backzutaten
+Orangenkuchen,Backwaren
+Ajvar,Trockensortiment & Konserven
+Marzipan-Monde,Backwaren
+Thüringer Rotwurst,Fisch & Wurstwaren
+Ananas-Marzipan-Kuchen,Backwaren
+Puddingschnecken,Gewürze & Backzutaten
+Elisenlebkuchen,Backwaren
+Kartoffelrösti,Tiefkühlware
+Mortadella fettreduziert,Fleischtheke
+Schokoladenpudding,Kühlregal (Molkerei)
+Rosinenbrot glutenfrei,Backwaren
+Mandarinen-Omelettes,Kühlregal (Molkerei)
+Nussstangen,Backwaren
+Mohnstollen,Gewürze & Backzutaten
+Mohnkranz,Kühlregal (Molkerei)
+Möhren-Nusstorte Rüblitorte,Backwaren
+Pfefferkuchen,Gewürze & Backzutaten
+Frischecreme Streichcreme,Kühlregal (Vegan & Käse)
+Bierschinken,Trockensortiment & Konserven
+Schlemmerfilet Bordelaise,Tiefkühlware
+ACE-Frucht-Vitamingetränk angereichert,Getränke Alkoholfrei
+Salami Kroatische Art,Fisch & Wurstwaren
+Kastanienbrot glutenfrei,Backwaren
+Schokoladenstreusel,Süßwaren & Snacks
+Röstzwiebeln,Obst & Gemüse
+Kirschtasche,Backwaren
+Käseschinkenwurst,Kühlregal (Molkerei)
+Gansgalantine,Fleischtheke
+Kalbskäse,Kühlregal (Molkerei)
+Orangenflammeri,Gewürze & Backzutaten
+Fischstäbchen paniert,Tiefkühlware
+Zitronenkuchen vegan,Kühlregal (Vegan & Käse)
+Sojawürstchen,Kühlregal (Vegan & Käse)
+Schweinefleischsülze,Fleischtheke
+Orangentäschchen,Backwaren
+Apfel-Quarktorte,Kühlregal (Molkerei)
+Baiser-Schokosahnetorte,Kühlregal (Molkerei)
+Garnele paniert,Tiefkühlware
+Kartoffelkuchen,Backwaren
+Nuss-Spritzgebäck schokoliert,Backwaren
+Fruchtsaftgetränk Kirsche,Getränke Alkoholfrei
+Schinkenpresskopf,Fisch & Wurstwaren
+Mehrfruchtsaft,Obst & Gemüse
+Frühstücksfleisch,Fleischtheke
+Sandwaffeln,Backwaren
+Schlackwurst,Fisch & Wurstwaren
+Käsekuchen,Kühlregal (Molkerei)
+Gemüsecremesuppe Instantpulver,Obst & Gemüse
+Gewürzsalz Kräutersalz,Gewürze & Backzutaten
+Kalbfleischwurst,Fisch & Wurstwaren
+Vollkorn-Marmorkuchen,Backwaren
+Nürnberger Lebkuchen,Backwaren
+Orangenbiskuitplätzchen,Backwaren
+Eier-Frischteigwaren Ravioli,Trockensortiment & Konserven
+Sardellenpaste,Fisch & Wurstwaren
+Erbswurst,Fisch & Wurstwaren
+Soja-Bolognese,Kühlregal (Vegan & Käse)
+Knackwurst Servela Würstchen,Fisch & Wurstwaren
+Marzipan-Walnuss-Sahnetorte,Kühlregal (Molkerei)
+Aprikosenglasur Aprikotur,Gewürze & Backzutaten
+Brotaufstrich Ei-Kräuter,Backwaren
+Vegetarisches Gulasch,Kühlregal (Vegan & Käse)
+Müsli Basismischung,Süßwaren & Snacks
+Bananennektar,Obst & Gemüse
+Roter Mehrfruchtsaft angereichert,Obst & Gemüse
+Wiener Apfelstrudel,Backwaren
+Apfeltorte gedeckt,Backwaren
+Schweinskäse weiß,Kühlregal (Molkerei)
+Gemüseaufstrich,Backwaren
+Hobelspäne Räderkuchen frittiert,Backwaren
+Weiße Graupenwurst,Fisch & Wurstwaren
+Schmalz Schmelz,Kühlregal (Vegan & Käse)
+Nuss-Pralinen,Süßwaren & Snacks
+Himbeertörtchen,Kühlregal (Molkerei)
+Fleischkäse grob,Kühlregal (Molkerei)
+Vollkorn-Schoko-Mandelkuchen,Backwaren
+Schokosahnetorte,Kühlregal (Molkerei)
+Energieriegel gefüllt,Süßwaren & Snacks
+Vollkornhaselnusskuchen,Backwaren
+Marzipanstollen,Gewürze & Backzutaten
+Knoblauchwurst,Fisch & Wurstwaren
+Schwarze Graupenwürstchen,Fleischtheke
+Ananas-Kranz gefüllt,Backwaren
+Mandel-Marzipan-Donuts frittiert,Gewürze & Backzutaten
+Fruchtschnitte Fruchtriegel,Obst & Gemüse
+Kalbfleischkäse,Kühlregal (Molkerei)
+Roter Presskopf,Fleischtheke
+Käsewindbeutel gefüllt,Kühlregal (Molkerei)
+Sauerkirschnektar,Obst & Gemüse
+Makronentorte,Backwaren
+Pilzcremesuppe Instantpulver,Obst & Gemüse
+Mettwurst einfach,Fisch & Wurstwaren
+Geflügeljagdwurst,Fisch & Wurstwaren
+Schupfnudeln schwäbisch,Trockensortiment & Konserven
+Rind Schwein,Fleischtheke
+Fischfrikadelle paniert,Tiefkühlware
+Hessische Landrotwurst,Fisch & Wurstwaren
+Thüringer Fleischrotwurst fettreduziert,Fisch & Wurstwaren
+Dessert,Kühlregal (Molkerei)
+Kümmelwurst,Fisch & Wurstwaren
+Mortadella süddeutsch,Fleischtheke
+Buttermilchdrink,Kühlregal (Molkerei)
+Hummus Kichererbsenmus,Backwaren
+Smoothie grün,Obst & Gemüse
+Zitronenkuchen,Backwaren
+Mohnstollen Mohnstriezel,Gewürze & Backzutaten
+Eierlikörtorte,Backwaren
+Muffins vegan,Kühlregal (Vegan & Käse)
+Käsewiener,Kühlregal (Molkerei)
+Kalbfleischsülze,Trockensortiment & Konserven
+Französische Schweinefleischterrine gebacken,Fleischtheke
+Hirschfleischpastete,Fleischtheke
+Bienenstich,Gewürze & Backzutaten
+Hannoversche Weißwurst,Fisch & Wurstwaren
+Apfelkuchen vegan,Kühlregal (Vegan & Käse)
+Liegnitzer,Backwaren
+Seelachs im Backteig,Tiefkühlware
+Erdbeerkuchen,Backwaren
+Aalrauchmettwurst,Fisch & Wurstwaren
+Käsetorte,Kühlregal (Molkerei)
+Cola-Misch-Getränk Orange,Getränke Alkoholfrei
+Schokoladen-Haselnussmakronen,Backwaren
+Trüffeltorte,Backwaren
+Schokoladen-Nusstorte,Backwaren
+Fränkischer Fleischpresssack,Fleischtheke
+Eiskonfekt,Süßwaren & Snacks
+Gnocchi,Obst & Gemüse
+Buchweizentorte,Kühlregal (Molkerei)
+Mandelkranz,Gewürze & Backzutaten
+Englischer Teekuchen glutenfrei,Backwaren
+Feines Früchtebrot,Backwaren
+Hähnchencreme,Backwaren
+Rotweinpunsch,Bier & Wein
+Schokoladen-Makronen,Backwaren
+Bockwurst,Fisch & Wurstwaren
+Donut frittiert,Gewürze & Backzutaten
+Rheinische Mutzen frittiert,Trockensortiment & Konserven
+Frucht-Chutney,Gewürze & Backzutaten
+Rindsbratwurst,Fisch & Wurstwaren
+Mandarinen-Schmand-Kuchen,Kühlregal (Molkerei)
+Waffeln,Backwaren
+Erdbeer-Sahnecremetorte,Kühlregal (Molkerei)
+Marzipanstangen,Backwaren
+Jagdwurst fettreduziert,Fisch & Wurstwaren
+Pfirsichtorte,Backwaren
+Krabben,Fisch & Wurstwaren
+Nussboden,Backwaren
+Kabeljau im Backteig,Tiefkühlware
+Kalbsroulade,Fisch & Wurstwaren
+Zervelatwurst fettreduziert,Fisch & Wurstwaren
+Knoblauchwurst einfach,Fisch & Wurstwaren
+Mohnschnecken,Backwaren
+Langos frittiert,Gewürze & Backzutaten
+Grießpudding,Kühlregal (Molkerei)
+Schokoladenkuchen,Backwaren
+Gemüsemischung mexikanische Art,Obst & Gemüse
+Weiße Lebkuchen,Backwaren
+Amerikaner,Backwaren
+Plockwurst einfach,Fisch & Wurstwaren
+Birnensaftschorle,Getränke Alkoholfrei
+Currybratwurst gegrillt,Fisch & Wurstwaren
+Erfrischungsgetränk isotonisch,Getränke Alkoholfrei
+Sülzwurst,Fisch & Wurstwaren
+Johannisbeernektar schwarz,Obst & Gemüse
+Schinken-Käse-Sülze,Kühlregal (Molkerei)
+Erdbeersahnetorte,Kühlregal (Molkerei)
+Rostbratwurst gargezogen,Fisch & Wurstwaren
+Mandelbrot,Backwaren
+Speiseeis Karamell,Tiefkühlware
+Smoothie gelb,Obst & Gemüse
+Schokoladen-Dragees,Süßwaren & Snacks
+Tofu-Bratlinge,Kühlregal (Vegan & Käse)
+Schweineohren Schweinsohren,Backwaren
+Vollkornplunderteig gebacken,Backwaren
+Schweinskopfwurst,Fisch & Wurstwaren
+Speiseeis überzogen,Tiefkühlware
+Linzer Torte,Backwaren
+Gerollte Marzipan-Nuss-Schnitten,Kühlregal (Molkerei)
+Eierpunsch,Bier & Wein
+Schweineroulade,Fleischtheke
+Wildbretgalantine gebacken,Fleischtheke
+Kürbis-Kuchen,Backwaren
+Königskuchen,Backwaren
+Nussecken,Backwaren
+Rinderbierschinken,Fisch & Wurstwaren
+Schoko-Plunder,Backwaren
+Buttermilchdessert,Kühlregal (Molkerei)
+Gelee extra,Süßwaren & Snacks
+Gewürzkuchen,Backwaren
+Eberswalder Spritzkuchen frittiert,Backwaren
+Baumkuchenspitzen,Backwaren
+Alaska-Seelachs paniert,Tiefkühlware
+Nuss-Trüffel-Pralinen,Süßwaren & Snacks
+Nüsse,Kühlregal (Molkerei)
+Aprikosenkuchen,Backwaren
+Rindersalami,Fisch & Wurstwaren
+Vollkornsandkuchen,Backwaren
+Thüringer Mohnkuchen,Gewürze & Backzutaten
+Brötchen,Backwaren
+Kartoffelkroketten,Tiefkühlware
+Molkenmischgetränk,Kühlregal (Molkerei)
+Rind Frikadelle,Fleischtheke
+Zervelatwurst,Fisch & Wurstwaren
+Pfirsich-Maracuja Fruchtnektar,Getränke Alkoholfrei
+Rhabarberkompott,Trockensortiment & Konserven
+Kokosmakronen,Backwaren
+Wiener Hörnchen,Gewürze & Backzutaten
+Haselnuss-Krokant,Süßwaren & Snacks
+Feine Oblaten-Lebkuchen,Backwaren
+Kalbfleischgalantine gebacken,Fleischtheke
+Marzipanmakronen,Backwaren
+Frucht-Sorbet,Tiefkühlware
+Fruchtsaftgetränk,Getränke Alkoholfrei
+Waffelschnitte gefüllt,Süßwaren & Snacks
+Karamell-Toffee gefüllt,Süßwaren & Snacks
+Presssäckel,Fleischtheke
+Vanille-Mürbchen,Backwaren
+Knäckebrotstückchen,Backwaren
+Paprikaspeckwurst,Fisch & Wurstwaren
+Apfel-Weincreme eihaltig,Gewürze & Backzutaten
+Quarkbällchen frittiert,Kühlregal (Molkerei)
+Schupfnudeln eifrei,Trockensortiment & Konserven
+Kuchen,Backwaren
+Haselnussmakronen,Backwaren
+Vanillebuttercreme eihaltig,Gewürze & Backzutaten
+Fettgebäck frittiert,Backwaren
+Kartoffel-Speck-Rösti,Tiefkühlware
+Gemüsesülze Gemüse-Mix,Fleischtheke
+Kartoffeltaschen,Tiefkühlware
+Mokkasahnetorte,Kühlregal (Molkerei)
+Mokkaflammeri,Gewürze & Backzutaten
+Pfirsichtörtchen,Kühlregal (Molkerei)
+Karpfen im Backteig,Fisch & Wurstwaren
+Husarenkrapfen,Backwaren
+Brotaufstrich Tomate-Mozzarella,Backwaren
+Jagdwurst Schinkenwurst grob,Fisch & Wurstwaren
+Frischkäse-Torte,Kühlregal (Molkerei)
+Kartoffelpuffer,Tiefkühlware
+Zervelatwurst Ia,Fisch & Wurstwaren
+Sülzkotelett,Fleischtheke
+Plockwurst,Fisch & Wurstwaren
+Kartoffel-Schupfnudeln,Trockensortiment & Konserven
+Gänsepresskopf,Fleischtheke
+Sächsischer Presskopf,Trockensortiment & Konserven
+Käsekrainer Käsewürstchen,Kühlregal (Molkerei)
+Bratwurst mittelgrob,Fisch & Wurstwaren
+Rosinenkuchen,Backwaren
+Bremer Pinkel,Fisch & Wurstwaren
+Kalbsbrust gefüllt,Fleischtheke
+Schokoladenbuttercreme eihaltig,Gewürze & Backzutaten
+Salami Ia,Fisch & Wurstwaren
+Französische Apfeltarte,Backwaren
+Biskuitplätzchen schokoliert,Backwaren
+Reiswurst,Trockensortiment & Konserven
+Kaffeegebäck,Kühlregal (Molkerei)
+Bohnen weiß,Trockensortiment & Konserven
+Burgunder Schinken,Fisch & Wurstwaren
+Gekochte Zwiebelwurst,Fisch & Wurstwaren
+Vollkornhefeteig süß gebacken,Gewürze & Backzutaten
+Haselnusskerne gebrannt,Süßwaren & Snacks
+Fruchtsaftgetränk Zitrusfrüchte,Getränke Alkoholfrei
+Kabanossi Peperoni,Fleischtheke
+Trinkjoghurt fettarm,Kühlregal (Molkerei)
+Seelachs paniert,Tiefkühlware
+Münchner Weißwurst,Fisch & Wurstwaren
+Knackwürstchen fettreduziert,Fleischtheke
+Karottensaftschorle,Getränke Alkoholfrei
+Schinkenroulade,Fisch & Wurstwaren
+Weizenmischtoastbrot getoastet,Backwaren
+Weizenglutenfertigmischung,Backwaren
+Apfelkompott Apfelmus,Trockensortiment & Konserven
+Makronen Mandelmakronen,Backwaren
+Geflügelbratwurst gegrillt,Fisch & Wurstwaren
+Honigkuchen schokoliert,Backwaren
+Touristenwurst,Fisch & Wurstwaren
+Ochsenschwanz,Fleischtheke
+Marzipan,Süßwaren & Snacks
+Mangonektar,Obst & Gemüse
+Delikatesswürstchen,Fleischtheke
+Maronenkrem,Süßwaren & Snacks
+Krakauer,Fleischtheke
+Kekse Plätzchen schokoliert,Backwaren
+Birnendicksaft,Süßwaren & Snacks
+Mandeln gebrannt,Süßwaren & Snacks
+Pizzateig gebacken,Gewürze & Backzutaten
+Waffelkekse schokoliert,Backwaren
+Frucht-Joghurteis,Tiefkühlware
+Erdnusskerne gebrannt,Süßwaren & Snacks
+Fruchtsaftgetränk angereichert,Getränke Alkoholfrei
+Speiseeis Kaffee,Tiefkühlware
+Gefüllter Schinken,Fisch & Wurstwaren
+Müslikekse Müsliplätzchen schokoliert,Süßwaren & Snacks
+Vanillepudding,Kühlregal (Molkerei)
+Rheinische Bratwurst gegrillt,Fisch & Wurstwaren
+Mürbchen schokoliert,Backwaren
+Schokoladen-Biskuitplätzchen,Backwaren
+Zedernbrot,Backwaren
+Vollkornhefezopf,Gewürze & Backzutaten
+Printen schokoliert,Backwaren
+Limettensaft Konzentrat,Obst & Gemüse
+Franzbrötchen,Backwaren
+Pfirsichnektar,Obst & Gemüse
+Matjeshering,Trockensortiment & Konserven
+Mischpilze gebacken,Obst & Gemüse
+Schwein Rind,Fleischtheke
+Eisbein,Fleischtheke
+Hörnchen,Backwaren
+Plunderteig gebacken,Backwaren
+Wollwurst Geschwollene,Fisch & Wurstwaren
+Zitronensaft Konzentrat,Obst & Gemüse
+Weizenvollkorntoastbrot getoastet,Backwaren
+Fleischkäse weiß,Kühlregal (Molkerei)
+Wiener Sandtorte,Backwaren
+Rostbratwurst gegrillt,Fisch & Wurstwaren
+Vollkornmürbeteig süß gebacken,Backwaren
+Kirsch-Streuselkuchen,Backwaren
+Speiseeis,Tiefkühlware
+Mokkacreme-Marzipan-Torte,Backwaren
+Kokosmakronen schokoliert,Backwaren
+Orangencremetorte,Kühlregal (Molkerei)
+Frankfurter Kranz,Backwaren
+Mosaikumrandung,Fleischtheke
+Krakauer Schinkenwurst,Fisch & Wurstwaren
+Weißer Presskopf,Fleischtheke
+Pfirsich-Maracujanektarschorle,Getränke Alkoholfrei
+Rollmops,Trockensortiment & Konserven
+Sahne-Windbeutel,Kühlregal (Molkerei)
+Blätterkrokant überzogen,Kühlregal (Molkerei)
+Cabanossi gebrüht,Fleischtheke
+Zuger Kirschtorte,Backwaren
+Kochsalami,Fisch & Wurstwaren
+Spritzgebäck schokoliert,Backwaren
+Krakauer Kochpolnische,Fleischtheke
+Cabanossi,Fleischtheke
+Touristenwurst einfach,Fisch & Wurstwaren
+Pudding-Vollkornplunder belegt,Backwaren
+Dominosteine,Backwaren
+Käsesahnetorte,Kühlregal (Molkerei)
+Fruchtsirup,Süßwaren & Snacks
+Vanillebuttercreme gestreckt,Gewürze & Backzutaten
+Apfel-Mohntorte,Backwaren
+Gemüsecremesuppe,Obst & Gemüse
+Zwiebelkuchen,Gewürze & Backzutaten
+Gefüllter Schweinekamm,Fleischtheke
+Knoblauch gesäuert,Trockensortiment & Konserven
+Holländische Kirsch-Sahneschnitten Kirsch-Sahnetorte,Kühlregal (Molkerei)
+Presswurst,Fisch & Wurstwaren
+Flockentorte,Backwaren
+Kuchenboden belegt,Backwaren
+Meeresfrüchte,Trockensortiment & Konserven
+Pasteten,Kühlregal (Molkerei)
+Debreziner Würstchen,Fleischtheke
+Mehrfruchtnektar,Obst & Gemüse
+Gemüsemischung gesäuert,Trockensortiment & Konserven
+Schwarz-Weiß-Buttercremetorte,Backwaren
+Nuss-Plunder,Backwaren
+Mohn-Plunder,Backwaren
+Gerauchte Schinkenwurst,Fisch & Wurstwaren
+Eierschecke,Gewürze & Backzutaten
+Mehrfruchtsaftschorle,Getränke Alkoholfrei
+Pudding-Vollkornplunder,Backwaren
+Pfefferschote gesäuert,Trockensortiment & Konserven
+Flocken-Sahnetorte,Kühlregal (Molkerei)
+Schuhsohlen,Kühlregal (Molkerei)
+Rindfleischsülze,Fleischtheke
+Wildpastete,Fleischtheke
+Spitzbuben,Backwaren
+Honiggurke gesäuert,Trockensortiment & Konserven
+Helle Soße,Gewürze & Backzutaten
+Feingebäck schokoliert,Backwaren
+Fruchtmischung Fruchtcocktail,Trockensortiment & Konserven
+Prinzregententorte,Backwaren
+Herrentorte,Backwaren
+Schwarzwälder Kirschtorte,Backwaren
+Gefüllter Schweinebauch,Fleischtheke
+Schweinebauch,Fleischtheke
+Sambal Oelek,Gewürze & Backzutaten
+Käsewiener gargezogen,Kühlregal (Molkerei)
+Zitronensahnetorte,Kühlregal (Molkerei)
+Kirschnektarschorle,Getränke Alkoholfrei
+Pilzcremesuppe,Obst & Gemüse
+Mohn-Vollkornplunder,Backwaren
+Lebkuchen,Backwaren
+Erdbeer-Charlotte,Kühlregal (Molkerei)
+Nugat Nougat Noisette,Süßwaren & Snacks
+Buttercremetorte,Backwaren
+Weizenbier,Bier & Wein
+Blumenkohl gesäuert,Trockensortiment & Konserven
+Marzipan-Vollkornplunder,Backwaren
+Kalbsbrust,Fleischtheke
+Speiseeis Frucht,Tiefkühlware
+Baumstamm,Backwaren
+Pfefferschote,Trockensortiment & Konserven
+Bananennektarschorle,Getränke Alkoholfrei
+Nussbiskuitrolle Nussbiskuitroulade,Kühlregal (Molkerei)
+Rinderbrust,Fleischtheke
+Quark-Vollkornplunder,Kühlregal (Molkerei)
+Johannisbeernektarschorle,Getränke Alkoholfrei
+Kürbis gesäuert,Trockensortiment & Konserven
+Rindsbratwurst gegrillt,Fisch & Wurstwaren
+Berner Würstchen,Fleischtheke
+Senfgurke gesäuert,Trockensortiment & Konserven
+Wachsbohne gesäuert,Trockensortiment & Konserven
+Tiroler Tiroler Schinkenwurst,Fisch & Wurstwaren
+Schokobuttercreme gestreckt,Gewürze & Backzutaten
+Joghurtsahnetorte,Kühlregal (Molkerei)
+Erdbeer-Sahneschnitten,Kühlregal (Molkerei)
+Traubentorte,Backwaren
+Norddeutsche Kochmettwurst,Fisch & Wurstwaren
+Preiselbeer-Stracciatella-Sahne-Kranz,Kühlregal (Molkerei)
+Zucchini gesäuert,Trockensortiment & Konserven
+Zuckermais gesäuert,Trockensortiment & Konserven
+Pudding-Plunder,Backwaren
+Bismarckhering,Trockensortiment & Konserven
+Sahne-Eclairs,Kühlregal (Molkerei)
+Wurstsülze,Fisch & Wurstwaren
+Wildbretpastete,Fleischtheke
+Nuss-Sahnetorte,Kühlregal (Molkerei)
+Mokkabuttercreme gestreckt,Gewürze & Backzutaten
+Mehrfruchtsaftschorle angereichert,Getränke Alkoholfrei
+Silberzwiebel gesäuert,Trockensortiment & Konserven
+Marzipan-Plunder,Backwaren
+Quark-Plunder,Kühlregal (Molkerei)
+Cornichons gesäuert,Trockensortiment & Konserven
+Sachertorte,Backwaren
+Bratmakrele,Trockensortiment & Konserven
+Münchner Weißwurst gargezogen,Fisch & Wurstwaren
+Brathering,Trockensortiment & Konserven
+Tomate gesäuert,Trockensortiment & Konserven
+Bockwurst gargezogen,Fisch & Wurstwaren
+Knollensellerie gesäuert,Trockensortiment & Konserven
+Aprikosenteilchen,Backwaren
+Kalbfleischpastete,Fleischtheke
+Spiegeleierkuchen,Backwaren
+Olivenpastete,Fleischtheke
+Mokkabuttercremetorte,Backwaren
+Baumstamm Bismarckeiche,Backwaren
+Mürbchen,Backwaren
+Aprikosen-Nuss-Torte,Backwaren
+Würfelpastete,Fleischtheke
+Pudding-Frucht-Plunder,Backwaren
+Donauwellen,Backwaren
+Gesülzter Hackbraten,Fleischtheke
+Frühlingspastete,Fleischtheke
+Quark-Frucht-Plunder,Kühlregal (Molkerei)
+Aprikosen-Sahnetorte,Kühlregal (Molkerei)
+Sternpastete,Fleischtheke
+Eierpastete,Fleischtheke
+Schoko-Müslikekse Schoko-Müsliplätzchen,Süßwaren & Snacks
+Haselnusspastete,Fleischtheke
+Berliner Weisse,Bier & Wein
+Champignonpastete,Fleischtheke
+Schinken-Käsepastete,Kühlregal (Molkerei)
+Schokobuttercremetorte,Backwaren
+Quark-Frucht-Vollkornplunder,Kühlregal (Molkerei)
+Biskuitschnitte,Backwaren
+Wildpaste,Backwaren
+Trüffelmosaikpastete,Fleischtheke
+Lachsschinkenpastete,Fisch & Wurstwaren
+Pudding-Frucht-Vollkornplunder,Backwaren
+Berner Würstchen gegrillt,Fleischtheke
+Pudding-Plunder belegt,Backwaren
+Mosaikroulade,Fleischtheke

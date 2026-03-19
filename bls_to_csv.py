@@ -6,12 +6,7 @@ Smart Cart Data Engineering Pipeline (Enterprise Edition V8 - ML READY)
 -------------------------------------------------------------------------
 Zweck: Extraktion, NLP-Bereinigung und Transformation des 
 offiziellen Bundeslebensmittelschlüssels (BLS) in einen 
-Machine-Learning-bereiten Datensatz für XGBoost.
-
-Neu in V8:
-- Tokenizer-Fix: Slashes (/) werden zu Leerzeichen.
-- Retail-Filter: Löscht anatomische Nischenprodukte (Wortanzahl > 3).
-- Class Imbalance Reduktion: Reduziert den Fleisch-Überhang.
+Machine-Learning-bereiten Datensatz für die Logistische Regression (TF-IDF).
 """
 
 import pandas as pd
@@ -150,7 +145,7 @@ class TextSanitizer:
         # 5. Tokenizer-Fix: Slashes zu Leerzeichen
         name = name.replace('/', ' ')
         
-        # 6. Zombie-Wörter & Adjektive löschen (jetzt auch "Fett i.Tr." und "vol")
+        # 6. Zombie-Wörter & Adjektive löschen
         words_to_strip = [
             r'\broh\b', r'\bgekocht\b', r'\bgebraten\b', r'\bgedünstet\b', r'\bgedämpft\b',
             r'\btiefgefroren\b', r'\bkonserve\b', r'\babgetropft\b', r'\bheiß\b',
@@ -164,7 +159,7 @@ class TextSanitizer:
         # 7. Isolierte Zahlen löschen
         name = re.sub(r'\b\d+(,\d+)?\b', '', name)
         
-        # 8. RETAIL-FILTER: Maximal 3 Wörter erlaubt (verhindert Class Imbalance durch Spezial-Fleisch)
+        # 8. RETAIL-FILTER: Maximal 3 Wörter erlaubt (verhindert Class Imbalance)
         name = re.sub(r'[-/&]$', '', name.strip())
         name = re.sub(r'\s+', ' ', name).strip()
         
@@ -324,7 +319,7 @@ class PipelineOrchestrator:
             self.df_clean.to_csv(self.output_file, index=False, encoding='utf-8')
             log.info(f"✅ ML-DATENSATZ EXPORTIERT: {self.output_file}")
             print("\n" + "="*55)
-            print(" XGBOOST LABEL VERTEILUNG (GROUND TRUTH)")
+            print(" NLP LABEL VERTEILUNG (GROUND TRUTH FÜR LOGISTIC REGRESSION)")
             print("="*55)
             print(self.df_clean['Supermarket_Category'].value_counts())
 

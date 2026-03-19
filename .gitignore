@@ -1,4 +1,17 @@
+# Python Caches
 __pycache__/
-*.pyc
-*.csv
-*.pkl
+*.py[cod]
+*$py.class
+
+# Virtuelle Umgebungen (Niemals hochladen!)
+venv/
+env/
+.env/
+
+# Sphinx Build-Dateien (Verhindert Konflikte)
+docs/build/
+
+# IDE & OS Dateien
+.vscode/
+.idea/
+.DS_Store

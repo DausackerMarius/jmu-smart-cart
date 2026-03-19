@@ -1,0 +1,159 @@
+text,true_category,is_noisy,pred_category,latency_ms,is_correct
+Kamillenee,Kaffee & Tee,True,Fleischtheke,2.696800045669079,False
+Laichsfilet,Fisch & Wurstwaren,True,Fleischtheke,2.535899984650314,False
+Buttercroisant,Backwaren,True,Gewürze & Backzutaten,3.118299995549023,False
+Tomatenamrk,Trockensortiment & Konserven,True,Obst & Gemüse,2.454000059515238,False
+Ftea,Kühlregal (Vegan & Käse),True,Fleischtheke,1.67559995315969,False
+Sinckers,Süßwaren & Snacks,True,Sonstiges (Kasse),1.9245999865233898,False
+Buttercroifssant,Backwaren,True,Gewürze & Backzutaten,2.9947999864816666,False
+Äfel,Obst & Gemüse,True,Gewürze & Backzutaten,1.353900064714253,False
+Fetta,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.5316000208258629,False
+Bannen,Obst & Gemüse,True,Backwaren,1.7642999300733209,False
+Wehy Pulver,Fitness & Sport,True,Süßwaren & Snacks,2.526399912312627,False
+Zanhbürste,Drogerie & Haushalt,True,Fleischtheke,2.4775000056251884,False
+Camexmbert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.48480006121099,False
+Snickrs,Süßwaren & Snacks,True,Sonstiges (Kasse),1.9249999895691872,False
+Forlle,Fisch & Wurstwaren,True,Getränke Alkoholfrei,1.8090000376105309,False
+Kaffeebhonen,Kaffee & Tee,True,Trockensortiment & Konserven,2.7209999971091747,False
+Tomatnemark,Trockensortiment & Konserven,True,Obst & Gemüse,2.6790000265464187,False
+Snickrs,Süßwaren & Snacks,True,Sonstiges (Kasse),0.00100000761449337,False
+Kaffeebohnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.74860009085387,False
+Camembert,Kühlregal (Vegan & Käse),False,Kühlregal (Molkerei),2.119499957188964,False
+Toilettenpapxier,Drogerie & Haushalt,True,Kühlregal (Molkerei),3.015599912032485,False
+Snickes,Süßwaren & Snacks,True,Sonstiges (Kasse),1.7512000631541014,False
+Lcahsfilet,Fisch & Wurstwaren,True,Kühlregal (Molkerei),2.1331000607460737,False
+Ripentomaten,Obst & Gemüse,True,Gewürze & Backzutaten,2.3943999549373984,False
+Zahnbürste,Drogerie & Haushalt,False,Kühlregal (Molkerei),2.1309000439941883,False
+Tomatepnmark,Trockensortiment & Konserven,True,Obst & Gemüse,2.3988999892026186,False
+Kaffeebohnn,Kaffee & Tee,True,Trockensortiment & Konserven,2.3090000031515956,False
+Sapghetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),1.9906999077647924,False
+Tomatenmjark,Trockensortiment & Konserven,True,Gewürze & Backzutaten,2.445199992507696,False
+Fischstäbhcen,Tiefkühlware,True,Fisch & Wurstwaren,2.7048999909311533,False
+Kaffeebhnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.3823999799788,False
+Zahnbüste,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.02969997189939,False
+Sickers,Süßwaren & Snacks,True,Sonstiges (Kasse),1.7287000082433224,False
+Spagheti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),1.8902999581769109,False
+Hefeweizn,Bier & Wein,True,Gewürze & Backzutaten,2.066300017759204,False
+Fischstsäbchen,Tiefkühlware,True,Fisch & Wurstwaren,2.745000063441694,False
+Spghetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),1.9504999509081244,False
+Whey uPlver,Fitness & Sport,True,Gewürze & Backzutaten,2.172800013795495,False
+Snpaghetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),2.1106000058352947,False
+Fea,Kühlregal (Vegan & Käse),True,Sonstiges (Kasse),0.7168999873101711,False
+Basmatrieis,Trockensortiment & Konserven,True,Tiefkühlware,1.6058000037446618,False
+Hefeweizevn,Bier & Wein,True,Gewürze & Backzutaten,2.647200017236173,False
+Snickers,Süßwaren & Snacks,False,Sonstiges (Kasse),1.9266000017523766,False
+Toilettenppier,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.7099999133497477,False
+Ftea,Kühlregal (Vegan & Käse),True,Fleischtheke,0.0007998896762728691,False
+Wheyx Pulver,Fitness & Sport,True,Süßwaren & Snacks,2.480600029230118,False
+Fischstyäbchen,Tiefkühlware,True,Fisch & Wurstwaren,2.755999914370477,False
+Zanbürste,Drogerie & Haushalt,True,Fleischtheke,2.060699975118041,False
+Camembet,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.8513998948037624,False
+Basmatires,Trockensortiment & Konserven,True,Backwaren,2.270399942062795,False
+Kaffeebhonen,Kaffee & Tee,True,Trockensortiment & Konserven,0.001600012183189392,False
+Lcahsfilet,Fisch & Wurstwaren,True,Kühlregal (Molkerei),0.001100008375942707,False
+Spghetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),0.00100000761449337,False
+Zahbnürste,Drogerie & Haushalt,True,Fleischtheke,2.411399967968464,False
+Tomatemnark,Trockensortiment & Konserven,True,Obst & Gemüse,2.3666999768465757,False
+Forlele,Fisch & Wurstwaren,True,Getränke Alkoholfrei,1.8034999957308173,False
+Fbeta,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.5071999514475465,False
+Tomajtenmark,Trockensortiment & Konserven,True,Gewürze & Backzutaten,2.4093000683933496,False
+Cmaembert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.1158999297767878,False
+Snicekrs,Süßwaren & Snacks,True,Sonstiges (Kasse),1.960999914444983,False
+Hefeewizen,Bier & Wein,True,Gewürze & Backzutaten,2.1377999801188707,False
+Fischtsäbchen,Tiefkühlware,True,Fisch & Wurstwaren,2.5415000272914767,False
+Zahqnbürste,Drogerie & Haushalt,True,Fleischtheke,2.5183999678120017,False
+Hefewiezen,Bier & Wein,True,Gewürze & Backzutaten,2.351700095459819,False
+Camembrt,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.8621999770402908,False
+Toilettenpaupier,Drogerie & Haushalt,True,Sonstiges (Kasse),3.080700058490038,False
+Fischstbchen,Tiefkühlware,True,Fisch & Wurstwaren,2.45939998421818,False
+Tomatenmarck,Trockensortiment & Konserven,True,Gewürze & Backzutaten,2.3823999799788,False
+Apfelaft,Getränke Alkoholfrei,True,Obst & Gemüse,1.8457999685779214,False
+Baanen,Obst & Gemüse,True,Backwaren,1.7201999435201287,False
+Whey Pulver,Fitness & Sport,False,Süßwaren & Snacks,2.2273999638855457,False
+Speisesalfz,Gewürze & Backzutaten,True,Tiefkühlware,2.262099995277822,False
+Apfelsat,Getränke Alkoholfrei,True,Obst & Gemüse,1.9085999811068177,False
+Kasffeebohnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.597499988041818,False
+Fischstäbchen,Tiefkühlware,False,Fisch & Wurstwaren,2.766299992799759,False
+Sncikers,Süßwaren & Snacks,True,Sonstiges (Kasse),1.866400009021163,False
+Toilettenpafpier,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.9331999830901623,False
+Kartoffelcips,Süßwaren & Snacks,True,Tiefkühlware,2.5155999464914203,False
+Lahcsfilet,Fisch & Wurstwaren,True,Fleischtheke,2.3228999925777316,False
+Camembet,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),0.001100008375942707,False
+Hefeweizjen,Bier & Wein,True,Gewürze & Backzutaten,2.3595000384375453,False
+Tomatemark,Trockensortiment & Konserven,True,Obst & Gemüse,2.197899972088635,False
+Camebert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.9314000383019447,False
+Feqta,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.4585999306291342,False
+Kaffeebohenn,Kaffee & Tee,True,Trockensortiment & Konserven,2.4967000354081392,False
+Rispdentomaten,Obst & Gemüse,True,Backwaren,2.7628999669104815,False
+Spaghbetti,Trockensortiment & Konserven,True,Obst & Gemüse,2.180399955250323,False
+Toilettenpapeir,Drogerie & Haushalt,True,Kühlregal (Molkerei),3.0182000482454896,False
+Fyeta,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.4649999793618917,False
+Zahnbürkste,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.2682000417262316,False
+Kaffeebohnen,Kaffee & Tee,False,Trockensortiment & Konserven,0.000900006853044033,False
+Spaghtti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),2.0047000143676996,False
+Fetga,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.8752999603748322,False
+Fzeta,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),1.5958999283611774,False
+Basmatieis,Trockensortiment & Konserven,True,Tiefkühlware,1.476299948990345,False
+Feta,Kühlregal (Vegan & Käse),False,Kühlregal (Molkerei),1.3894999865442514,False
+Whe Pulver,Fitness & Sport,True,Süßwaren & Snacks,1.792699913494289,False
+Skt,Bier & Wein,True,Kühlregal (Molkerei),0.7110000587999821,False
+Toilettenpaier,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.7049999916926026,False
+Fischstäbcjhen,Tiefkühlware,True,Fisch & Wurstwaren,2.6949000312015414,False
+Apfelsqaft,Getränke Alkoholfrei,True,Obst & Gemüse,2.1588000236079097,False
+Forlle,Fisch & Wurstwaren,True,Getränke Alkoholfrei,0.001100008375942707,False
+Whey ulver,Fitness & Sport,True,Gewürze & Backzutaten,2.0551000488922,False
+Basmatiries,Trockensortiment & Konserven,True,Backwaren,2.253800048492849,False
+Fischstäbcehen,Tiefkühlware,True,Fisch & Wurstwaren,2.938700024969876,False
+Bannaen,Obst & Gemüse,True,Backwaren,1.8020999850705266,False
+Whey Plver,Fitness & Sport,True,Gewürze & Backzutaten,2.061599981971085,False
+Whewy Pulver,Fitness & Sport,True,Süßwaren & Snacks,2.3871000157669187,False
+Spaghetti,Trockensortiment & Konserven,False,Kühlregal (Molkerei),1.9947000546380877,False
+Fea,Kühlregal (Vegan & Käse),True,Sonstiges (Kasse),0.000700005330145359,False
+Cammebert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.2113999584689736,False
+Toilettenpapeir,Drogerie & Haushalt,True,Kühlregal (Molkerei),0.001400010660290718,False
+Spgahetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),2.13670008815825,False
+Hefewoeizen,Bier & Wein,True,Gewürze & Backzutaten,2.435899921692908,False
+Kartoffelcihps,Süßwaren & Snacks,True,Tiefkühlware,2.827899996191263,False
+Tomatenmark,Trockensortiment & Konserven,False,Gewürze & Backzutaten,2.7028999757021666,False
+Kamillenete,Kaffee & Tee,True,Fleischtheke,2.933999989181757,False
+Camemmbert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.4396999506279826,False
+Rispentoamten,Obst & Gemüse,True,Backwaren,2.8921000193804502,False
+Apfelsfaft,Getränke Alkoholfrei,True,Obst & Gemüse,2.402300015091896,False
+Sickers,Süßwaren & Snacks,True,Sonstiges (Kasse),0.001200009137392044,False
+Cmembert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.133800066076219,False
+Lahcsfilet,Fisch & Wurstwaren,True,Fleischtheke,0.000900006853044033,False
+Basmatrieis,Trockensortiment & Konserven,True,Tiefkühlware,0.000600004568696022,False
+Lcahsfilet,Fisch & Wurstwaren,True,Kühlregal (Molkerei),0.00100000761449337,False
+Tomatenark,Trockensortiment & Konserven,True,Obst & Gemüse,2.298499923199415,False
+Toamtenmark,Trockensortiment & Konserven,True,Gewürze & Backzutaten,2.329300041310489,False
+Buttercriossant,Backwaren,True,Gewürze & Backzutaten,2.938800025731325,False
+Fischastäbchen,Tiefkühlware,True,Backwaren,3.5599999828264117,False
+Basmatrieis,Trockensortiment & Konserven,True,Tiefkühlware,0.001200009137392044,False
+Speiseaslz,Gewürze & Backzutaten,True,Tiefkühlware,2.4916999973356724,False
+Fischsätbchen,Tiefkühlware,True,Fisch & Wurstwaren,2.938700024969876,False
+Snckers,Süßwaren & Snacks,True,Sonstiges (Kasse),1.9139000214636326,False
+Snickewrs,Süßwaren & Snacks,True,Sonstiges (Kasse),2.3994999937713146,False
+Kamillente,Kaffee & Tee,True,Fleischtheke,2.4581000907346606,False
+Whe yPulver,Fitness & Sport,True,Süßwaren & Snacks,2.3581000277772546,False
+Kamillenee,Kaffee & Tee,True,Fleischtheke,0.00100000761449337,False
+Hefewizen,Bier & Wein,True,Gewürze & Backzutaten,2.315600053407252,False
+Buttercroissat,Backwaren,True,Gewürze & Backzutaten,3.1220000237226486,False
+Buttercroizssant,Backwaren,True,Gewürze & Backzutaten,3.31579998601228,False
+Zahbnürste,Drogerie & Haushalt,True,Fleischtheke,0.001100008375942707,False
+Fisschstäbchen,Tiefkühlware,True,Backwaren,3.1228000298142433,False
+Kaffebohnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.5548000121489167,False
+Spaghteti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),2.4782000109553337,False
+Buttercriossant,Backwaren,True,Gewürze & Backzutaten,0.001200009137392044,False
+Zahnübrste,Drogerie & Haushalt,True,Kühlregal (Molkerei),2.7405000291764736,False
+Camebmert,Kühlregal (Vegan & Käse),True,Kühlregal (Molkerei),2.34850007109344,False
+Whe Pulver,Fitness & Sport,True,Süßwaren & Snacks,0.00100000761449337,False
+Speiseslz,Gewürze & Backzutaten,True,Tiefkühlware,2.229499979875982,False
+Kafeebohnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.88159993942827,False
+Spghetti,Trockensortiment & Konserven,True,Kühlregal (Molkerei),0.001300009898841381,False
+Kffeebohnen,Kaffee & Tee,True,Trockensortiment & Konserven,2.6042000390589237,False
+Froelle,Fisch & Wurstwaren,True,Gewürze & Backzutaten,1.9751000218093395,False
+Buttercroisssant,Backwaren,True,Gewürze & Backzutaten,3.585800062865019,False
+Skt,Bier & Wein,True,Kühlregal (Molkerei),0.001100008375942707,False
+Buttercroissnat,Backwaren,True,Gewürze & Backzutaten,3.292400040663779,False
+Wheyn Pulver,Fitness & Sport,True,Süßwaren & Snacks,2.6390000712126493,False
+Zahnbüste,Drogerie & Haushalt,True,Kühlregal (Molkerei),0.001200009137392044,False

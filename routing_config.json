@@ -11,54 +11,54 @@
         "vW3"
     ],
     "Obst & Gemüse": [
-        "vA6",
-        "vB6"
-    ],
-    "Fisch & Wurstwaren": [
-        "vD4",
-        "v1"
-    ],
-    "Drogerie & Haushalt": [
-        "vD5",
-        "vD6"
-    ],
-    "Kühlregal (Molkerei)": [
-        "vA9",
-        "vC3"
-    ],
-    "Kühlregal (Vegan & Käse)": [
-        "vD2",
-        "vC6"
-    ],
-    "Backwaren": [
+        "v1",
         "v2",
-        "v3"
-    ],
-    "Tiefkühlware": [
-        "vA4",
-        "vA9_2"
-    ],
-    "Trockensortiment & Konserven": [
-        "vB10",
-        "vC2"
-    ],
-    "Gewürze & Backzutaten": [
-        "vB7",
+        "vA2",
         "vB2"
     ],
+    "Backwaren": [
+        "v3",
+        "vA4",
+        "vB4"
+    ],
+    "Fisch & Wurstwaren": [
+        "vD6",
+        "vC3",
+        "vA9_2"
+    ],
+    "Drogerie & Haushalt": [
+        "vA7"
+    ],
+    "Kühlregal (Molkerei)": [
+        "vA9"
+    ],
+    "Kühlregal (Vegan & Käse)": [
+        "vD4"
+    ],
+    "Tiefkühlware": [
+        "vB7"
+    ],
+    "Trockensortiment & Konserven": [
+        "vC5"
+    ],
+    "Gewürze & Backzutaten": [
+        "vD2",
+        "vC2"
+    ],
     "Getränke Alkoholfrei": [
-        "vA7",
-        "vD1"
+        "vA6",
+        "vB10",
+        "vC6"
     ],
     "Bier & Wein": [
-        "vC5",
-        "vC7"
+        "vD1",
+        "vB6"
     ],
     "Kaffee & Tee": [
-        "vA2"
+        "vD5"
     ],
     "Süßwaren & Snacks": [
-        "vB4"
+        "vC7"
     ],
     "Fitness & Sport": [
         "vB9"

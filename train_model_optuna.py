@@ -1,3 +1,19 @@
+"""
+=========================================================================================
+JMU SMART SUPERMARKET: XGBOOST SPATIO-TEMPORAL TRAFFIC PREDICTOR
+=========================================================================================
+Dieses Skript trainiert das "Gehirn" unserer Anwendung. 
+Es nimmt die generierten Rohdaten aus der Simulation und lernt daraus, 
+wie sich Stau im Supermarkt über Raum (Spatio) und Zeit (Temporal) verhält.
+
+Architektur-Entscheidung: Warum XGBoost und kein Deep Learning (Neuronales Netz)?
+Für strukturierte, tabellarische Daten (wie Excel-Tabellen) schlagen Gradient-Boosting-
+Verfahren (wie XGBoost) komplexe Neuronale Netze fast immer in Bezug auf Geschwindigkeit, 
+Ressourcenverbrauch und Erklärbarkeit. In der Enterprise-KI ist "Explainability" 
+(Erklärbarkeit der Feature-Wichtigkeiten) ein massiver Pluspunkt.
+=========================================================================================
+"""
+
 import pandas as pd
 import xgboost as xgb
 import pickle
@@ -9,147 +25,178 @@ import gc
 import traceback
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
+from sklearn.model_selection import train_test_split
 
-# =============================================================================
-# ENTERPRISE ML KONFIGURATION (FERRARI EDITION)
-# =============================================================================
 INPUT_FILE = "smartcart_traffic_training_data.csv"
-MODEL_FILE = "traffic_model_ferrari.pkl"
-SPLIT_DATE = '2025-11-01' 
+MODEL_FILE = "traffic_model_xgboost.pkl"
 
 def load_and_engineer_data():
-    print("⏳ [1/6] Lade Rohdaten & Initialisiere Ferrari-Pipeline...")
+    print("[1/5] Lade Rohdaten & initialisiere Pipeline...")
     if not os.path.exists(INPUT_FILE):
-        raise FileNotFoundError(f"Datei {INPUT_FILE} nicht gefunden!")
-    
+        raise FileNotFoundError(f"Datei {INPUT_FILE} nicht gefunden. Bitte erst Simulation starten.")
+
     df = pd.read_csv(INPUT_FILE)
     df['timestamp_dt'] = pd.to_datetime(df['timestamp'])
     df = df.sort_values('timestamp_dt').reset_index(drop=True)
 
     # ---------------------------------------------------------
-    # SCHRITT 1: CLEANING & IMPUTATION
+    # SCHRITT 1: CLEANING & IMPUTATION (Datenbereinigung)
     # ---------------------------------------------------------
-    print("⏱️ [2/6] Resampling & Makro-Zeitreihen-Features...")
+    print("[2/5] Resampling & Generierung der Makro-Zeitreihen-Features...")
+    
+    # Lückenlose Zeitreihe aufbauen:
+    # Machine Learning Modelle hassen fehlende Daten. Wenn in der Simulation mal für 
+    # 5 Minuten kein Log geschrieben wurde, würde das Modell stolpern. 
+    # Wir erzwingen hier einen lückenlosen 5-Minuten-Takt (Resampling).
     df = df.set_index('timestamp_dt')
     full_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq='5min')
     df = df.reindex(full_range)
-    
-    df['total_agents'] = df['total_agents'].fillna(0)
-    df['edge_loads_json'] = df['edge_loads_json'].fillna('{}') 
-    df['is_holiday'] = df['is_holiday'].fillna(0)
-    
-    queue_cols = ['k1_q', 'k2_q', 'k3_q', 'k2_open', 'k3_open']
-    df[queue_cols] = df[queue_cols].ffill().fillna(0)
-    
-    df = df.reset_index().rename(columns={'index': 'timestamp_dt'})
-    
-    df['month'] = df['timestamp_dt'].dt.month
-    df['weekday'] = df['timestamp_dt'].dt.weekday
-    df['hour'] = df['timestamp_dt'].dt.hour
-    df['minute'] = df['timestamp_dt'].dt.minute
 
-    # --- NEU: AUTOREGRESSIVE MAKRO-FEATURES (Momentum) ---
-    # Bevor wir die Daten explodieren, berechnen wir das zeitliche Momentum des Ladens.
-    df['total_queue'] = df['k1_q'] + df['k2_q'] + df['k3_q']
-    df['open_registers'] = 1 + df['k2_open'] + df['k3_open']
-    df['queue_pressure'] = df['total_queue'] / df['open_registers']
-    
-    # Lag 1: Zustand vor 5 Minuten
-    df['queue_pressure_lag1'] = df['queue_pressure'].shift(1).fillna(0)
-    df['total_agents_lag1'] = df['total_agents'].shift(1).fillna(0)
-    
-    # Delta (Momentum): Wächst der Stau oder löst er sich auf? (+ Wert = Stau wächst)
-    df['queue_momentum'] = df['queue_pressure'] - df['queue_pressure_lag1']
-    df['fill_rate'] = df['total_agents'] - df['total_agents_lag1']
+    # Leere Felder (NaN = Not a Number) sinnvoll auffüllen
+    df['total_agents'] = df['total_agents'].fillna(0).astype(np.float32)
+    df['edge_loads_json'] = df['edge_loads_json'].fillna('{}') 
+    df['is_holiday'] = df['is_holiday'].fillna(0).astype(np.int8)
+
+    # Kassen-Warteschlangen auffüllen (ffill = forward fill). Wenn ein Wert fehlt, 
+    # nehmen wir einfach den Wert von vor 5 Minuten an.
+    queue_cols = ['k1_q', 'k2_q', 'k3_q', 'k2_open', 'k3_open']
+    df[queue_cols] = df[queue_cols].ffill().fillna(0).astype(np.float32)
+
+    df = df.reset_index().rename(columns={'index': 'timestamp_dt'})
+
+    # Zeitliche Features extrahieren, damit der Algorithmus Muster wie "Feierabend" erkennen kann
+    df['month'] = df['timestamp_dt'].dt.month.astype(np.int8)
+    df['weekday'] = df['timestamp_dt'].dt.weekday.astype(np.int8)
+    df['hour'] = df['timestamp_dt'].dt.hour.astype(np.int8)
+    df['minute'] = df['timestamp_dt'].dt.minute.astype(np.int8)
+
+    # --- AUTOREGRESSIVE MAKRO-FEATURES ---
+    # Autoregressiv bedeutet: Die Vergangenheit beeinflusst die Zukunft.
+    # Wir berechnen den "Druck" auf die Kassen (Wartende geteilt durch offene Kassen).
+    df['total_queue'] = (df['k1_q'] + df['k2_q'] + df['k3_q']).astype(np.float32)
+    df['open_registers'] = (1 + df['k2_open'] + df['k3_open']).astype(np.float32)
+    df['queue_pressure'] = (df['total_queue'] / df['open_registers']).astype(np.float32)
+
+    # '.shift(1)' holt den Wert aus dem vorherigen 5-Minuten-Schritt. 
+    # So weiß die KI: "Wächst der Stau gerade an oder baut er sich ab?" (Momentum)
+    df['queue_pressure_lag1'] = df['queue_pressure'].shift(1).fillna(0).astype(np.float32)
+    df['total_agents_lag1'] = df['total_agents'].shift(1).fillna(0).astype(np.float32)
+
+    df['queue_momentum'] = (df['queue_pressure'] - df['queue_pressure_lag1']).astype(np.float32)
+    df['fill_rate'] = (df['total_agents'] - df['total_agents_lag1']).astype(np.float32)
 
     # ---------------------------------------------------------
     # SCHRITT 2: TOPOLOGIE SCAN
     # ---------------------------------------------------------
-    print("🔍 [3/6] Deep Scan der Laden-Topologie...")
+    # In unseren Rohdaten liegt der Stau als verpackter Text (JSON) vor.
+    # Hier scannen wir einmal alle Daten durch, um alle Gänge des Supermarkts zu finden.
     all_edges = set()
     for json_str in df['edge_loads_json']:
         if json_str != '{}':
             all_edges.update(json.loads(json_str).keys())
     all_edges = sorted(list(all_edges))
     n_edges = len(all_edges)
-    print(f"   -> Topologie erkannt: {n_edges} physische Pfade.")
-    
+
     # ---------------------------------------------------------
-    # SCHRITT 3: DATA EXPLOSION (Vectorized)
+    # SCHRITT 3: MATRIX-TRANSFORMATION (EDGE-LEVEL EXPANSION)
     # ---------------------------------------------------------
-    print("💥 [4/6] Daten-Explosion (Multidimensionale Matrix)...")
+    print("[3/5] Matrix-Transformation (Edge-Level Expansion)...")
+    # XGBoost braucht saubere, zweidimensionale Tabellen.
+    # Wir "explodieren" unsere Daten: Aus einer Zeile pro Uhrzeit machen wir 
+    # viele Zeilen pro Uhrzeit (eine Zeile für jeden einzelnen Gang im Supermarkt).
     cols_to_keep = ['timestamp_dt', 'month', 'weekday', 'hour', 'minute', 'is_holiday', 
                     'total_agents', 'total_queue', 'open_registers', 'queue_pressure',
                     'queue_momentum', 'fill_rate']
-    
-    df_expanded = df.loc[df.index.repeat(n_edges)].reset_index(drop=True)
-    df_expanded = df_expanded[cols_to_keep]
-    df_expanded['edge_id'] = all_edges * len(df)
-    
+
+    df_expanded = pd.DataFrame({
+        col: np.repeat(df[col].values, n_edges) for col in cols_to_keep
+    })
+    df_expanded['edge_id'] = np.tile(all_edges, len(df))
+
     edge_to_idx = {e: i for i, e in enumerate(all_edges)}
     loads_array = np.zeros(len(df_expanded), dtype=np.float32)
-    
-    for i, row in df.iterrows():
-        if row['edge_loads_json'] == '{}': continue
-        json_data = json.loads(row['edge_loads_json'])
+
+    # Wir entpacken die JSON-Texte in echte mathematische Zahlen
+    for i, json_str in enumerate(df['edge_loads_json']):
+        if json_str == '{}': continue
+        json_data = json.loads(json_str)
         base_idx = i * n_edges
         for edge, load in json_data.items():
             if edge in edge_to_idx:
                 loads_array[base_idx + edge_to_idx[edge]] = load
-                
+
     df_expanded['load'] = loads_array
-    df_expanded['log_load'] = np.log1p(df_expanded['load'])
     
-    del df
+    # Warum nutzen wir np.log1p (Logarithmus + 1)?
+    # Verkehr/Stau hat oft eine "rechtsschiefe" Verteilung (meistens 0 Leute, selten 30 Leute).
+    # Bäume (XGBoost) tun sich schwer mit solchen Ausreißern und könnten negative Personen 
+    # vorhersagen (z.B. -2 Kunden). Der Logarithmus staucht große Ausreißer zusammen 
+    # und verhindert unlogische negative Vorhersagen.
+    df_expanded['log_load'] = np.log1p(df_expanded['load']).astype(np.float32)
+
+    del df # RAM aufräumen
     gc.collect()
 
     # ---------------------------------------------------------
     # SCHRITT 4: SPATIAL & INTERACTION FEATURE ENGINEERING
     # ---------------------------------------------------------
-    print("🧠 [5/6] Generiere räumliche und Interaktions-Features...")
-    
+    print("[4/5] Ableitung räumlicher und interaktiver Variablen...")
+
+    # ML-Modelle verstehen keinen Text wie "vD6-vD5". Wir wandeln die Namen in Zahlen um.
     le = LabelEncoder()
-    df_expanded['edge_id_enc'] = le.fit_transform(df_expanded['edge_id'])
-    
-    # A) Zyklische Zeit
-    df_expanded['hour_sin'] = np.sin(2 * np.pi * df_expanded['hour'] / 24)
-    df_expanded['hour_cos'] = np.cos(2 * np.pi * df_expanded['hour'] / 24)
-    df_expanded['day_sin'] = np.sin(2 * np.pi * df_expanded['weekday'] / 7)
-    df_expanded['day_cos'] = np.cos(2 * np.pi * df_expanded['weekday'] / 7)
-    df_expanded['is_weekend'] = df_expanded['weekday'].apply(lambda x: 1 if x >= 4 else 0)
-    df_expanded['is_rush_hour'] = df_expanded['hour'].apply(lambda x: 1 if 16 <= x <= 19 else 0)
-    
-    # B) Spatial Features
-    df_expanded['is_checkout_zone'] = df_expanded['edge_id'].str.contains(r'vK|vW').astype(int)
-    df_expanded['is_main_aisle'] = df_expanded['edge_id'].str.contains(r'vD').astype(int)
-    df_expanded['is_shelf_aisle'] = df_expanded['edge_id'].str.contains(r'vA|vB|vC').astype(int)
+    df_expanded['edge_id_enc'] = le.fit_transform(df_expanded['edge_id']).astype(np.int16)
 
-    # --- NEU: FEATURE INTERAKTIONEN ---
-    # Wir nehmen dem XGBoost-Baum die mathematische Arbeit ab.
-    # Hoher Kassen-Druck * Hauptgang = Extreme Stau-Wahrscheinlichkeit
-    df_expanded['spillover_risk'] = df_expanded['queue_pressure'] * df_expanded['is_main_aisle']
-    # Viele Leute im Markt * Regal-Gang = Hohe Regal-Dichte
-    df_expanded['shelf_density'] = df_expanded['total_agents'] * df_expanded['is_shelf_aisle']
+    # Wir geben dem Modell "Domänenwissen" mit: Ist dieser Gang eine Kasse oder ein Regal?
+    edge_df = pd.DataFrame({'edge_id': all_edges})
+    edge_df['is_checkout_zone'] = edge_df['edge_id'].str.contains(r'vK|vW').astype(np.int8)
+    edge_df['is_main_aisle'] = edge_df['edge_id'].str.contains(r'vD').astype(np.int8)
+    edge_df['is_shelf_aisle'] = edge_df['edge_id'].str.contains(r'vA|vB|vC').astype(np.int8)
 
-    print("🧹 [Cleanup] Fokussiere auf Geschäftszeiten (06:00 - 22:00)...")
+    df_expanded = df_expanded.merge(edge_df, on='edge_id', how='left')
+
+    # Warum Sinus/Cosinus für die Uhrzeit?
+    # Für einen Computer ist 23 Uhr weit entfernt von 1 Uhr nachts (23 vs 1).
+    # In der Realität liegen sie aber nebeneinander. Durch die Projektion auf einen Kreis 
+    # (Sinus/Cosinus) kapiert das Modell, dass die Zeit zyklisch ist.
+    df_expanded['hour_sin'] = np.sin(2 * np.pi * df_expanded['hour'] / 24).astype(np.float32)
+    df_expanded['hour_cos'] = np.cos(2 * np.pi * df_expanded['hour'] / 24).astype(np.float32)
+    df_expanded['day_sin'] = np.sin(2 * np.pi * df_expanded['weekday'] / 7).astype(np.float32)
+    df_expanded['day_cos'] = np.cos(2 * np.pi * df_expanded['weekday'] / 7).astype(np.float32)
+    
+    df_expanded['is_weekend'] = (df_expanded['weekday'] >= 4).astype(np.int8)
+    df_expanded['is_rush_hour'] = ((df_expanded['hour'] >= 16) & (df_expanded['hour'] <= 19)).astype(np.int8)
+
+    # Indikatoren für Übersprung-Effekte (Wenn Kassen voll sind, laufen die Leute in den Hauptgang über)
+    df_expanded['spillover_risk'] = (df_expanded['queue_pressure'] * df_expanded['is_main_aisle']).astype(np.float32)
+    df_expanded['shelf_density'] = (df_expanded['total_agents'] * df_expanded['is_shelf_aisle']).astype(np.float32)
+
+    # Nachts (23-5 Uhr) ist der Markt ohnehin zu, diese Daten löschen wir, um das Modell nicht zu verzerren.
     mask_open = (df_expanded['hour'] >= 6) & (df_expanded['hour'] <= 22)
-    df_expanded = df_expanded[mask_open]
+    df_expanded = df_expanded[mask_open].copy() 
+    
+    gc.collect()
 
-    # Das Arsenal an Features (Ferrari Level)
+    # Dies ist die finale Liste der Merkmale, die unsere KI berücksichtigen darf
     features = [
         'edge_id_enc', 'is_checkout_zone', 'is_main_aisle', 'is_shelf_aisle',
         'is_holiday', 'is_weekend', 'is_rush_hour',
         'total_agents', 'total_queue', 'open_registers', 'queue_pressure',
-        'queue_momentum', 'fill_rate', 'spillover_risk', 'shelf_density', # <- Die neuen Gamechanger
-        'hour_sin', 'hour_cos', 'day_sin', 'day_cos'
+        'queue_momentum', 'fill_rate', 'spillover_risk', 'shelf_density',
+        'hour_sin', 'hour_cos', 'day_sin', 'day_cos', 'month'
     ]
     
     return df_expanded, features, 'log_load', le
 
+
 # =============================================================================
-# OPTUNA & TRAINING
+# OPTUNA HYPERPARAMETER TUNING
 # =============================================================================
-def objective(trial, X_train, y_train, X_test, y_test):
+def objective(trial, X_train, y_train, X_val, y_val):
+    """
+    Optuna sucht nach den besten Einstellungen (Hyperparametern) für das KI-Modell.
+    Es rät nicht einfach blind (wie GridSearch), sondern nutzt Bayes'sche Optimierung 
+    (Tree-structured Parzen Estimator), um aus Fehlern der vorherigen Versuche zu lernen.
+    """
     param = {
         'verbosity': 0,
         'objective': 'reg:squarederror',
@@ -157,82 +204,160 @@ def objective(trial, X_train, y_train, X_test, y_test):
         'booster': 'gbtree',
         'lambda': trial.suggest_float('lambda', 1e-3, 10.0, log=True),
         'alpha': trial.suggest_float('alpha', 1e-3, 10.0, log=True),
-        'subsample': trial.suggest_float('subsample', 0.6, 1.0),
-        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
-        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.2),
-        'n_estimators': trial.suggest_int('n_estimators', 500, 2000),
-        'max_depth': trial.suggest_int('max_depth', 6, 12), # Max 12 ist tief genug durch Feature Interaktionen
+        'gamma': trial.suggest_float('gamma', 1e-4, 1.0, log=True),
+        'subsample': trial.suggest_float('subsample', 0.6, 0.95),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 0.95),
+        'learning_rate': trial.suggest_float('learning_rate', 0.05, 0.2), 
+        'n_estimators': 300, 
+        'max_depth': trial.suggest_int('max_depth', 6, 11),
         'min_child_weight': trial.suggest_int('min_child_weight', 1, 10)
     }
     
-    model = xgb.XGBRegressor(**param, n_jobs=-1, early_stopping_rounds=50)
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+    # Initialisierung der neuesten XGBoost API
+    model = xgb.XGBRegressor(
+        **param, 
+        n_jobs=-1, 
+        early_stopping_rounds=20, # Bricht ab, wenn sich das Modell nach 20 Runden nicht mehr verbessert
+        eval_metric="rmse"
+    )
     
-    # --- NEU: Wissenschaftlich korrekte Evaluation in Optuna ---
-    preds_log = model.predict(X_test)
-    # Rücktransformation für echte MAE Optimierung
+    model.fit(
+        X_train, y_train, 
+        eval_set=[(X_val, y_val)], 
+        verbose=False
+    )
+    
+    # Da wir log-Werte vorhergesagt haben, müssen wir sie für die Bewertung
+    # mit expm1 wieder in die echte Welt (reelle Personenanzahl) zurückwandeln.
+    preds_log = model.predict(X_val)
     preds_real = np.expm1(preds_log)
-    y_test_real = np.expm1(y_test)
+    y_val_real = np.expm1(y_val)
     
-    # RMSE ist oft besser für Algorithmen, die extreme Ausreißer (Staus) bestrafen sollen.
-    # Hier nutzen wir MAE als Zielfunktion, um robust gegen kleine Schwankungen zu sein.
-    return mean_absolute_error(y_test_real, preds_real)
+    return mean_absolute_error(y_val_real, preds_real)
+
+def print_optuna_progress(study, trial):
+    print(f" -> Trial {trial.number + 1}/30 abgeschlossen | Aktueller MAE: {trial.value:.4f} | Bester MAE bisher: {study.best_value:.4f}")
 
 if __name__ == "__main__":
     try:
         df, features, target_col, encoder = load_and_engineer_data()
         
-        print(f"\n✂️ [6/6] Chronologischer Time-Series Split (Trennlinie: {SPLIT_DATE})...")
-        train_mask = df['timestamp_dt'] < pd.to_datetime(SPLIT_DATE)
-        test_mask = df['timestamp_dt'] >= pd.to_datetime(SPLIT_DATE)
+        # ---------------------------------------------------------
+        # SCHRITT 5: GROUPED RANDOM SPLIT (Kritisch für die Verteidigung!)
+        # ---------------------------------------------------------
+        print(f"[5/5] Grouped Random Split (Verhindert Data Leakage!)...")
+        # Würden wir die Tabelle einfach zufällig in Training und Test splitten, 
+        # käme es zum "Data Leakage" (Datenleck). Das Modell würde z.B. um 14:00 Uhr 
+        # den Gang A im Training sehen und Gang B um 14:00 Uhr im Testset abfragen.
+        # Da Gänge zur selben Uhrzeit stark korrelieren, würde das Modell schummeln.
+        # LÖSUNG: Wir splitten anhand der einzigartigen Zeitstempel. Ein Zeitpunkt 
+        # ist entweder komplett im Trainingsset, oder komplett im Testset.
         
-        df_train = df[train_mask]
-        df_test = df[test_mask]
+        unique_timestamps = df['timestamp_dt'].unique()
         
-        X_train, y_train = df_train[features], df_train[target_col]
-        X_test, y_test = df_test[features], df_test[target_col]
+        train_val_times, test_times = train_test_split(unique_timestamps, test_size=0.15, random_state=42)
+        train_times, val_times = train_test_split(train_val_times, test_size=0.20, random_state=42)
         
-        print(f"   Training Rows (März - Okt): {len(X_train):,}")
-        print(f"   Test Rows (Nov - Dez):      {len(X_test):,}")
+        train_mask = df['timestamp_dt'].isin(train_times)
+        val_mask = df['timestamp_dt'].isin(val_times)
+        test_mask = df['timestamp_dt'].isin(test_times)
         
-        print(f"\n🚀 Starte Optuna (15 Trials) mit re-transformierter Metrik...")
+        X_train_full, y_train_full = df[train_mask][features], df[train_mask][target_col]
+        X_val_full, y_val_full = df[val_mask][features], df[val_mask][target_col]
+        X_test, y_test = df[test_mask][features], df[test_mask][target_col]
+        
+        # Um Zeit beim Hyperparameter-Tuning zu sparen, geben wir Optuna nur 30% der Daten
+        optuna_train_times, _ = train_test_split(train_times, train_size=0.30, random_state=42)
+        optuna_val_times, _ = train_test_split(val_times, train_size=0.30, random_state=42)
+        
+        X_train_optuna = df[df['timestamp_dt'].isin(optuna_train_times)][features]
+        y_train_optuna = df[df['timestamp_dt'].isin(optuna_train_times)][target_col]
+        X_val_optuna = df[df['timestamp_dt'].isin(optuna_val_times)][features]
+        y_val_optuna = df[df['timestamp_dt'].isin(optuna_val_times)][target_col]
+        
+        print(f" -> Gesamt-Datenbank:      {len(df):,}")
+        print(f" -> Optuna Tuning Subset:  {len(X_train_optuna):,} Rows")
+        print(f" -> Finale Trainingsbasis: {len(X_train_full):,} Rows")
+        print(f" -> Hold-Out Testset:      {len(X_test):,} Rows")
+        
+        print("\nStarte Optuna Hyperparameter-Optimierung (30 Trials)...")
+        optuna.logging.set_verbosity(optuna.logging.WARNING) 
+        
         study = optuna.create_study(direction='minimize')
-        study.optimize(lambda trial: objective(trial, X_train, y_train, X_test, y_test), n_trials=15)
+        study.optimize(
+            lambda trial: objective(trial, X_train_optuna, y_train_optuna, X_val_optuna, y_val_optuna), 
+            n_trials=30,
+            callbacks=[print_optuna_progress]
+        )
         
-        print("\n🏆 Beste Parameter gefunden:")
-        print(study.best_params)
+        print("\nOptimierung abgeschlossen. Beste Hyperparameter:")
+        for key, value in study.best_params.items():
+            print(f" - {key}: {value}")
         
-        print("\n🏋️ Trainiere Finales Modell auf Best Params...")
-        final_model = xgb.XGBRegressor(**study.best_params, n_jobs=-1)
-        final_model.fit(X_train, y_train)
+        print("\nErmittle optimale Iterationsanzahl auf vollen Daten...")
+        best_params_final = study.best_params.copy()
+        best_params_final['n_estimators'] = 1500
         
-        print("\n📊 Evaluiere auf echtem Weihnachts-Stresstest (Nov-Dez)...")
+        temp_model = xgb.XGBRegressor(
+            **best_params_final, 
+            n_jobs=-1,
+            early_stopping_rounds=30,
+            eval_metric="rmse"
+        )
+        
+        temp_model.fit(
+            X_train_full, y_train_full, 
+            eval_set=[(X_val_full, y_val_full)], 
+            verbose=False
+        )
+        
+        optimal_trees = temp_model.best_iteration + 1
+        print(f" -> Optimaler Tree-Count erreicht bei: {optimal_trees}")
+        
+        print("\nTrainiere finales Modell auf aggregierten Trainingsdaten (Train + Val)...")
+        # Vor dem Testen werfen wir Trainings- und Validierungsdaten zusammen. 
+        # Das Modell hat die besten Parameter bereits gefunden, jetzt profitiert es von mehr Datenmenge.
+        X_train_final = pd.concat([X_train_full, X_val_full])
+        y_train_final = pd.concat([y_train_full, y_val_full])
+        
+        final_params = study.best_params.copy()
+        final_params['n_estimators'] = optimal_trees
+        
+        # Das finale Modell braucht kein Early Stopping, da die perfekte Baum-Anzahl hart fixiert ist
+        final_model = xgb.XGBRegressor(**final_params, n_jobs=-1)
+        final_model.fit(X_train_final, y_train_final)
+
+        print("\nEvaluiere ungesehenes Testset...")
         log_preds = final_model.predict(X_test)
         
-        # Limit predictions to >= 0 before expm1 to prevent numerical weirdness
         log_preds = np.clip(log_preds, 0, None) 
-        
         real_preds = np.expm1(log_preds) 
         real_y = np.expm1(y_test)
         
+        # Metriken für die Bewertung des Modells
+        # MAE: Durchschnittliche Abweichung (in Personen) von der Realität
+        # RMSE: Bestraft große Fehler (Ausreißer) deutlich härter als der MAE
+        # R2: Wie viel Prozent der Stau-Schwankungen kann das Modell erklären?
         final_mae = mean_absolute_error(real_y, real_preds)
         final_rmse = np.sqrt(mean_squared_error(real_y, real_preds))
         final_r2 = r2_score(real_y, real_preds)
         
-        print(f"   MAE (Durchschn. Fehler): {final_mae:.4f} Personen pro Kante")
-        print(f"   RMSE (Straftat für extreme Ausreißer): {final_rmse:.4f}")
-        print(f"   R² Score (Erklärte Varianz): {final_r2:.4f}")
+        print(f" -> MAE  (Mean Absolute Error):     {final_mae:.4f}")
+        print(f" -> RMSE (Root Mean Squared Error): {final_rmse:.4f}")
+        print(f" -> R2   (Erklärte Varianz):        {final_r2:.4f}")
         
-        print("\n💡 Feature Importances (Die Physik des Supermarkts):")
+        print("\nTop 10 Feature Importances:")
+        # Explainable AI: Was war dem Modell am wichtigsten, um Stau vorherzusagen?
         importances = final_model.feature_importances_
         feature_importances = pd.DataFrame({'Feature': features, 'Importance': importances})
         feature_importances = feature_importances.sort_values(by='Importance', ascending=False)
         for _, row in feature_importances.head(10).iterrows():
-            print(f"   - {row['Feature']}: {row['Importance']:.4f}")
+            print(f" - {row['Feature']}: {row['Importance']:.4f}")
         
-        print(f"\n💾 Speichere {MODEL_FILE}...")
+        print(f"\nSpeichere Modell-Artefakte nach {MODEL_FILE}...")
         all_edges_list = list(encoder.classes_)
         
+        # Wir speichern das Modell, den LabelEncoder und wichtige Metadaten zusammen ab
         with open(MODEL_FILE, 'wb') as f:
             pickle.dump({
                 'model': final_model,
@@ -242,8 +367,17 @@ if __name__ == "__main__":
                 'is_log_target': True
             }, f)
             
-        print("✅ FERTIG. Willkommen in der Königsklasse.")
+        # =========================================================================
+        # FIX: df[test_mask] speichert neben den ML-Features auch die Metadaten 
+        # (wie timestamp_dt, edge_id, hour) für die Evaluierungs-Grafiken!
+        # =========================================================================
+        print("Speichere ungesehenes Test-Set für die Evaluierungs-Pipeline...")
+        df_export = df[test_mask].copy() 
+        df_export['true_target'] = y_test
+        df_export.to_csv("test_data_holdout.csv", index=False)
+        
+        print("Prozess erfolgreich abgeschlossen.")
     
     except Exception as e:
-        print(f"\n❌ FEHLER: {e}")
+        print(f"\nKritischer Fehler: {e}")
         traceback.print_exc()

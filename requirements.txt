@@ -1,0 +1,21 @@
+# Web & Dashboard
+dash
+dash-bootstrap-components
+plotly
+Flask
+
+# Data Science & Machine Learning
+pandas
+numpy
+scikit-learn
+xgboost
+
+# Graphentheorie & Routing
+networkx
+
+# Textverarbeitung
+cologne-phonetics
+
+# Dokumentation
+Sphinx
+sphinx-rtd-theme
