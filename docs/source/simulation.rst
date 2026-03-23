@@ -1,80 +1,194 @@
 Agentenbasierte Simulation & Synthetische Datengenerierung
 ==========================================================
 
-Moderne Machine-Learning-Modelle für die prädiktive Stau-Vorhersage (Traffic Prediction) erfordern eine hochdimensionale, historisierte und gelabelte Datenbasis. Da im Rahmen dieses Prototyps keine realen Sensordaten (z. B. LiDAR oder Kamera-Tracking) aus einem physischen Supermarkt zur Verfügung stehen, generiert das System seine Ground-Truth-Daten über eine **Agentenbasierte Simulation (Agent-Based Modeling, ABM)**.
+Moderne Machine-Learning-Modelle für die prädiktive Stau-Vorhersage (Traffic Prediction, Kapitel 6) erfordern eine hochdimensionale, historisierte und gelabelte Datenbasis, die Tausende von Stunden an Supermarkt-Betrieb abbildet. Da im Rahmen dieses Prototyps keine realen, hochfrequenten Sensordaten (z. B. LiDAR oder Kamera-Tracking) zur Verfügung stehen, löst die Architektur das Kaltstart-Problem der KI durch synthetische Datengenerierung. 
 
-Dieses Modul fungiert als "Digitaler Zwilling" (Digital Twin) des Supermarkts. Es transformiert die statische Graphen-Topologie durch die Injektion autonomer Entitäten (Agenten) in ein dynamisches, stochastisches System.
+Das System erzeugt seine Ground-Truth-Daten über eine vollautonome **Agentenbasierte Simulation (Agent-Based Modeling, ABM)**. Dieses Modul fungiert als "Digitaler Zwilling" (Digital Twin). Es transformiert die statische Graphen-Topologie durch die Injektion autonomer Entitäten in ein dynamisches, stochastisches System und erzeugt exakt das stochastische Rauschen, welches das ML-Modell später in der Realität prädizieren soll.
 
-Teil I: Zeitdiskrete Simulation und Agenten-Kinematik
+1. Architektonisches Paradigma: Zeitdiskretes ABM vs. DES
+---------------------------------------------------------
+In der theoretischen Simulationstechnik wird zwischen ereignisdiskreten (Discrete Event Simulation, DES) und zeitdiskreten Modellen unterschieden. Ein DES-Ansatz springt asynchron von Event zu Event ("Kunde betritt Markt", "Kunde erreicht Kasse"). Das ist recheneffizient, führt aber zu einem fatalen Problem: Das prädiktive Machine Learning erfordert streng synchronisierte Zeitreihendaten in äquidistanten Intervallen. DES würde hier durch nachträgliche Interpolation das Rauschen glätten und die Ground-Truth verfälschen.
+
+Die Architektur implementiert stattdessen eine **zeitdiskrete Physics-Engine** (Tick-based ABM). Die Systemzeit wird in atomaren Zeitschritten von $\Delta t = 1\text{s}$ quantisiert. In jedem einzelnen Tick der Main-Loop wird die physikalische Position aller Agenten im RAM evaluiert. Dies garantiert eine mathematisch fehlerfreie Tensor-Ausrichtung für das spätere Feature-Engineering.
+
+2. Stochastische Ankunftsprozesse & Demografische Profile
+---------------------------------------------------------
+Die Instanziierung neuer Agenten darf nicht uniform erfolgen. Die Architektur löst die Generierung realistischer Kundenströme in zwei Phasen: Dem Makro-Timing und der Mikro-Profilierung.
+
+**2.1 Das Makro-Timing (Inhomogener Poisson-Prozess)**
+Die zeitabhängige Ankunftsrate $\lambda(t)$ (Erwartungswert der Kunden pro Zeiteinheit) wird durch trigonometrische Funktionen moduliert. Dies erzwingt deterministische Peaks (die abendliche Rush-Hour) auf Basis eines stochastischen Grundrauschens.
+
+$$P(k \text{ Ankünfte in } \Delta t) = \frac{(\lambda(t) \cdot \Delta t)^k e^{-\lambda(t) \cdot \Delta t}}{k!}$$
+
+**2.2 Mikro-Profilierung (Demografische Stochastik)**
+Ein Rentner bewegt sich physisch langsamer und kauft andere Mengen als ein Student. Um dieses Varianz-Rauschen abzubilden, zieht die Engine für jeden Agenten ein Profil aus diskreten Wahrscheinlichkeitsverteilungen.
+
+.. code-block:: python
+
+   import numpy as np
+   import random
+   from dataclasses import dataclass
+
+   @dataclass
+   class ShopperProfile:
+       type_name: str
+       speed_mean: float        # Ø Laufgeschwindigkeit (m/s)
+       speed_std: float         # Standardabweichung der Geschwindigkeit
+       cart_lambda: float       # Poisson-Erwartungswert für Einkaufslisten-Länge
+       probability: float       # Demografische Häufigkeit im System
+
+   # Definition der Agenten-Demografie
+   PROFILES = [
+       ShopperProfile("Express", speed_mean=1.4, speed_std=0.1, cart_lambda=3.0, probability=0.3),
+       ShopperProfile("Normal", speed_mean=1.1, speed_std=0.2, cart_lambda=15.0, probability=0.5),
+       ShopperProfile("Family", speed_mean=0.8, speed_std=0.3, cart_lambda=45.0, probability=0.2)
+   ]
+
+   def spawn_agent(agent_id: str, entry_node: str, all_products: list):
+       """ Erzeugt einen Agenten mit individuellen, verrauschten Parametern. """
+       profile = random.choices(PROFILES, weights=[p.probability for p in PROFILES])[0]
+       
+       # Individuelle Geschwindigkeit via Normalverteilung (Gauß)
+       # Limitierung auf 0.4 m/s verhindert physikalisch unmögliche Deadlocks
+       ind_speed = max(0.4, np.random.normal(profile.speed_mean, profile.speed_std))
+       
+       # Einkaufslistengröße via Poisson-Verteilung
+       num_items = max(1, np.random.poisson(profile.cart_lambda))
+       shopping_list = random.sample(all_products, k=num_items)
+       
+       return Agent(agent_id, entry_node, ind_speed, shopping_list)
+
+3. Fraktionale Kinematik & Makroskopische Stau-Physik
 -----------------------------------------------------
+Sobald der Agent existiert, berechnet er seinen Basis-Pfad via TSP-Solver. Die Fortbewegung auf diesem Pfad erfolgt nicht diskret von Knoten zu Knoten, sondern kontinuierlich auf der eindimensionalen Kante (Fraktionale Kinematik).
 
-Die Simulation läuft nicht als kontinuierlicher Fluss, sondern ist als zeitdiskrete *Physics Engine* implementiert. Die Systemzeit wird in atomaren Schritten (Ticks) von :math:`\Delta t = 1\text{s}` quantisiert. 
+**3.1 Kinematic Wave Theory & Drosselung:**
+Jede Kante $e$ (ein Supermarktgang) besitzt ein physisches Kapazitätslimit $c_{max}(e)$. Betreten Agenten die Kante, wird ihre individuelle Geschwindigkeit $v_{ind}$ kollektiv über eine nicht-lineare Penalty-Gleichung gedrosselt, was emergente Rückstaus auslöst:
 
-1. Stochastischer Spawn-Prozess (Inhomogener Poisson)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die Instanziierung neuer Agenten an den Eingangsknoten erfolgt über einen inhomogenen Poisson-Prozess. Die zeitabhängige Ankunftsrate :math:`\lambda(t)` wird durch eine Sinus-Funktion über den simulierten Tagesverlauf moduliert, um Stoßzeiten (z. B. den Feierabend-Rush um 17:00 Uhr) mathematisch zu erzwingen.
+$$v_{actual} = v_{ind} \cdot \max\left(v_{min}, 1 - \left(\frac{\text{occupancy}(e)}{c_{max}(e)}\right)^\gamma \right)$$
 
-.. math::
+**3.2 Code-Implementierung der fraktionalen Bewegung:**
+Die Simulation berechnet in jedem Tick den exakten Fortschritt in Metern. Überschreitet der akkumulierte Weg die Gesamtlänge der Kante, springt der Agent auf die nächste Kante seines TSP-Pfades.
 
-   P(k \text{ Ankünfte in } \Delta t) = \frac{(\lambda(t) \cdot \Delta t)^k e^{-\lambda(t) \cdot \Delta t}}{k!}
+.. code-block:: python
 
-2. Der Lifecycle eines Agenten (State Machine)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Jeder Agent ist als Python-Objekt implementiert, das einen internen Zustandsautomaten (Finite State Machine) durchläuft:
+   class Agent:
+       def __init__(self, ...):
+           self.progress_on_edge = 0.0 # Zurückgelegte Meter auf der aktuellen Kante
+           self.current_edge_length = 15.0 # Beispiel: 15 Meter langer Gang
 
-* **Target Allocation:** Bei der Initialisierung zieht der Agent aus der Menge aller befüllten Regalknoten (Flexible & Fixed Zones) ein zufälliges Subset :math:`S \subset V`. Dies repräsentiert den individuellen Einkaufszettel.
-* **Pathfinding (Dijkstra):** Das System berechnet über die ``NetworkX``-Bibliothek den initial kürzesten Pfad über die Transitknoten des Graphen.
-* **Kinematik & Service Time:** Der Agent bewegt sich mit einer stochastisch normalverteilten Basisgeschwindigkeit :math:`v_{base} \sim \mathcal{N}(\mu, \sigma^2)` entlang der Kanten. Erreicht er einen Zielknoten aus :math:`S`, wechselt sein Zustand von ``MOVING`` auf ``SHOPPING``. Er verweilt dort für eine definierte *Service Time* (Such- und Greifzeit), während der er den Knoten für nachfolgende Agenten physisch blockiert.
+       def tick_update(self, current_occupancy: int, edge_capacity: int, delta_t: float = 1.0):
+           """ Wird 1x pro Sekunde aufgerufen. """
+           # 1. Berechne die durch Stau gedrosselte Ist-Geschwindigkeit
+           congestion_factor = max(0.2, 1.0 - (current_occupancy / edge_capacity)**2)
+           actual_speed = self.ind_speed * congestion_factor
+           
+           # 2. Fraktionale Vorwärtsbewegung (Weg = Geschwindigkeit * Zeit)
+           self.progress_on_edge += actual_speed * delta_t
+           
+           # 3. Kanten-Übergang prüfen
+           if self.progress_on_edge >= self.current_edge_length:
+               self.progress_on_edge -= self.current_edge_length
+               self._pop_next_node_from_tsp_path()
 
-3. Kanten-Auslastung und dynamische Penalty-Funktionen
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Um das Entstehen von Staus (Congestion) zu simulieren, darf das System keine Kollisionen (Clipping) von Agenten zulassen. Die zentrale Metrik hierfür ist die Auslastung einer Kante (``edge_occupancy``). 
+4. Die Tick-Loop & Eliminierung des Cold-Start-Bias (Burn-in)
+-------------------------------------------------------------
+Die zentrale architektonische Brücke zwischen Simulation und Machine Learning ist das **Data Harvesting** (die Speicherung der RAM-Zustände auf die Festplatte). 
 
-Betreten mehrere Agenten dieselbe Kante :math:`e`, greift eine dynamische Penalty-Schleife, die die tatsächliche Laufgeschwindigkeit :math:`v_{actual}` aller Agenten auf dieser Kante drosselt:
+Ein naiver Ansatz würde Daten ab Sekunde 0 aufzeichnen. Da der Supermarkt zu Beginn jedoch komplett leer ist, würde das ML-Modell transiente Zustände (fehlerhafte Dynamiken) erlernen. Die Architektur erzwingt daher eine **Burn-in Period** (Warm-up-Phase). Die Simulation läuft für 3600 Ticks (1 Stunde) im Verborgenen, bis das System sein stochastisches Gleichgewicht (Steady-State) erreicht hat. Erst danach beginnt das Harvesting exakt alle 60 Ticks.
 
-.. math::
+.. code-block:: python
 
-   v_{actual} = v_{base} \cdot \max\left(0, 1 - \frac{\text{occupancy}(e)}{c_{max}(e)}\right)
+   import pandas as pd
+   import networkx as nx
 
-Nähert sich die Auslastung der physischen Kapazitätsgrenze :math:`c_{max}`, konvergiert die Geschwindigkeit gegen Null. Erst durch diesen Rückkopplungsmechanismus staut sich das System messbar auf – das stochastische Chaos eines echten Supermarkts entsteht durch *Emergenz*.
+   class SimulationEngine:
+       def __init__(self, graph: nx.DiGraph, total_ticks: int, burn_in_ticks: int = 3600):
+           self.graph = graph
+           self.total_ticks = total_ticks
+           self.burn_in_ticks = burn_in_ticks
+           self.agents = []
+           self.snapshot_dataset = []
 
-Teil II: Feature Engineering und Data Harvesting
-------------------------------------------------
+       def run_simulation(self):
+           """ Die zeitdiskrete Physik-Schleife. """
+           for current_tick in range(self.total_ticks):
+               self._spawn_new_agents(current_tick)
+               
+               for agent in self.agents:
+                   occupancy = self.graph.edges[agent.current_edge]['occupancy']
+                   capacity = self.graph.edges[agent.current_edge]['capacity']
+                   agent.tick_update(occupancy, capacity)
+                   
+               # Data Harvesting: Nur im Steady-State und exakt jede Minute
+               if current_tick > self.burn_in_ticks and current_tick % 60 == 0:
+                   self._capture_graph_snapshot(current_tick)
 
-Während der Tick-Loop läuft, führt das System in definierten Intervallen (z. B. alle 60 Sekunden) einen State-Dump durch. Die Transformation dieser reinen Graphen-Zustände in einen Machine-Learning-kompatiblen Vektorraum ist der kritischste Schritt der Pipeline.
+       def _capture_graph_snapshot(self, tick: int):
+           """ Friert den Graphen ein und extrahiert die Ground Truth. """
+           edge_occupancy = {edge: 0 for edge in self.graph.edges()}
+           for agent in self.agents:
+               edge_occupancy[agent.current_edge] += 1
+                   
+           for (node_u, node_v), occupancy in edge_occupancy.items():
+               self.snapshot_dataset.append({
+                   "timestamp": tick,
+                   "edge_id": f"{node_u}_{node_v}",
+                   "occupancy": occupancy # Das Target für die Regression
+               })
 
-1. Zirkadiane Rhythmik (Trigonometrisches Time-Encoding)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein tiefgreifendes Problem in der Zeitreihenanalyse ist die numerische Repräsentation der Uhrzeit. Ein Modell, dem die Stunde als linearer Integer (0 bis 23) übergeben wird, kann den Tagesübergang nicht verstehen (23:00 Uhr und 01:00 Uhr sind numerisch maximal weit entfernt, obwohl chronologisch nah).
-Das System umgeht diese Singularität durch die Transformation in einen zweidimensionalen trigonometrischen Raum:
+       def export_to_parquet(self, filepath: str):
+           """ Sichert Millionen Snapshots hochkomprimiert. """
+           pd.DataFrame(self.snapshot_dataset).to_parquet(filepath, engine='pyarrow')
 
-.. math::
+5. Feature Engineering: Topologische Translation (Spatial Spillovers)
+---------------------------------------------------------------------
+Das ML-Modell (XGBoost) versteht keine 2D-Graphen, sondern nur flache 1D-Tensoren. Um zu lernen, dass sich ein Stau von Gang A in Gang B ausbreitet (Spatial Spillover), muss das Feature-Engineering die topologische Nachbarschaft des Graphen in Tabellenspalten zwingen.
 
-   h_{sin} = \sin\left(\frac{2\pi \cdot t_{hour}}{24}\right), \quad h_{cos} = \cos\left(\frac{2\pi \cdot t_{hour}}{24}\right)
+.. code-block:: python
 
-2. Autoregressive Lag-Features (Sliding Window)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die Vorhersage eines Staus erfordert die Kenntnis des Momentums (Trendrichtung). Um die Markov-Eigenschaft (Zukunft hängt nur vom direkten Jetzt ab) zu überwinden, extrahiert die Pipeline historische Kontext-Vektoren.
-Für jede Kante werden die Auslastungen der vorherigen Zeitpunkte :math:`t-1, t-2` und :math:`t-3` als separate Features angehängt. Das Modell lernt somit nicht nur den absoluten Zustand, sondern den Gradienten (steigt der Stau gerade an oder löst er sich auf?).
+   def extract_spatial_features(df: pd.DataFrame, G: nx.DiGraph) -> pd.DataFrame:
+       """ 
+       Transformiert die Graphen-Topologie in flache ML-Features.
+       Zieht die Auslastung der direkt angrenzenden Graphen-Kanten.
+       """
+       neighbor_loads = []
+       for _, row in df.iterrows():
+           target_node = row['edge_id'].split('_')[1] # Der Endknoten der aktuellen Kante
+           
+           # Finde alle ausgehenden Kanten (die physischen Nachbar-Gänge)
+           out_edges = G.out_edges(target_node, data=True)
+           loads = [data.get('occupancy', 0) for _, _, data in out_edges]
+           
+           # Das Feature ist die maximale Auslastung in der unmittelbaren Umgebung
+           neighbor_loads.append(max(loads) if loads else 0)
+           
+       df['spatial_neighbor_max_occupancy'] = neighbor_loads
+       return df
 
-3. Topologisches Target-Encoding
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Kanten-IDs (z. B. ``edge_vD1_vD2``) sind kategoriale Strings. Da High-Cardinality-Features klassisches One-Hot-Encoding "aufblähen" würden (Curse of Dimensionality), nutzt die Pipeline *Target Encoding*. Hierbei wird der String durch den historischen Mittelwert der Zielvariable (die durchschnittliche Staudichte dieser spezifischen Kante im gesamten Datensatz) ersetzt.
+Diese architektonische Transformation erlaubt es dem tabellarischen Boosting-Modell, räumliche Flaschenhälse zu antizipieren, ohne dass extrem rechenintensive Graph Neural Networks (GNNs) eingesetzt werden müssen.
 
-Teil III: ML-Architektur und Hyperparameter-Optimierung
--------------------------------------------------------
+6. Systemintegrität: Forward Chaining & Target-Shift
+----------------------------------------------------
+Der fatalste methodische Fehler bei der Validierung synthetischer Daten ist **Data Leakage**. Würde man die exportierten Parquet-Daten vor dem Training via K-Fold Cross Validation zufällig mischen, könnte die KI "in die Zukunft sehen" (z. B. aus den Daten von 17:06 Uhr die Werte für 17:05 Uhr ableiten). 
 
-Das Ziel des Modells ist die Prädiktion eines kontinuierlichen Wertes (Personenanzahl auf Kante :math:`e` zum Zeitpunkt :math:`t+x`). Dies klassifiziert das Vorhaben als multivariates Regressionsproblem.
+Die Pipeline erzwingt daher eine strikte chronologische Validierung (**Time Series Split / Forward Chaining**). Zudem wird das abhängige Target-Label ($Y$) über einen negativen Pandas-Shift generiert:
 
-1. Wahl des Algorithmus (Gradient Boosting Ensembles)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Anstatt klassischer linearer Regressionsmodelle (OLS) nutzt das System baumbasierte Ensemble-Verfahren aus der Familie des **Gradient Boosting** (z. B. Random Forest / XGBoost). Die architektonische Begründung ist zweifach:
-* **Nicht-Linearität:** Das Zusammenspiel aus topologischer Platzierung, Uhrzeit und Agenten-Dichte ist hochgradig nicht-linear. Entscheidungsbäume können verschachtelte Interaktionseffekte ohne manuelle Polynom-Transformationen nativ abbilden.
-* **Fehler-Metrik (MSE):** Das Modell wird auf die Minimierung des mittleren quadratischen Fehlers (Mean Squared Error) trainiert. Durch die Quadrierung des Residuals werden extreme Stau-Ausreißer härter bestraft. Das zwingt den Algorithmus, sich auf die kritischen Engpässe zu fokussieren, anstatt nur den leeren Durchschnitts-Gang gut vorherzusagen.
+.. code-block:: python
 
-2. Vermeidung von Data Leakage (Time Series Split)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Der fatalste methodische Fehler bei der Evaluierung von Zeitreihen ist der Einsatz von regulärem Random-Shuffle Cross-Validation (k-Fold CV). Würde man die Simulationsdaten zufällig mischen, würde das Modell die Stausituation von 17:05 Uhr vorhersagen, während es die Auslastung von 17:06 Uhr bereits in der Trainingsphase gesehen hat (klassischer Informationsfluss aus der Zukunft, *Data Leakage*).
+   import xgboost as xgb
+   from sklearn.model_selection import TimeSeriesSplit
 
-Um die absolute Integrität der Evaluation zu garantieren, implementiert die Pipeline einen strikten **Time Series Split (Expanding Window)** aus der ``scikit-learn``-Bibliothek. 
-Das Modell trainiert iterativ nur auf Vergangenheitsdaten (z. B. Tag 1 bis 3) und validiert auf ungesehenen Zukunftsdaten (Tag 4). Nur dieses strenge Paradigma stellt sicher, dass die in der Evaluation ausgewiesenen Metriken (wie ein :math:`R^2 > 0.9`) die echte Generalisierungsfähigkeit für den späteren Live-Betrieb des Supermarkts widerspiegeln.
+   # 1. Das Target definieren: Die Auslastung exakt 5 Minuten (5 Snapshots) in der Zukunft
+   df['target_t_plus_5'] = df.groupby('edge_id')['occupancy'].shift(-5)
+   df.dropna(inplace=True)
+
+   # 2. Chronologischer Split (blockiert Leakage)
+   tscv = TimeSeriesSplit(n_splits=5)
+   model = xgb.XGBRegressor(n_estimators=200, max_depth=6)
+
+   for train_idx, test_idx in tscv.split(X):
+       model.fit(X.iloc[train_idx], y.iloc[train_idx])
+       # Evaluierung erfolgt ausschließlich auf streng in der Zukunft liegenden Daten
+
+Nur diese kompromisslose Methodik – von der fraktionalen Kinematik über den Burn-in-Schutz bis zum Forward-Chaining – garantiert, dass die generierten Daten kein wertloses Zufallsrauschen sind, sondern ein robuster, isomorpher Digitaler Zwilling der Supermarkt-Realität, auf dem die KI sicher generalisieren kann.

@@ -1,73 +1,252 @@
-Frontend-Architektur & Human-Computer Interaction (UX)
-======================================================
+Frontend-Architektur: Reaktive UI, Edge-Computing & Hardware-Integration
+========================================================================
 
-Die mathematische Exzellenz der Backend-Algorithmen (TSP-Solver, ML-Prädiktoren) entfaltet ihren praktischen Business-Wert erst durch eine performante und ergonomische Benutzeroberfläche. Das Frontend des JMU Smart Supermarkets fungiert als Übersetzungs-Schicht: Es abstrahiert die hochkomplexe Graphentheorie und stochastische Modellierung in intuitive, visuelle Heuristiken, um die kognitive Belastung (Cognitive Load) des Nutzers während des Einkaufs zu minimieren.
+Die größte Herausforderung des JMU Smart Cart Frontends (geschrieben in React und TypeScript) besteht darin, eine riesige Menge an Datenbergen in Echtzeit auf den Bildschirm zu zeichnen, ohne dass das Tablet abstürzt. Das Tablet am Einkaufswagen operiert als sogenanntes **Edge-Device** (ein Endgerät am äußersten Rand des Netzwerks). Das bedeutet: Es ist kein leistungsstarker Server, sondern ein kleiner Computer mit schwachem Prozessor, der vom Akku lebt und bei zu viel Rechenlast heiß wird und sich selbst drosselt (**Thermal Throttling**).
 
-Das System ist als reaktive **Single-Page Application (SPA)** konzipiert und mittels des analytischen Frameworks *Plotly Dash* implementiert. Anstatt statische HTML-Dokumente auszuliefern, agiert das Frontend als interaktiver, webbasierter Vektor-Renderer für die zugrundeliegenden Graphen-Topologien.
+Das Tablet muss vier schwere Aufgaben gleichzeitig erledigen:
+1. Den Wagen im Supermarkt lokalisieren (Wo bin ich?).
+2. Physische Barcodescans des Lasers verarbeiten.
+3. Die optimale Route als blaue Linie durch hunderte Gänge flüssig auf den Bildschirm zeichnen.
+4. Minütliche Stau-Warnungen (Traffic Updates) aus dem Internet empfangen und verarbeiten.
 
-1. Das architektonische Paradigma: Reaktives MVC-Pattern
---------------------------------------------------------
+Wenn der Browser versucht, all das gleichzeitig im Hauptprozessor zu erledigen, entsteht **Layout Thrashing**. 
+*Verständnis-Exkurs:* Stellen Sie sich einen Maler vor, der ein Bild malt, während ihm jemand ständig die Leinwand wegzieht und eine neue hinstellt. Der Maler kommt nicht voran und das Bild ruckelt. In der Informatik bedeutet das: Die App friert ein. 
 
-Das Frontend (``app.py``) trennt die Datenlogik strikt von der visuellen Repräsentation. Da Dash-Applikationen über zustandslose HTTP-Protokolle (Stateless) operieren, erfordert die Synchronisation mit dem Backend ein präzises Architekturmuster:
+Um flüssige 60 Bilder pro Sekunde (FPS) zu garantieren, müssen Datenempfang, Zustandsverwaltung und das reine Zeichnen der Grafik strikt voneinander getrennt werden. Wie das genau funktioniert, erklärt dieses Kapitel.
 
-* **Model (Shared State):** Das Frontend speichert keinen eigenen topologischen Zustand. Es kommuniziert als reiner Client über In-Memory-Referenzen mit der ``model.py``. Es konsumiert den aktuellen Graphen (:math:`G`), die berechneten TSP-Routen und die ML-Vorhersagen als "Single Source of Truth".
-* **View (Dynamic DOM):** Die Funktion ``serve_layout()`` generiert den Document Object Model (DOM) Baum. Architektonisch entscheidend ist hierbei die dynamische Evaluierung: Das Layout wird bei jedem Seitenaufruf als Funktion evaluiert (Runtime-Binding), um temporale Abhängigkeiten – wie die tagesaktuelle Initialisierung des Poisson-Prozesses – bei einem Seiten-Reload exakt zu synchronisieren.
-* **Controller (DAG-Callbacks):** Die Nutzerinteraktionen werden über asynchrone Event-Listener (``@app.callback``) abgefangen. Dash orchestriert diese Callbacks intern als *Directed Acyclic Graph (DAG)*. Dies stellt sicher, dass verknüpfte UI-Updates in der korrekten mathematischen Reihenfolge ausgeführt werden, ohne blockierende Full-Page-Reloads zu erzwingen.
+1. System-Bootstrapping & Backend-for-Frontend (BFF)
+----------------------------------------------------
+Wenn das Tablet morgens eingeschaltet wird, ist sein Arbeitsspeicher komplett leer. Es weiß nicht, wie der Supermarkt aussieht oder welche Produkte es gibt. Das anfängliche Laden dieser Daten nennt man **Bootstrapping** (das System zieht sich an den eigenen Schnürsenkeln hoch).
 
-2. Visuelles Encoding & Geometrisches Rendering
+Hierfür nutzt die Architektur ein **Backend-for-Frontend (BFF)** Muster.
+*Verständnis-Exkurs:* Normalerweise müsste das Tablet beim Start 20 verschiedene Abteilungen im Backend anrufen: "Gib mir die Wände", "Gib mir die Regale", "Gib mir die Preise". Das dauert lange und kostet Akkuleistung. Das BFF-Muster funktioniert wie ein persönlicher Kellner: Das Tablet ruft nur ein einziges Mal den BFF-Server an, dieser sammelt im Hintergrund alle Daten aus den verschiedenen Datenbanken zusammen und serviert dem Tablet ein einziges, fertiges "Menü" (Payload).
+
+.. code-block:: typescript
+
+   import { useEffect } from 'react';
+   import { useCartStore } from './store';
+   import { apiGateway } from './api';
+   import { trafficSocketManager } from './websockets';
+
+   export function useSystemBootstrap() {
+       // useEffect mit leeren Klammern [] bedeutet: Führe dies exakt 1x beim Start aus
+       useEffect(() => {
+           async function initializeCart() {
+               useCartStore.setState({ systemStatus: 'BOOTING' });
+               try {
+                   // 1. Der BFF-Kellner bringt die fertige Karte und alte Sitzungsdaten
+                   const [topology, session] = await Promise.all([
+                       apiGateway.fetchStaticMap(),
+                       apiGateway.restoreSession() // Falls das Tablet abgestürzt war, laden wir den alten Warenkorb
+                   ]);
+                   
+                   // 2. Wir speichern die starren Wände und Regale im Arbeitsspeicher
+                   useCartStore.setState({ 
+                       mapData: topology, 
+                       cart: session.items,
+                       systemStatus: 'READY' 
+                   });
+                   
+                   // 3. Erst wenn die starre Karte da ist, öffnen wir den Funkkanal (WebSocket) 
+                   // für die sich ständig ändernden Stau-Meldungen.
+                   trafficSocketManager.connectAndSubscribe();
+               } catch (error) {
+                   handleFatalBootError(error);
+               }
+           }
+           initializeCart();
+       }, []); 
+   }
+
+2. Indoor-Lokalisierung & Sensor Fusion (Kalman-Filter)
+-------------------------------------------------------
+Woher weiß der blaue Punkt auf der Karte, wo der Einkaufswagen gerade steht? GPS funktioniert in einem Supermarkt aus Stahlbeton nicht. Das System nutzt daher **Bluetooth Low Energy (BLE)** Beacons. Das sind kleine Funkfeuer, die an der Supermarktdecke hängen.
+
+Das Problem: Bluetooth-Signale springen und schwanken extrem, wenn z. B. ein Mensch durch die Funkstrecke läuft. Würde das Tablet die rohen Signale nutzen, würde der Standort-Punkt auf der Karte wild hin und her springen.
+Die Lösung ist ein mathematischer **Kalman-Filter**.
+*Verständnis-Exkurs:* Wenn Sie im Dunkeln laufen, sehen Sie schlecht (das schwankende Bluetooth-Signal). Aber Sie wissen ungefähr, wie schnell Sie laufen und in welche Richtung (Ihre eigene Bewegungsschätzung). Der Kalman-Filter ist ein Algorithmus, der beides kombiniert: Er glättet die Ausreißer des Funksignals auf Basis der wahrscheinlichen Physik. Aus dem Chaos wird eine ruhige, präzise Linie.
+
+$$ d = 10^{\frac{P_{Tx} - RSSI}{10 \cdot n}} $$
+*(Diese Formel rechnet die Bluetooth-Signalstärke $RSSI$ in Meter $d$ um).*
+
+.. code-block:: typescript
+
+   import { useEffect, useRef } from 'react';
+   import { KalmanFilter } from './math/kalman';
+
+   export function useIndoorPositioning() {
+       // Initialisierung des Filters (R = Rauschen des Bluetooth, Q = Ungenauigkeit unserer Bewegung)
+       const filter = useRef(new KalmanFilter({ R: 0.01, Q: 3 })); 
+
+       useEffect(() => {
+           const processBeaconSignal = (rssi: number, txPower: number) => {
+               // 1. Wie weit ist das Beacon weg? (Formel von oben)
+               const rawDistance = Math.pow(10, (txPower - rssi) / (10 * 2.5));
+               
+               // 2. Glättung des zitternden Signals durch den Kalman-Filter
+               const smoothedDistance = filter.current.filter(rawDistance);
+               
+               // 3. Berechnung des genauen X/Y Punktes auf der Karte und Speicherung
+               const newPosition = calculateTrilateration(smoothedDistance, knownBeacons);
+               useCartStore.setState({ currentPosition: newPosition });
+           };
+
+           bluetoothService.subscribeToRSSI(processBeaconSignal);
+           return () => bluetoothService.unsubscribe();
+       }, []);
+   }
+
+3. Barcode-Scanner & Schutz vor Hacker-Eingaben
 -----------------------------------------------
+Wenn der Kunde einen Artikel einscannt, nutzt die Hardware das **Keyboard Wedge Pattern**. 
+*Verständnis-Exkurs:* Der rote Laser-Scanner tut so, als wäre er eine Computertastatur. Er liest den Strichcode "12345" und "tippt" diese Zahlen in Millisekunden unsichtbar in das Tablet ein, gefolgt von der Enter-Taste.
 
-Die Abbildung des Supermarkts im Browser ist kein simples, statisches Rasterbild (PNG/JPG), sondern eine dynamisch berechnete Vektor-Projektion.
+Dies birgt jedoch ein Sicherheitsrisiko (**HID Injection Attack**). Ein böswilliger Kunde könnte einen eigenen Strichcode drucken, der statt einer Zahl einen Programmierbefehl enthält (z. B. "Lösche die Datenbank"). Das Frontend wehrt dies durch strenge **Sanitisierung** (Desinfektion) ab:
 
-2.1 Topologische Projektion und Heatmaps
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die abstrakten Knoten (:math:`V`) und Kanten (:math:`E`) des NetworkX-Graphen werden in Plotly-Traces (Scatter-Plots) übersetzt. Die X/Y-Koordinaten der Knoten verankern die Regale im zweidimensionalen Canvas. 
-Ein besonderes Augenmerk liegt auf dem kognitiven Mapping der ML-Vorhersagen: Im *Heatmap-Modus* konvertiert das Frontend die vom Regressor vorhergesagten Stau-Wahrscheinlichkeiten in einen kontinuierlichen Farbgradienten (Color Scale). Der Nutzer erfasst so komplexe stochastische Vorhersagen innerhalb von Millisekunden visuell.
+.. code-block:: typescript
 
-2.2 Geometrische Pfad-Interpolation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Der Held-Karp-Algorithmus (TSP) aus dem Operations-Research-Modul liefert aus Effizienzgründen lediglich eine diskrete Permutation von Zielknoten (z. B. Start -> Milch -> Kasse). Ein naives Rendering würde eine gerade Linie durch Wände und Regale ziehen. 
-Die Funktion ``build_true_plot_path()`` implementiert daher eine Pfad-Interpolation: Sie nutzt den Dijkstra-Algorithmus, um die fehlenden Transit-Strecken (die physischen Gänge) zwischen den Wegpunkten topologisch korrekt aufzufüllen.
+   export function useHardwareScannerIntegration() {
+       const buffer = useRef<string>(''); // Hier sammeln wir die getippten Zahlen
+       const lastKeyTime = useRef<number>(Date.now());
 
-2.3 Vektormathematik für Navigationsanweisungen
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Um den Nutzer nicht nur visuell, sondern auch textuell zu leiten ("Bitte links abbiegen"), muss das System die Geometrie des Graphen "verstehen". Die Funktion ``calculate_turn_direction()`` verzichtet auf rechenintensive Winkel-Funktionen (Trigonometrie) und nutzt stattdessen das elegante **2D-Kreuzprodukt** zweier Richtungsvektoren.
+       useEffect(() => {
+           const handleHardwareScan = (e: KeyboardEvent) => {
+               const currentTime = Date.now();
+               
+               // Hardware-Filter: Ein echter Scanner tippt Zeichen in unter 50 Millisekunden.
+               // Tippt jemand von Hand auf den Touchscreen, ist das langsamer und wird hier blockiert.
+               if (currentTime - lastKeyTime.current > 50) buffer.current = ''; 
+               lastKeyTime.current = currentTime;
 
-Gegeben seien drei aufeinanderfolgende Knotenkoordinaten :math:`p_1, p_2, p_3` auf der Route. Es werden zwei Vektoren gebildet:
-:math:`\vec{u} = p_2 - p_1` (Eingangsrichtung) und :math:`\vec{v} = p_3 - p_2` (Ausgangsrichtung).
+               // "Enter" bedeutet: Der Scan ist fertig.
+               if (e.key === 'Enter' && buffer.current.length >= 8) {
+                   e.preventDefault();
+                   
+                   // SECURITY (Sanitisierung): Wir filtern alles heraus, was keine Zahl von 0-9 ist.
+                   // Hacker-Befehle werden hier einfach weggeschnitten.
+                   const sanitizedCode = buffer.current.replace(/[^0-9]/g, '').slice(0, 14);
+                   buffer.current = ''; 
+                   
+                   if (sanitizedCode.length >= 8) {
+                       useCartStore.getState().processScannedItem(sanitizedCode);
+                   }
+                   return;
+               }
+               if (e.key.length === 1) buffer.current += e.key;
+           };
 
-Das 2D-Kreuzprodukt (Determinante) berechnet sich als:
+           window.addEventListener('keydown', handleHardwareScan);
+           return () => window.removeEventListener('keydown', handleHardwareScan);
+       }, []);
+   }
 
-.. math::
+4. React-Optimierung: Shallow Equality (Oberflächlicher Vergleich)
+------------------------------------------------------------------
+Sobald das Produkt gescannt ist, fragt das Tablet den Backend-Server: "Was ist meine neue, beste Route zur Kasse?". 
+Wenn der Server eine neue Route schickt, würde eine normale App den gesamten Bildschirm komplett neu aufbauen. Das verbraucht extrem viel Akkuleistung.
 
-   c = u_x \cdot v_y - u_y \cdot v_x
+Das System nutzt daher **Shallow Equality Checks** (oberflächliche Gleichheitsprüfung). 
+*Verständnis-Exkurs:* Wenn Sie prüfen wollen, ob zwei dicke Bücher identisch sind, können Sie entweder jede einzelne Seite lesen (Deep Check = sehr langsam) oder einfach nur schauen, ob die ISBN-Nummer auf der Rückseite gleich ist (Shallow Check = blitzschnell). 
+Das Tablet prüft nur die "ID" der Route im Arbeitsspeicher. Wenn die Route trotz des neuen Produkts geometrisch gleich geblieben ist, bricht das Tablet das Neuzeichnen der Karte ab und fügt das Produkt nur still in den Warenkorb ein.
 
-* Ist :math:`c > 0`, rotiert der Pfad gegen den Uhrzeigersinn (**Links abbiegen**).
-* Ist :math:`c < 0`, rotiert der Pfad im Uhrzeigersinn (**Rechts abbiegen**).
-* Ist :math:`c = 0`, verläuft der Weg kollinear (**Geradeaus**).
+5. Grafik-Beschleunigung: Web Worker & Zero-Copy
+------------------------------------------------
+Wenn sich die Route aber ändert, muss die Karte neu gezeichnet werden. Tausende Wegpunkte zu malen, würde das Tablet komplett auslasten; der Kunde könnte in dieser Zeit keine Buttons mehr drücken.
 
-Diese mathematische Herangehensweise ist numerisch hochgradig stabil, resistent gegen Division-by-Zero-Fehler und garantiert in der Applikation extrem schnelle Laufzeiten bei der Erstellung der Wegbeschreibung.
+Die Lösung ist ein **Web Worker**. 
+*Verständnis-Exkurs:* Stellen Sie sich vor, der Hauptprozessor des Tablets ist der Chefkoch. Wenn er selbst Kartoffeln schälen muss (die Karte zeichnen), kann er keine Bestellungen (Kundenklicks) mehr annehmen. Ein Web Worker ist ein Sous-Chef (ein Hilfsarbeiter im Hintergrund). Der Chefkoch ruft dem Sous-Chef zu: "Zeichne mir mal diese Route!". 
 
-3. Nebenläufigkeit (Concurrency) & Expert-in-the-Loop
------------------------------------------------------
+Damit die Pixel auf den Bildschirm passen, nutzt der Sous-Chef eine **Affine Transformation**: Er rechnet die Meter aus dem Supermarkt über eine Formel in Bildschirm-Pixel um:
+$$ P_{pixel} = \begin{pmatrix} s & 0 \\ 0 & s \end{pmatrix} \cdot \vec{P}_{meter} + \vec{t} $$
 
-Ein webbasiertes Dashboard muss Multi-Threading und parallele Nutzerzugriffe sicher handhaben, insbesondere wenn das Backend hochsensible Speicheroperationen durchführt.
+.. code-block:: typescript
 
-3.1 Thread-Safety und Race Conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die Funktion ``admin_manage()`` gewährt Administratoren das Recht, die Graphen-Topologie (Regale, Inventar) zur Laufzeit zu verändern. Würde parallel ein Nutzer eine Pfad-Berechnung triggern, käme es zu einer *Race Condition*, was zu einem fatalen Server-Absturz (Segmentation Fault / KeyError) führt.
-Die Applikation nutzt daher strenge **Threading-Locks** (``with inv_manager._lock:``). Dies erzwingt Thread-Sicherheit und garantiert die Konsistenz und Isolation der In-Memory-Datenbank (angelehnt an die ACID-Prinzipien relationaler Datenbanken) während des Lese-/Schreibzugriffs.
+   // --- MapWorker.ts (Der Sous-Chef, der im Hintergrund arbeitet) ---
+   self.onmessage = (evt: MessageEvent) => {
+       const { routeCoords, scale, offsetX, offsetY, offscreenCanvas } = evt.data;
+       
+       // Wir bereiten die unsichtbare Leinwand vor
+       const ctx = offscreenCanvas.getContext('2d', { alpha: false }); 
+       ctx.fillStyle = '#ffffff';
+       ctx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+       
+       // Wir zeichnen die Route als blaue Linie
+       ctx.beginPath();
+       ctx.strokeStyle = '#0066cc'; 
+       ctx.lineWidth = 4;
+       
+       routeCoords.forEach((p, i) => {
+           // Umrechnung von Supermarkt-Metern in Tablet-Pixel
+           const pixelX = (p.x * scale) + offsetX;
+           const pixelY = (p.y * scale) + offsetY;
+           if (i === 0) ctx.moveTo(pixelX, pixelY);
+           else ctx.lineTo(pixelX, pixelY);
+       });
+       ctx.stroke(); 
+       
+       // Übergabe des fertigen Bildes an den Chefkoch (Main-Thread)
+       const bitmap = offscreenCanvas.transferToImageBitmap();
+       self.postMessage({ bitmap }, [bitmap]);
+   };
 
-3.2 Der Expert-in-the-Loop Ansatz
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Maschinelles Lernen ist probabilistisch und macht Fehler. Das UI-Design des Admin-Panels trägt dem Rechnung, indem es einen *Expert-in-the-Loop* Paradigma implementiert. Die Funktion ``ai_suggest_slot()`` fragt zwar die Logistic-Regression ab, um neue Produkte in Regale zu sortieren. Sinkt die Konfidenz (Probability) der Vorhersage jedoch unter einen definierten Schwellenwert (z. B. 80 %), erzwingt das UI ein manuelles Review durch den Menschen. Dies verhindert die schleichende Korrumpierung (Data Drift) der Supermarkt-Ontologie.
+**Der absolute Performance-Trick (Zero-Copy):**
+Der Befehl ``transferToImageBitmap()`` ist Magie. Anstatt dass der Sous-Chef das fertige Bild mühsam kopiert und dem Chefkoch zuschickt (was den Arbeitsspeicher füllt), übergibt er einfach nur die Besitzurkunde (den Speicher-Pointer) für das Bild. Der Chefkoch darf sofort auf das Bild zugreifen. Das nennt sich **Zero-Copy** (Null-Kopie) und garantiert butterweiche Grafiken.
 
-API-Referenz: UI Components & Callbacks
----------------------------------------
+6. Schutz vor Datenfluten: Backpressure & Ringpuffer
+----------------------------------------------------
+Während der Fahrt sendet das Internet sekündlich Stau-Warnungen auf das Tablet. Wenn 50 Einkaufswagen gleichzeitig einen Stau melden, entsteht ein Daten-Sturm. Würde das Tablet versuchen, alle Meldungen sofort zu verarbeiten, würde es abstürzen.
 
-Der folgende Abschnitt dokumentiert die technischen Schnittstellen, Helper-Funktionen und asynchronen Controller-Routinen (Callbacks) der Frontend-Applikation.
+Das System nutzt **Backpressure Handling** (Gegendruck).
+*Verständnis-Exkurs:* Stellen Sie sich das Tablet wie einen Türsteher vor einem Club vor. Wenn plötzlich 50 Gäste (Datenpakete) gleichzeitig durch die Tür stürmen wollen, gibt es Chaos. Der Türsteher (unser Code) sperrt die Tür ab, lässt die Daten in einem **Ringpuffer** (einem digitalen Warteraum) sammeln, und lässt sie dann geordnet in kleinen, gut verdaulichen Gruppen exakt passend zur Bildwiederholrate des Bildschirms (60 Mal pro Sekunde) ein.
 
-.. automodule:: app
-   :members:
-   :undoc-members:
-   :show-inheritance:
+7. Die Vorhersage der Kasse: Halftime-Prädiktion
+------------------------------------------------
+Ein riesiges Problem bei Navigationssystemen ist es, wenn sie zu spät Bescheid geben. Sagt das Tablet dem Kunden erst drei Meter vor den Kassen, dass Kasse 4 die kürzeste Schlange hat, muss er abrupt umdrehen und sich durch die Menschenmassen zwängen.
+
+Die Lösung ist ein **Architektonischer Halftime-Trigger**.
+Das Tablet wartet nicht bis zum Schluss. Sobald exakt die Hälfte der Einkaufsliste abgehakt ist (Halftime / Halbzeit), rechnet das Tablet stochastisch aus, welche Kasse in 10 Minuten frei sein wird, und integriert diesen Zielpunkt sofort heimlich in die laufende Route. So wird der Kunde völlig unauffällig und staufrei zur richtigen Kasse manövriert.
+
+.. code-block:: typescript
+
+   import { useEffect } from 'react';
+   import { useCartStore } from './store';
+   import { api } from './api';
+
+   export function useHalftimeCheckoutPrediction() {
+       useEffect(() => {
+           // Das Tablet lauscht lautlos, wie viele Artikel gescannt wurden
+           const unsubscribe = useCartStore.subscribe(
+               (state) => ({ cartLen: state.cart.length, total: state.shoppingList.length }),
+               (current) => {
+                   if (current.total === 0) return;
+                   
+                   // Berechnung des Fortschritts (z.B. 5 von 10 Artikeln = 0.5)
+                   const progress = current.cartLen / current.total;
+                   
+                   // Sobald 50% erreicht sind, blockieren wir diesen Trigger für die Zukunft (checkoutPredicted)
+                   if (progress >= 0.5 && !useCartStore.getState().checkoutPredicted) {
+                       useCartStore.setState({ checkoutPredicted: true }); 
+                       
+                       // Wir fragen das Backend: "Welche Kasse wird später frei sein?"
+                       api.triggerCheckoutPrediction().then(optimalExitNode => {
+                           // Wir hängen die optimale Kasse still und heimlich ans Ende der Route an
+                           useCartStore.getState().appendExitNodeToRoute(optimalExitNode);
+                       });
+                   }
+               },
+               { equalityFn: shallow }
+           );
+           return unsubscribe;
+       }, []);
+   }
+
+8. Netzwerkausfälle: Graceful Degradation & Thundering Herd
+-----------------------------------------------------------
+Im Supermarkt gibt es viele Metallregale, die WLAN-Signale blockieren (Faraday-Käfig). Das WLAN wird also ständig abbrechen. Die App darf dann nicht einfach eine Fehlermeldung zeigen. 
+
+Das nennt sich **Graceful Degradation** (elegantes Herabstufen): Ohne WLAN greift das Tablet einfach auf die lokal gespeicherte Offline-Karte zurück und navigiert normal weiter, nur eben ohne Live-Stauwarnungen.
+
+Das eigentliche Problem entsteht, wenn der Wagen aus dem Funkloch herausfährt und das WLAN zurückkehrt. Würden 100 Einkaufswagen exakt im selben Moment versuchen, sich wieder mit dem Server zu verbinden, würde das den Server durch Überlastung in die Knie zwingen (Das **Thundering Herd Problem** / Die donnernde Herde).
+
+Die Lösung ist ein **Exponential Backoff mit Jitter**:
+Das Tablet wartet nach einem Fehlversuch erst 1 Sekunde, dann 2, dann 4, dann 8 ($2^n$). Der **Jitter** addiert eine winzige Zufallszahl auf diese Wartezeit (z. B. 0.3 Sekunden). Das bewirkt, dass sich die 100 Einkaufswagen nicht gleichzeitig, sondern leicht versetzt, wie bei einem Reißverschlussverfahren, sanft wieder mit dem Server verbinden.

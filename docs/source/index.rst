@@ -12,9 +12,9 @@ Diese Dokumentation umfasst die gesamte End-to-End Pipeline: Von der Datenbescha
    backend_api
    topologie
    data_engineering
+   operations_research
    simulation
    ml_architektur
-   operations_research
    stochastik
    frontend
    fazit
