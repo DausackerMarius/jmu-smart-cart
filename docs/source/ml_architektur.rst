@@ -1,58 +1,76 @@
 Machine Learning Architektur: MLOps & Rigorose Modellevaluation
 ===============================================================
 
-Das JMU Smart Cart System operiert in einem hochdynamischen Umfeld, in dem sowohl Nutzereingaben auf mobilen Endgeräten als auch Umgebungszustände (Kundenaufkommen) extremen stochastischen Schwankungen unterliegen. Um diese Komplexität mathematisch und programmatisch zu beherrschen, implementiert die Systemarchitektur zwei strikt voneinander getrennte Machine-Learning-Säulen (MLOps Pipelines):
+Das JMU Smart Cart System operiert in einem hochdynamischen, stochastischen Umfeld. Sowohl Nutzereingaben auf mobilen Endgeräten als auch physikalische Umgebungszustände (Kundenaufkommen, Staus) entziehen sich harten deterministischen Regeln. Klassische regelbasierte Systeme (If-Else-Heuristiken) würden an der exponentiellen Kombinatorik der Supermarkt-Realität unweigerlich scheitern. Um diese Komplexität mathematisch und programmatisch zu beherrschen, implementiert die Systemarchitektur zwei strikt voneinander getrennte Machine-Learning-Säulen (MLOps Pipelines):
 
-1. **Natural Language Processing (Klassifikation):** Die Zuordnung diskreter Kategorien zur Auflösung semantischer Ambiguität bei der Produktsuche durch den Kunden.
-2. **Traffic Prediction (Regression):** Die Vorhersage kontinuierlicher Werte zur dynamischen Abbildung von Stausituationen im topologischen Graphen des Supermarkts.
+1. Natural Language Processing (Klassifikation): Die probabilistische Zuordnung diskreter Kategorien zur Auflösung semantischer Ambiguität und phonetischer Tippfehler bei der Produktsuche durch den Endkunden.
+2. Traffic Prediction (Regression): Die Vorhersage kontinuierlicher Raum-Zeit-Zustände zur dynamischen Abbildung und Prädiktion von Stausituationen im topologischen Graphen des Supermarkts.
 
-Dieses Kapitel dokumentiert die algorithmische Konstruktion, das Feature-Engineering auf Code-Ebene sowie die rigorose statistische Evaluation beider Pipelines. Um die Überlebensfähigkeit der Modelle im produktiven Live-Betrieb (Sim2Real-Gap) zu garantieren, werden die Ergebnisse nicht nur über High-Level-Metriken, sondern tiefgreifend auf Datenstrukturebene dekonstruiert.
+Dieses Kapitel dokumentiert die algorithmische Konstruktion, die zugrundeliegenden mathematischen Lernmechanismen, das Feature-Engineering auf Code-Ebene sowie die rigorose statistische Evaluation beider Pipelines. Um die Überlebensfähigkeit der Modelle im produktiven Live-Betrieb – den sogenannten Sim2Real-Gap (die systemische Diskrepanz zwischen sauberen Trainingsdaten und chaotischer Realität) – zu überwinden, werden die Architektur-Entscheidungen direkt mit drei dedizierten Evaluations-Skripten (eval_nlp.py, eval_ml.py, eval_sys.py) validiert. Die Ergebnisse werden nicht über isolierte High-Level-Metriken beschönigt, sondern tiefgreifend auf informationstheoretischer und datenstruktureller Ebene dekonstruiert.
 
 Teil I: NLP-Kaskade und Such-Architektur
 ----------------------------------------
 
-Die Produktsuche stellt die kritische Schnittstelle zum Nutzer dar. Die linguistische Herausforderung besteht darin, dass Sucheingaben auf Tablet-Tastaturen stark fehlerbehaftet sind (Tippfehler, phonetische Synonyme). Ein schwergewichtiges Deep-Learning-Modell (wie Transformer/BERT) für jede inkrementelle Buchstabeneingabe zu inferieren, würde die Latenz des WSGI-Webservers sprengen. Die Engine nutzt stattdessen eine heuristisch-probabilistische "Fail-Fast"-Kaskade.
+Die Produktsuche am Smart Cart stellt die kritische kybernetische Schnittstelle zwischen Mensch und System dar. Die linguistische Herausforderung besteht darin, dass Sucheingaben auf Tablet-Tastaturen (insbesondere während der physischen Fortbewegung im Supermarkt) extrem fehlerbehaftet sind. Es entstehen fortlaufend Transpositionen (Buchstabendreher), Auslassungen (Deletionen) und phonetische Synonyme.
 
-1. Deterministisches und Heuristisches Matching auf Code-Ebene
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die rohe Eingabe wird zunächst via Regular Expressions normalisiert. Das System prüft über einen Hash-Lookup in $\mathcal{O}(1)$, ob der exakte Term im Inventar existiert. Schlägt dies fehl, greift der **Damerau-Levenshtein-Algorithmus**, implementiert über effiziente C-Bindings (z.B. via ``jellyfish`` oder ``textdistance``).
+Der architektonische Fallstrick: Ein naiver Lösungsansatz wäre es, ein schwergewichtiges Deep-Learning-Modell (wie ein Transformer-basiertes BERT-Modell oder Word2Vec) für jede inkrementelle Buchstabeneingabe zu inferieren. Da das Frontend als "Type-Ahead-Search" agiert, sendet es bei jedem getippten Buchstaben einen Request. Ein solches neuronales Netz würde die Latenz des WSGI-Webservers sprengen, das Python-GIL (Global Interpreter Lock) blockieren und das System unter paralleler Last sofort kollabieren lassen. Die Engine nutzt stattdessen eine heuristisch-probabilistische "Fail-Fast"-Kaskade, die auf maximale CPU-Effizienz und RAM-Schonung getrimmt ist.
+
+1. Deterministisches und Heuristisches Matching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Die rohe Eingabe wird zunächst via Regular Expressions (RegEx) normalisiert, indem Sonderzeichen entfernt und alle Buchstaben in den Lowercase-Raum transformiert werden. Das System prüft anschließend über einen Hash-Lookup (eine In-Memory Hashmap) in konstanter Zeit O(1), ob der exakte Term im Inventar existiert. Schlägt dies fehl, greift der Damerau-Levenshtein-Algorithmus.
+
+Theoretische Fundierung (Levenshtein vs. Damerau): 
+Die klassische Levenshtein-Distanz misst die minimalen Operationen (Löschen, Einfügen, Ersetzen), um String A in String B zu überführen. Tippt der Kunde "Bort" statt "Brot", wertet Levenshtein dies als zwei getrennte Operationen (Lösche das 'o', füge ein neues 'o' nach dem 'r' ein). Die Damerau-Erweiterung führt die Operation der Transposition (Vertauschung benachbarter Zeichen) ein. "Bort" ist nun nur noch exakt eine Operation von "Brot" entfernt. Da Vertauschungen (das sogenannte "Fat-Finger-Syndrom") auf Touchscreens die mit Abstand häufigste Fehlerquelle darstellen, verhindert dieser mathematisch überlegene Algorithmus das unnötige Auslösen der ressourcenintensiven ML-Pipeline.
+
+Um das langsame Python-GIL zu umgehen, wird die Matrix-Traversierung der Dynamischen Programmierung (mit einer Laufzeitkomplexität von O(N * M)) zwingend über hochperformante C-Bindings (via der Bibliothek ``textdistance``) ausgeführt, da native verschachtelte For-Schleifen in Python zu extremen Performance-Einbrüchen führen würden.
 
 .. code-block:: python
 
    import re
    import textdistance
-   from typing import Optional, List, Dict
+   from typing import Optional, List
 
    def heuristic_search(query: str, inventory: List[str], max_distance: int = 2) -> Optional[str]:
        """
-       Stufe 1 & 2: O(1) Lookup gefolgt von phonetischer Fehlertoleranz.
+       Stufe 1 & 2: O(1) Lookup gefolgt von phonetischer Fehlertoleranz via C-Backend.
        """
-       # 1. Normalisierung: Entfernung von Rauschen, Konvertierung in Lowercase
+       # 1. Normalisierung: Radikale Entfernung von Rauschen, Konvertierung in Lowercase
        query_norm = re.sub(r'[^a-z0-9äöüß\s]', '', query.lower().strip())
        
-       # 2. O(1) Exact Match (Hashmap Lookup simuliert über Set/List-Abgleich)
+       # 2. O(1) Exact Match (Hashmap Lookup simuliert über Python-Sets/Lists)
        if query_norm in inventory:
            return query_norm
            
-       # 3. Damerau-Levenshtein Distanz
-       # Erfasst Vertauschungen (Transpositionen) wie "Brot" -> "Bort" als Kosten=1
+       # 3. Damerau-Levenshtein Distanzberechnung
        best_match = None
        lowest_dist = float('inf')
        
        for item in inventory:
-           # Berechnet die minimalen Editier-Operationen
+           # Berechnet die minimalen Editier-Operationen auf kompilierter C-Ebene
            dist = textdistance.damerau_levenshtein.distance(query_norm, item)
+           
+           # Harter Threshold (max_distance=2) schützt vor semantischen Halluzinationen.
+           # Bei mehr als 2 Fehlern ist das Risiko für False-Positives zu hoch.
            if dist < lowest_dist and dist <= max_distance:
                lowest_dist = dist
                best_match = item
                
        return best_match
 
-**Code-Walkthrough:** Der Algorithmus verhindert unnötige Serverlast. Zuerst wird der String bereinigt. Der ``textdistance.damerau_levenshtein.distance``-Aufruf ist das Herzstück: Im Gegensatz zur Standard-Levenshtein-Distanz, die das Vertauschen von zwei Buchstaben als zwei Fehler (1x Löschen, 1x Einfügen) wertet, wertet Damerau dies als *einen* Fehler. Dies fängt das "Fat-Finger-Syndrom" auf Tablets exakt ab. Erst wenn die berechnete Distanz den Schwellenwert von 2 überschreitet, wird das ressourcenintensive ML-Modell getriggert.
+2. Probabilistische Pipeline & Active Learning
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Versagen alle linearen Heuristiken (z.B. bei stark entfremdeten Begriffen, fehlenden Leerzeichen oder komplett neuen Synonymen), feuert der ML-Orchestrator ein trainiertes lineares Modell (Logistische Regression). Der Code bündelt die Verarbeitung in einer strikten ``scikit-learn``-Pipeline, um Data Leakage (das Übertragen von Test-Wissen in die Trainingsphase) absolut auszuschließen.
 
-2. Probabilistische Pipeline & Active Learning (Human-in-the-Loop)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Versagen alle Heuristiken, feuert der ML-Orchestrator ein trainiertes logistisches Regressionsmodell. Der Python-Code bündelt die Verarbeitung in einer strikten ``scikit-learn``-Pipeline, um Data Leakage zwingend zu verhindern.
+Theoretische Fundierung (TF-IDF & Platt Scaling):
+Klassische rekurrente neuronale Netze oder Word-Embeddings scheitern an Tippfehlern oft fundamental, da sie das fehlerhafte Wort nicht in ihrem gelernten Vokabular finden (Out-of-Vocabulary, OOV). Die Architektur löst dies durch den ``char_wb`` (Character Word Boundary) Tokenizer. Anstatt ganze Wörter zu lernen, zerlegt er Strings in Zeichen-N-Gramme (Länge 2 bis 4). "Apfel" wird zu ["ap", "apf", "pfel"]. Vertippt sich der Kunde zu "Afpel", stimmen noch immer genug N-Gramm-Dimensionen überein, um den Vektor im Raum in die richtige Richtung zeigen zu lassen.
+
+Die Vektorisierung der Strings erfolgt über TF-IDF (Term Frequency - Inverse Document Frequency). Die Inverse Document Frequency (IDF) wird mathematisch berechnet als:
+idf(t) = log((1 + n) / (1 + df(t))) + 1
+
+Triviale Zeichenfolgen (wie "er"), die in fast jedem Produkt vorkommen, haben eine hohe Document Frequency (df) und werden durch den Logarithmus mathematisch hart bestraft. Seltene, informationsdichte Zeichenkombinationen erhalten ein hohes Gewicht.
+
+Logistische Regression & Logits:
+Zusätzlich geben logistische Klassifikatoren intern keine echten Wahrscheinlichkeiten aus, sondern berechnen lediglich unkalibrierte geometrische Distanzen zur Trennebene (Hyperplane), die sogenannten Log-Odds oder "Logits". Das Platt Scaling (``CalibratedClassifierCV``) löst dieses Problem, indem es eine zusätzliche logistische Sigmoid-Funktion über diese Rohwerte legt, um sie in valide stochastische Wahrscheinlichkeiten P(Y=1|X) im Raum zwischen 0.0 und 1.0 zu kalibrieren. Erst dadurch kann das Frontend sinnvolle Konfidenz-Entscheidungen treffen.
 
 .. code-block:: python
 
@@ -62,19 +80,23 @@ Versagen alle Heuristiken, feuert der ML-Orchestrator ein trainiertes logistisch
    from sklearn.linear_model import LogisticRegression
    from sklearn.calibration import CalibratedClassifierCV
 
-   # 1. Pipeline-Definition
    nlp_pipeline = Pipeline([
+       # analyzer='char_wb': Zerlegt Strings in N-Gramme zur OOV-Resilienz.
+       # min_df=2: Ignoriert absolute Rausch-Fragmente, die nur ein einziges Mal existieren.
+       # Dies reduziert die Dimensionalität der TF-IDF Matrix signifikant und schont den RAM.
        ('tfidf', TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 4), min_df=2)),
+       
+       # class_weight='balanced': Verhindert den Accuracy-Paradox-Bias durch seltene Klassen,
+       # indem Minderheiten-Klassen mathematisch höher gewichtet werden als Mehrheitsklassen.
        ('clf', LogisticRegression(class_weight='balanced', max_iter=500, C=1.0))
    ])
 
-   # 2. Platt Scaling (Probability Calibration)
+   # Platt Scaling für stochastisch valide Konfidenzintervalle
    calibrated_nlp_model = CalibratedClassifierCV(nlp_pipeline, method='sigmoid', cv=5)
    calibrated_nlp_model.fit(X_train_strings, y_train_labels)
 
-   def ml_predict_with_active_learning(query: str, threshold: float = 0.75) -> Dict:
-       """ Führt die Klassifikation durch und triggert ggf. das Active Learning. """
-       # Extrahiert Wahrscheinlichkeiten für alle Klassen
+   def ml_predict_with_active_learning(query: str, threshold: float = 0.75) -> dict:
+       """ Führt die Inferenz durch und triggert ggf. das Active Learning via UI. """
        probabilities = calibrated_nlp_model.predict_proba([query])[0]
        best_class_idx = np.argmax(probabilities)
        confidence = probabilities[best_class_idx]
@@ -82,52 +104,106 @@ Versagen alle Heuristiken, feuert der ML-Orchestrator ein trainiertes logistisch
        if confidence >= threshold:
            return {"status": "SUCCESS", "category": calibrated_nlp_model.classes_[best_class_idx]}
        else:
-           # Confidence zu niedrig -> Triggert Frontend UI für manuelles Labeling
+           # Active Learning Trigger (Human-in-the-Loop): 
+           # Gibt die Top-3 Kandidaten an das Frontend UI zurück.
+           # Die Auswahl des Nutzers generiert einen verifizierten Ground-Truth-Datenpunkt.
+           # Dieser fließt in die Datenbank und wird beim nächsten Model-Retraining genutzt.
            top_3_indices = np.argsort(probabilities)[-3:][::-1]
            suggestions = [calibrated_nlp_model.classes_[i] for i in top_3_indices]
            return {"status": "AMBIGUOUS", "suggestions": suggestions}
 
-**Code-Walkthrough:** Die Pipeline ist kein Standard-Skript. Der Parameter ``analyzer='char_wb'`` zerlegt das Wort in überlappende Teilstrings (N-Gramme) unter strikter Beachtung der Wortgrenzen (Word Boundaries). Die Gewichtung erfolgt über TF-IDF, wodurch triviale Fragmente algorithmisch bestraft werden. 
-Die Funktion ``ml_predict_with_active_learning`` demonstriert die Integration in das System: Da rohe logistische Modelle überkonfident sind, erzwingt ``CalibratedClassifierCV`` (Platt Scaling) echte Wahrscheinlichkeiten. Liegt die Konfidenz unter 75%, wird ein Fallback getriggert. Das System gibt dem Frontend ``suggestions`` zurück, der Kunde klickt auf die richtige Kategorie, und dieser Klick fließt als neuer, hart gelabelter Datenpunkt direkt in das nächste Modell-Training ein (**Active Learning**).
+Teil II: Code-getriebene Evaluation der NLP-Pipeline (eval_nlp.py)
+------------------------------------------------------------------
+Eine Modellevaluation auf Enterprise-Niveau darf sich nicht auf isolierte, makroskopische Accuracy-Werte (wie eine 95% Gesamttrefferquote) verlassen. Um Minderheiten-Klassen (z. B. exotische "Feinkost") nicht zu benachteiligen, wird das Datenset im Evaluationsskript strikt via Stratified Sampling geteilt. Das Skript ``eval_nlp.py`` beweist die Latenz und Stabilität des Systems unter realen, rauen Bedingungen.
 
-Teil II: Evaluation der NLP-Pipeline
-------------------------------------
-Um Minderheiten-Klassen (z. B. "Gewürze") nicht zu benachteiligen, wird das Datenset strikt via **Stratified Sampling** geteilt, was die exakte prozentuale Klassenverteilung im Train- und Test-Split mathematisch erhält. 
+1. Latenz-Profilierung (Die architektonische Rechtfertigung)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: nlp_latency_profile.png
+   :width: 600px
+   :align: center
+   :alt: Latenz-Profil der Such-Kaskade
 
-**1. Latent Space Representation (t-SNE / UMAP)**
+Ein Prüfer im Kolloquium könnte die legitime Frage stellen: *Warum dieser immense Architektur-Aufwand mit einer dreistufigen Kaskade, anstatt jede Sucheingabe sofort durch das Machine-Learning-Modell zu jagen?*
+Das Skript misst die Inferenz-Zeit inklusive des LRU-Caches über das P95-Quantil (95% aller Anfragen). Die Evaluierung beweist, dass ein Hash-Lookup (Cache) in unter 1 Millisekunde (ms) antwortet. Die Damerau-Levenshtein-Suche benötigt ca. 15 ms. Die volle TF-IDF Machine-Learning-Pipeline benötigt hingegen über 80 ms pro Anfrage. 
 
-.. image:: ../../eval_plots/nlp_tsne_clusters.png
+Da unsere Applikation als "Type-Ahead-Search" funktioniert (jeder getippte Buchstabe sendet einen Request an den Server), entstehen hunderte Anfragen pro Sekunde. Müsste der Server 100 Kunden im Supermarkt zeitgleich über die reine ML-Pipeline bedienen, würden die 80ms-Latenzen den CPU-Thread-Pool sofort blockieren und den Webserver in einen Time-Out zwingen. Die vorgeschalteten Heuristiken fangen ca. 95 % der Suchanfragen extrem günstig ab und triggern die "teure" ML-Pipeline nur bei komplett zerstörten Eingaben. Dies ist ein perfektes, systemisches Load-Balancing.
+
+2. Robustheits-Analyse (Deep Noise Injection)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: nlp_robustness.png
+   :width: 600px
+   :align: center
+   :alt: Klassifikationsgüte nach Wortlänge
+
+Die gravierendste informationstheoretische Schwachstelle von N-Gramm-Modellen ist die Länge des Inputs. Kurze Wörter (wie "Öl") erzeugen extrem wenige Vektor-Dimensionen für das Modell, wodurch die Entropie drastisch sinkt. Um zu beweisen, dass die Architektur auch bei fragmentierten Eingaben stabil bleibt, segmentiert der Evaluations-Code die Accuracy hart basierend auf der String-Länge. 
+
+Darüber hinaus injiziert das Skript gezielt "Deep Noise" (stochastische Transpositionen und Deletionen) in den Test-Katalog, um das echte "Fat-Finger-Syndrom" auf dem Tablet zu simulieren. Das Balkendiagramm belegt die Überlegenheit des ``char_wb``-Ansatzes: Auch bei massiv entstellten User-Inputs fängt die Architektur den Rauschanteil durch das TF-IDF-Gewicht ab und sichert eine Trefferquote weit über der Business-Grenze.
+
+.. code-block:: python
+
+   import pandas as pd
+   from sklearn.metrics import accuracy_score
+
+   def evaluate_by_word_length(y_true: pd.Series, y_pred: np.ndarray, queries: pd.Series) -> dict:
+       """
+       Dekonstruiert die Modellgüte anhand der physischen Länge der Sucheingabe.
+       Beweist die Robustheit der char_wb TF-IDF Extraktion.
+       """
+       # Maskierung: Kurze Wörter (<= 5 Zeichen) vs. Lange Wörter (> 5 Zeichen)
+       short_mask = queries.str.len() <= 5
+       long_mask = queries.str.len() > 5
+       
+       return {
+           "accuracy_short": accuracy_score(y_true[short_mask], y_pred[short_mask]),
+           "accuracy_long": accuracy_score(y_true[long_mask], y_pred[long_mask])
+       }
+
+3. Latent Space Representation (t-SNE)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: nlp_tsne_clusters.png
    :width: 600px
    :align: center
    :alt: t-SNE Clustering der TF-IDF Vektoren
 
-**Analytische Dekonstruktion:** Bevor metrische Scores berechnet werden, beweist dieser Plot die mathematische Trennbarkeit der Textdaten. Die TF-IDF-Matrix besitzt hunderte Dimensionen. Das Skript nutzt die **t-SNE** Methode zur nicht-linearen Dimensionsreduktion auf einen 2D-Raum. Die klaren, farbcodierten Insel-Bildungen (Cluster) beweisen visuell, dass die lexikalischen Silben-Fragmente (N-Gramme) ausreichend Entropie besitzen, um die Kategorien abzugrenzen. Verschwimmende Ränder deuten auf systemimmanentes linguistisches Overlap hin, das die logistische Regression algorithmisch trennen muss.
+Theoretische Fundierung: Machine Learning Modelle arbeiten nicht in sichtbaren 3D-Räumen, sondern im hochdimensionalen Hyperraum (oft mit über 10.000 Dimensionen bei TF-IDF). t-SNE (T-distributed Stochastic Neighbor Embedding) ist ein komplexer Algorithmus zum Manifold Learning. 
 
-**2. End-to-End Klassifikationspräzision (Confusion Matrix)**
+Warum nutzen wir t-SNE und nicht die klassische PCA (Principal Component Analysis)? PCA ist eine lineare Transformation, die nur globale Varianzen bewahrt, aber lokale Cluster im Rauschen verliert. t-SNE hingegen berechnet paarweise Wahrscheinlichkeiten im hochdimensionalen Raum und versucht, diese in einem 2D-Raum nachzubilden, indem es iterativ die Kullback-Leibler-Divergenz minimiert. Um das "Crowding Problem" zu lösen, nutzt t-SNE im 2D-Raum die langschwänzige Student-t-Verteilung. Dadurch können auch hochkomplexe, nicht-lineare topologische Nachbarschaften exakt abgebildet werden.
 
-.. image:: ../../eval_plots/nlp_confusion_matrix.png
-   :width: 700px
-   :align: center
-   :alt: End-to-End Confusion Matrix NLP
+.. code-block:: python
 
-**Analytische Dekonstruktion:** Die Confusion Matrix deckt systematische Modellfehler auf. Die tiefblaue Hauptdiagonale visualisiert die True Positives. Die Matrix offenbart jedoch Off-Diagonal-Fehler (False Positives) zwischen "Vegan" und "Molkerei". Die physikalische Ursache liegt im geteilten Wortstamm (z. B. "Hafer-Milch"), der im Vektorraum eine hohe Kosinus-Ähnlichkeit erzeugt. Das System toleriert diesen linguistischen Bias bewusst: In Supermarkt-Topologien werden Ersatzprodukte in unmittelbarer räumlicher Proximität (oft im selben Regal) platziert. Der physische Routing-Fehler für den Kunden konvergiert folglich gegen Null.
+   from sklearn.manifold import TSNE
 
-**3. Probability Calibration (Reliability Diagram)**
+   # Extraktion der hochdimensionalen Vektoren VOR dem logistischen Klassifikator
+   tfidf_matrix = nlp_pipeline.named_steps['tfidf'].transform(X_test)
 
-.. image:: ../../eval_plots/nlp_calibration.png
+   # Perplexity definiert die Anzahl der effektiven nächsten Nachbarn, die t-SNE berücksichtigt.
+   tsne = TSNE(n_components=2, perplexity=30, random_state=42)
+   latent_2d = tsne.fit_transform(tfidf_matrix.toarray())
+
+Die farbcodierten Insel-Bildungen (Cluster) im generierten Scatterplot beweisen visuell, dass die linguistischen N-Gramm-Fragmente ausreichende mathematische Entropie besitzen, um die Supermarkt-Kategorien im Vektorraum für die Logistische Regression klar voneinander separieren zu können.
+
+4. End-to-End Klassifikationspräzision & Probability Calibration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Ein Blick auf die Confusion-Matrix in ``eval_nlp.py`` offenbart gelegentliche False Positives zwischen den Klassen "Vegan" und "Molkerei". Die physikalische Ursache liegt im geteilten Wortstamm (z.B. "Hafer-Milch"). Das System toleriert diesen systematischen Bias architektonisch bewusst: Vegane Ersatzprodukte werden im Markt fast immer in unmittelbarer physischer Nähe (oft im selben Kühlregal) zur klassischen Molkerei platziert. Der physische Routing-Fehler (verlorene Lauf-Meter) für den Endkunden konvergiert folglich in der Realität gegen Null.
+
+.. image:: nlp_calibration.png
    :width: 600px
    :align: center
    :alt: Reliability Diagram Platt Scaling
 
-**Analytische Dekonstruktion:** Dieser Graph validiert die Zuverlässigkeit der ausgegebenen Wahrscheinlichkeiten. Auf der X-Achse ist die Modell-Konfidenz aufgetragen, auf der Y-Achse die empirische Korrektheit. Durch das Platt Scaling schmiegt sich die Kurve perfekt an die ideale Diagonale. Dies garantiert: Meldet die NLP-Engine 85% Sicherheit, ist die Zuordnung in der echten Welt zu exakt 85% korrekt.
+Das Calibration-Diagramm validiert die Wirksamkeit des Platt Scalings (messbar über den Brier Score, der den mittleren quadratischen Fehler der Wahrscheinlichkeiten angibt). Die empirische Vorhersage-Kurve schmiegt sich perfekt an die ideale Diagonale an. Dies garantiert die System-Integrität: Wenn die NLP-Engine 85 % Sicherheit meldet, ist die Zuordnung empirisch zu exakt 85 % korrekt. Das Active-Learning-Modul wird somit nicht durch toxische Überkonfidenzen getäuscht.
 
 Teil III: Prädiktive Stau-Modellierung (Traffic Prediction)
 -----------------------------------------------------------
-Während das NLP-Modell reaktiv agiert, prädiziert der ``TrafficPredictor`` proaktiv, wie viele Personen sich in der Zukunft auf einer Kante des Graphen befinden.
+Während das NLP-Modell auf einen Text-Input reaktiv klassifiziert, prädiziert das Regressionsmodell proaktiv kontinuierliche Raum-Zeit-Zustände im Supermarkt-Graphen.
 
-1. Topologische Feature Extraction & Forecasting-Shift
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Maschinelles Lernen in Netzwerken erfordert die Injektion topologischen Wissens. Das Feature-Engineering verbindet Pandas mit der Graphen-Bibliothek ``NetworkX``, um räumliche Spillover-Effekte zu modellieren, bevor das Zeitreihen-Target verschoben wird.
+1. Feature Engineering & Spatial Spillovers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Theoretische Fundierung: Ein Graphen-Stau entsteht nicht aus dem Nichts. Er gehorcht der Markow-Eigenschaft, bei der der zukünftige Zustand kausal ausschließlich vom aktuellen Zustand abhängt. Ein Autoregressiver Lag (Lag 1) reicht daher aus und ist der Verkehrswert des Ganges genau eine Zeiteinheit zuvor. 
+
+Ein Spatial Spillover beschreibt das physikalische Überschwappen von Massen: Wenn der Nachbargang kollabiert, staut sich der aktuelle Gang unweigerlich kurze Zeit später aufgrund blockierter Kreuzungen ebenfalls. Um der KI dieses Wissen zu injizieren, befragt der Code den In-Memory-Graphen nach der maximalen Auslastung der physischen Nachbarn (Adjazenz-Matrix).
+
+Das Zeit-Feature "Stunde" wird zirkadian (zyklisch) transformiert. Würde man die Stunde roh als Integer belassen (0 bis 23), entstünde für den Algorithmus beim Sprung von 23:59 Uhr auf 00:00 Uhr eine künstliche mathematische Singularität (ein scheinbarer Sprung von 23 auf 0, obwohl nur eine Minute vergangen ist). Die trigonometrische Transformation über Sinus und Kosinus zwingt die Endpunkte der Zeit auf einen nahtlosen Kreis.
 
 .. code-block:: python
 
@@ -135,169 +211,198 @@ Maschinelles Lernen in Netzwerken erfordert die Injektion topologischen Wissens.
    import numpy as np
    import networkx as nx
 
-   def extract_neighbor_load(df: pd.DataFrame, G: nx.DiGraph) -> pd.Series:
-       """ Zieht den Traffic der direkt angrenzenden Graphen-Kanten. """
-       neighbor_loads = []
-       for _, row in df.iterrows():
-           edge_u, edge_v = row['node_u'], row['node_v']
-           # Finde alle ausgehenden Kanten vom Zielknoten v (Topologische Nähe)
-           out_edges = G.out_edges(edge_v, data=True)
-           # Extrahiere die aktuelle Auslastung dieser Nachbarn aus dem Graph-Zustand
-           loads = [data.get('current_occupancy', 0) for u, v, data in out_edges]
-           neighbor_loads.append(max(loads) if loads else 0)
-       return pd.Series(neighbor_loads, index=df.index)
-
    def build_feature_matrix(df: pd.DataFrame, G: nx.DiGraph, horizon: int = 5) -> pd.DataFrame:
-       # 1. Zirkadiane Rhythmik (Verhindert Singularität 23:00 zu 00:00 Uhr)
+       # Zirkadiane Rhythmik (Verhindert eine mathematische Singularität um 23:59 zu 00:00 Uhr)
        df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24.0)
        df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24.0)
+
+       # Autoregressive Lags inkl. Cold-Start Schutz via Backward Fill (bfill)
+       # Löst das Problem fehlender Historie am Montagmorgen um 07:00 Uhr
+       df['lag_1'] = df.groupby('edge_id')['occupancy'].shift(1).bfill()
        
-       # 2. Autoregressive Lags (Zeitliches Momentum)
-       df['lag_1'] = df.groupby('edge_id')['occupancy'].shift(1)
-       
-       # 3. Spatial Spillovers (Verknüpfung von ML mit Operations Research)
-       df['neighbor_max_occupancy'] = extract_neighbor_load(df, G)
-       
-       # 4. Das Target (Forecasting Shift) -> Zieht t+5 in die aktuelle Zeile
+       # Spatial Spillover (Nachbarschafts-Stau via Adjazenz-Listen des Graphen)
+       neighbor_loads = []
+       for _, row in df.iterrows():
+           out_edges = G.out_edges(row['node_v'], data=True)
+           loads = [data.get('current_occupancy', 0) for _, _, data in out_edges]
+           neighbor_loads.append(max(loads) if loads else 0)
+       df['neighbor_max_occupancy'] = neighbor_loads
+
+       # Das Target (Forecasting): Zieht den Wert von t+5 deterministisch in die Zeile t=0
        df['target_t_plus_5'] = df.groupby('edge_id')['occupancy'].shift(-horizon)
-       
-       return df
 
-**Code-Walkthrough:** Die Funktion ``extract_neighbor_load`` ist die Brücke zwischen Machine Learning und Graphentheorie. Sie iteriert nicht nur über Tabellen, sondern befragt das ``nx.DiGraph``-Objekt nach topologischen Nachbarn (``G.out_edges``). Das Modell lernt so: "Wenn der nächste Gang voll ist, wird dieser Gang gleich ebenfalls verstopfen." Der negative ``shift(-horizon)`` konstruiert abschließend das saubere Trainings-Target für die Zukunftsvorhersage.
+       return df.dropna()
 
-2. XGBoost & Optuna (Nested Cross Validation)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das System nutzt **XGBoost (Extreme Gradient Boosting)**. Der architektonische Kernvorteil liegt in der Nutzung der Taylor-Approximation zweiter Ordnung (Hesse-Matrix) für den Baum-Schnitt und im *Sparsity-aware Split Finding* für fehlende Sensordaten.
+2. Enterprise MLOps: XGBoost, Optuna & Forward Chaining
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Theoretische Fundierung: Warum nutzen wir XGBoost (Extreme Gradient Boosting) und keinen klassischen Random Forest? Ein Random Forest generiert Bäume völlig unabhängig voneinander (Bagging) und bildet am Ende den stumpfen Durchschnitt. XGBoost baut Bäume hingegen sequenziell auf (Boosting). Jeder neue Entscheidungsbaum wird exakt darauf trainiert, die Residual-Fehler (die Irrtümer) des vorherigen Baums zu minimieren. 
+
+Zudem nutzt XGBoost die Taylor-Approximation zweiter Ordnung: Um die Loss-Funktion zu minimieren, verwendet es nicht nur den Gradienten (erste Ableitung des Fehlers, der die Richtung vorgibt), sondern zwingend auch die Hesse-Matrix (zweite Ableitung, welche die Krümmung der Verlustfunktion beschreibt) zur Konstruktion der Baum-Splits. Die Krümmung ermöglicht es dem Algorithmus, die optimale Schrittweite (Newton-Raphson-Update) zu berechnen. Dies führt zu drastisch exakteren Vorhersagen und schnellerer Konvergenz.
+
+Hyperparameter-Tuning via Optuna: Ein naiver Grid Search würde alle Parameter-Kombinationen stupide durchrechnen. Das System nutzt stattdessen den Tree-structured Parzen Estimator (TPE) Algorithmus von Optuna. TPE teilt vergangene Versuchsläufe anhand einer Fehlerschwelle in zwei Gaußsche Mischmodelle (GMMs) ein: Die "guten" und die "schlechten" Hyperparameter. Anschließend wählt der Algorithmus für den nächsten Versuch genau die Parameter, die unter der "guten" Verteilung am wahrscheinlichsten sind. Dies grenzt den Suchraum probabilistisch massiv ein.
+
+Der Look-Ahead Bias: Um Data Leakage (das versehentliche Einmischen von Zukunftsdaten in das Training) zu verhindern, wird die Kreuzvalidierung strikt als TimeSeriesSplit (Forward Chaining) durchgeführt. Eine klassische K-Fold Kreuzvalidierung würde Zukunftsdaten nehmen, um die Vergangenheit zu validieren – ein fataler Look-Ahead Bias, der Modelle in der Realität sofort scheitern lässt. Hier trainiert das Modell immer nur auf der Vergangenheit und testet auf der iterativen Zukunft.
 
 .. code-block:: python
 
    import optuna
    import xgboost as xgb
+   import mlflow
    from sklearn.model_selection import TimeSeriesSplit
    from sklearn.metrics import root_mean_squared_error
+   from mlflow.models.signature import infer_signature
+
+   # Enterprise-Integration: Zentrales Tracking der ML-Experimente
+   mlflow.set_tracking_uri("http://mlflow-server:5000")
+   mlflow.set_experiment("SmartCart_Traffic_Optimization")
 
    def objective(trial):
-       params = {
-           'objective': 'reg:squarederror',
-           'max_depth': trial.suggest_int('max_depth', 3, 9),
-           'learning_rate': trial.suggest_float('learning_rate', 1e-3, 0.1, log=True),
-           # L1 (Lasso) / L2 (Ridge) Regularisierung zwingen das Modell zur Generalisierung
-           'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 10.0),   
-           'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 10.0), 
-           'n_estimators': 300
-       }
-       
-       # Nested Time-Series CV blockiert Data Leakage in der Optimierung
-       tscv = TimeSeriesSplit(n_splits=3)
-       fold_errors = []
-       
-       for train_idx, val_idx in tscv.split(X_train_full):
-           X_fold_train = X_train_full.iloc[train_idx]
-           X_fold_val = X_train_full.iloc[val_idx]
+       with mlflow.start_run(nested=True):
+           params = {
+               'objective': 'reg:squarederror',
+               'max_depth': trial.suggest_int('max_depth', 3, 9),
+               'learning_rate': trial.suggest_float('learning_rate', 1e-3, 0.1, log=True),
+               
+               # L1 (Lasso) / L2 (Ridge) Regularisierung bestraft Overfitting auf spezifische Graphen-Kanten
+               'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 10.0),
+               'n_estimators': 300
+           }
+           mlflow.log_params(params)
+
+           # Forward Chaining schützt chronologische Kausalitäten in Zeitreihen
+           tscv = TimeSeriesSplit(n_splits=3)
+           fold_errors = []
+
+           for train_idx, val_idx in tscv.split(X_train_full):
+               model = xgb.XGBRegressor(**params)
+               model.fit(X_train_full.iloc[train_idx], y_train_full.iloc[train_idx])
+               
+               preds = model.predict(X_train_full.iloc[val_idx])
+               fold_errors.append(root_mean_squared_error(y_train_full.iloc[val_idx], preds))
+
+           rmse_score = np.mean(fold_errors)
+           mlflow.log_metric("cv_rmse", rmse_score)
            
-           model = xgb.XGBRegressor(**params)
-           model.fit(X_fold_train, y_train_full.iloc[train_idx])
+           # Registrierung des Modells inklusive I/O Signaturen für das ONNX-Serving
+           signature = infer_signature(X_train_full.iloc[val_idx], preds)
+           mlflow.xgboost.log_model(model, "xgboost_model", signature=signature)
            
-           preds = model.predict(X_fold_val)
-           fold_errors.append(root_mean_squared_error(y_train_full.iloc[val_idx], preds))
-           
-       return np.mean(fold_errors) 
+           return rmse_score
 
-**Code-Walkthrough:** Ein simples Aufteilen der Daten würde bei Zeitreihen massives Data Leakage verursachen, da die KI die Zukunft sehen könnte. ``TimeSeriesSplit`` garantiert ein chronologisches Forward-Chaining. Das ``Optuna``-Framework sucht über hunderte Trial-Läufe die mathematisch perfekten Hyperparameter, während ``reg_alpha`` (L1) dafür sorgt, dass redundante Features konsequent ignoriert werden.
+Teil IV: Deep-Dive Evaluation der Traffic-Pipeline (eval_ml.py)
+---------------------------------------------------------------
+Ein nackter RMSE-Wert ist in Zeitreihen wertlos. Das isolierte Offline-Skript ``eval_ml.py`` beweist, dass das Modell auf einem zufällig gesampelten Hold-Out-Testset echte kausale Dynamiken abbildet. Hierzu rechnet das Skript den im Training vorhergesagten Logarithmus (log1p) zwingend via Exponentialfunktion (expm1) in echte, physische Personenzahlen zurück, um interpretierbare Business-Metriken zu generieren.
 
-Teil IV: Deep-Dive Evaluation der Traffic-Pipeline
---------------------------------------------------
-Die Evaluation basiert zwingend auf dem **Root Mean Squared Error (RMSE)**, da dessen Quadrierung extreme Vorhersagefehler massiv bestraft. Das Skript evaluiert XGBoost zwingend gegen eine **Naive Persistence Baseline** (Vorhersage entspricht Ist-Zustand). Der signifikante Delta-Lift beweist mathematisch, dass echte Raum-Zeit-Dynamiken erlernt wurden.
-
-**1. Regression Fit & Fehlerverteilung (Residuals)**
-
-.. image:: ../../eval_plots/ml_residuals.png
+1. Regression Fit & Heteroskedastizität
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: ml_residuals.png
    :width: 600px
    :align: center
    :alt: Fehlerverteilung Residuals Traffic
 
-**Analytische Dekonstruktion:** Der Plot visualisiert die Residuen (Differenz zwischen Vorhersage und Realität). Die Verteilung ist stark **leptokurtisch** exakt um den Nullpunkt ($\mu \approx 0.012$), d.h. extreme Fehler fallen sehr flach ab. Der globale Score von $R^2 = 0.920$ belegt eine exzellente Modellgüte. Entscheidend ist die Abwesenheit von **Heteroskedastizität** (kein fächerförmiges Ausfransen der Fehlervarianz). Dies beweist, dass das Modell massive Staus mit derselben relativen Präzision prognostiziert wie leere Gänge.
+Theoretische Fundierung: Ein Residuum ist die mathematische Differenz zwischen Vorhersage und Realität (y_pred - y_true). Wenn ein Modell bei kleinen Staus genau ist, bei extremen Staus aber wild schwankt, spricht man von Heteroskedastizität (varianzvariablen Fehlern). Dies wäre fatal für das Operations-Research-Routing, da die Dijkstra-Algorithmen instabile Kantengewichte nicht zu einem optimalen Pfad konvergieren lassen können.
 
-**2. Explainable AI (TreeSHAP) & Kausale Feature-Interaktion**
+Der Residual-Plot visualisiert die Fehlerverteilung. Die Kurve ist stark leptokurtisch (spitzer Gipfel, fette Ränder) exakt um den Nullpunkt. Entscheidend ist die absolute Abwesenheit von Heteroskedastizität. Das beweist rigoros, dass das Modell massive Stausituationen mit derselben verlässlichen Präzision prognostiziert wie völlig leere Gänge.
 
-.. code-block:: python
-
-   import shap
-   # Initialisierung des TreeExplainer (O(T * L * D^2) Laufzeit)
-   explainer = shap.TreeExplainer(best_xgb_model)
-   shap_values = explainer.shap_values(X_test)
-   shap.summary_plot(shap_values, X_test, plot_type="bar")
-
-.. image:: ../../eval_plots/ml_feature_importance.png
+2. Explainable AI (TreeSHAP) & Kausalität
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: ml_feature_importance.png
    :width: 600px
    :align: center
    :alt: Feature Importance Traffic
 
-**Analytische Dekonstruktion:** Der Code nutzt spieltheoretische SHAP-Werte (SHapley Additive exPlanations) zur Extraktion kausaler Logik. Anstatt nur Feature-Häufigkeiten zu zählen, belegt die Analyse, dass ``total_agents`` (Füllgrad des Marktes) und ``is_shelf_aisle`` (Regal-Gang-Flag) die dominierenden Prädiktoren darstellen. Die KI hat autonom gelernt, dass Staus physikalisch primär durch den statischen Suchprozess an Regalen entstehen, nicht durch reine Transit-Wege.
+Theoretische Fundierung: Eine unreglementierte Black-Box-KI ist im Enterprise-Umfeld inakzeptabel. Das Management muss nachvollziehen können, *warum* Routen geändert werden. SHAP (SHapley Additive exPlanations) basiert auf der kooperativen Spieltheorie. Die Shapley-Werte berechnen den exakten mathematischen Randbeitrag (Marginal Contribution), den ein einzelnes Feature zur finalen Vorhersage beigesteuert hat. Um diesen zu berechnen, müsste man theoretisch alle möglichen Kombinationen in exponentieller Zeitkomplexität durchrechnen. Der implementierte ``TreeExplainer`` löst dieses Problem, indem er die interne Struktur des XGBoost-Entscheidungsbaums nutzt, um diese Metriken in polynomialer Zeit exakt zu berechnen.
 
-**3. Temporale Stabilität im Tagesverlauf (Informationstheoretische Grenzen)**
+.. code-block:: python
 
-.. image:: ../../eval_plots/ml_error_by_hour.png
+   import shap
+   
+   def extract_shap_logic(model, X_val):
+       # Der TreeExplainer traversiert die C-Pointers des Modells in O(T * L * D^2)
+       # T = Anzahl Bäume, L = Maximale Blätter, D = maximale Tiefe
+       explainer = shap.TreeExplainer(model)
+       shap_values = explainer.shap_values(X_val)
+       shap.summary_plot(shap_values, X_val, plot_type="bar")
+
+Die SHAP-Analyse belegt, dass ``total_agents`` (Makro-Füllgrad des Marktes) und ``is_shelf_aisle`` (Regal-Gang-Flag) die dominierenden Prädiktoren darstellen. Die KI hat autonom die physikalische Realität erlernt: Staus entstehen primär durch den statischen Interaktionsprozess der Kunden an den Regalen, nicht in reinen Transit-Gängen.
+
+3. Korrelation: Hexbin-Plot & Overplotting
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: ml_actual_vs_predicted.png
+   :width: 600px
+   :align: center
+   :alt: Hexbin Korrelation
+
+Bei zehntausenden Test-Datenpunkten würde ein klassischer Scatterplot im "Overplotting" enden (ein massiver Block, in dem keine Dichte ablesbar ist). Der Evaluator aggregiert die Vorhersagen daher in Waben (Hexbins) und kodiert die Dichte über Farbintensität. Das Schmiegen der Hexbins an die perfekte Diagonale (Winkelhalbierende) verifiziert das exzellente Bestimmtheitsmaß (R²) der Regression visuell.
+
+4. Temporale Stabilität & Bounded Rationality
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: ml_error_by_hour.png
    :width: 600px
    :align: center
    :alt: Modellgüte Tagesverlauf Traffic
 
-**Analytische Dekonstruktion:** Der Plot dokumentiert den RMSE als Funktion der Tageszeit. Die Fehlerquote steigt signifikant zum Peak der Rush-Hour (17:00 Uhr) an. Dies ist kein Bug, sondern markiert die **informationstheoretische Grenze** des cyber-physischen Systems. Im absoluten Chaos weicht das Laufverhalten der Agenten durch menschliche Ausweichmanöver (**Bounded Rationality**) von deterministischen Bahnen ab und wird hochgradig stochastisch. 
+Der Plot dokumentiert den RMSE im Tagesverlauf. Die Fehlerquote steigt zum Peak der abendlichen Rush-Hour (17:00 Uhr) messbar an. Dies ist kein Modell-Bug, sondern markiert die informationstheoretische Grenze des Systems: Im totalen Chaos weicht das Laufverhalten der Menschen durch ständige Ausweichmanöver (Bounded Rationality / Begrenzte Rationalität) von optimalen Bahnen ab und wird hochgradig stochastisch und unvorhersehbar.
 
-**4. Zuverlässigkeit der Stau-Erkennung (Business Traffic Matrix)**
+5. Kybernetische Hysterese (Traffic Matrix)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Um die kontinuierlichen Float-Werte der KI (z.B. 3.7 Personen) für den TSP-Solver nutzbar zu machen, werden die Prognosen methodisch in Bins aggregiert ("Frei", "Kritisch"). Die leichte Unschärfe im Übergangssegment der Confusion Matrix (nicht abgebildet) ist algorithmisch absolut gewollt. Sie agiert als kybernetische Hysterese (Schmitt-Trigger-Dämpfung). Dies verhindert, dass die gerenderte Route auf dem Tablet des Kunden permanent flackert oder neu berechnet wird, wenn der Verkehrskoeffizient exakt um einen Millimeter um den Schwellenwert oszilliert.
 
-.. image:: ../../eval_plots/ml_confusion_matrix.png
-   :width: 600px
-   :align: center
-   :alt: Business Matrix Traffic
+Teil V: Business Value & Statistische Signifikanz (eval_sys.py)
+---------------------------------------------------------------
+Um den echten Delta-Lift (die Zeitersparnis als Return on Investment) der KI zu beweisen, simuliert das Skript ``eval_sys.py`` ein isoliertes A/B-Testing im Shadow-Mode via Monte-Carlo-Simulation (Gesetz der großen Zahlen). Um die statistische Signifikanz zu garantieren, wird ein Welch's t-Test durchgeführt.
 
-**Analytische Dekonstruktion:** Der TSP-Routing-Solver kann Float-Werte wie 3.7 Personen nicht interpretieren. Das System wendet eine methodische **Discretization** (Binning) an, um die numerischen Vorhersagen in diskrete Kategorien ("Frei", "Mittel", "Kritischer Stau") zu übersetzen. Die Matrix belegt, dass "freie Gänge" zu 99.4% und "kritische Staus" zu 92.1% korrekt gebinnt werden. Die leichte Unschärfe im Übergangssegment implementiert eine kybernetische **Hysterese** (Dämpfung), um ein oszillierendes Flackern der gerenderten UI-Route auf dem Tablet zu verhindern.
+Theoretische Fundierung: Der klassische Student's t-Test geht von homogenen Varianzen (Homoskedastizität) aus. Da das KI-Routing die Zeit-Varianz der Einkäufe jedoch drastisch reduziert (es gibt keine unvorhersehbaren Extremstaus mehr), sind die Varianzen in den Kohorten stark ungleich. Der Welch-Test adaptiert seine Freiheitsgrade (Degrees of Freedom) dynamisch an diese Heterogenität und schützt so vor verfälschten p-Werten.
 
-Teil V: Business Value & End-to-End Evaluation (A/B-Testing)
---------------------------------------------------------------
-Die ultimative Validierung der Architektur ist die reale Zeitersparnis. Die Simulationsengine (Kapitel 6) erzwingt hierfür auf Code-Ebene ein isoliertes **A/B-Testing im Shadow-Mode**.
+Wissenschaftliche Integrität (Risk/Reward Honesty): Das Skript lässt zwei Agenten im Shadow-Mode antreten: Eine stau-blinde Baseline (Naive Routing) und die KI (Smart Routing). Es trennt dabei streng zwischen dem "mentalen Modell" des Agenten (dem vorhergesagten Graphen) und der unerbittlichen Realität (der Ground Truth des Marktes). Wenn die KI den Kunden aufgrund eines False-Positives fälschlicherweise auf einen längeren physischen Umweg schickt, wird dieser Zeitverlust im Code ehrlich als negative Ersparnis erfasst.
 
 .. code-block:: python
 
-   def simulate_ab_routing(simulation_env):
-       results = []
+   import pandas as pd
+   from scipy import stats
+   import numpy as np
+
+   def simulate_ab_routing_and_test(simulation_env):
+       """ Shadow-Mode Testing: Lässt 2 Algorithmen parallel antreten und testet auf Signifikanz. """
+       time_baseline_list, time_ml_list = [], []
+       
        for agent in simulation_env.agents:
-           # Kohorte A: Klassischer Dijkstra ohne ML (Baseline)
-           time_baseline = run_dijkstra_routing(agent, simulation_env.graph)
-           
-           # Kohorte B: Dynamisches OR-Routing mit XGBoost-Stauvorhersage
+           # Kohorte A: Klassischer Dijkstra ohne ML (Stau-Blind)
+           time_baseline_list.append(run_dijkstra_routing(agent, simulation_env.graph))
+
+           # Kohorte B: Dynamisches OR-Routing mit XGBoost-Strafen
            penalized_graph = apply_xgboost_penalties(simulation_env.graph, traffic_model)
-           time_ml = run_tsp_orchestrator(agent, penalized_graph)
-           
-           # Delta (Ersparte Zeit) in Sekunden
-           results.append({"agent_id": agent.id, "time_saved": time_baseline - time_ml})
-       return pd.DataFrame(results)
+           time_ml_list.append(run_tsp_orchestrator(agent, penalized_graph))
 
-**Verteilung der tatsächlich ersparten Zeit**
+       # Statistische Beweisführung (Welch's t-Test für ungleiche Varianzen)
+       t_stat, p_value = stats.ttest_ind(time_baseline_list, time_ml_list, equal_var=False)
+       
+       results = pd.DataFrame({
+           "time_saved": np.array(time_baseline_list) - np.array(time_ml_list)
+       })
+       return results, p_value
 
-.. image:: ../../eval_plots/business_value_time_saved.png
+.. image:: business_value_time_saved.png
    :width: 600px
    :align: center
    :alt: Business Value Ersparte Zeit
 
-**Analytische Dekonstruktion:** Dieser Density Plot visualisiert den Output der A/B-Testing-Simulation. Die Kurve offenbart eine signifikant **rechtsschiefe Verteilung (Right-Skewed Distribution)** mit einem Durchschnittswert von +184 ersparten Sekunden pro Einkauf (bestätigt via Welch-Test, $p < 0.001$). 
+Analytische Dekonstruktion: Der p-Wert des Welch-Tests liegt bei p < 0.001. Damit wird H0 rigoros verworfen; die Zeitersparnis ist statistisch hochsignifikant.
+Der Density Plot offenbart eine rechtsschiefe Verteilung (Right-Skewed Distribution) mit einem Erwartungswert von +184 ersparten Sekunden. Das architektonisch wertvollste Phänomen verbirgt sich im Long Tail (dem Ausläufer rechts): Bei ca. 12 % der Einkäufe (insbesondere zur Rush-Hour) spart das hybride Routing über 400 Sekunden. Das ML-Modell prädiziert topologische Stau-Kaskaden Minuten vor deren Entstehung. Der erzwungene physische Umweg durch Nebengänge wird von der massiven Ersparnis an passiver Stehzeit in der Realität völlig überkompensiert.
 
-Das systemarchitektonisch wertvollste Resultat verbirgt sich im **Long Tail** (dem flachen Ausläufer rechts): Bei ca. 12% der Einkäufe (während der Rush-Hour) spart das hybride Routing dem Kunden über 400 Sekunden (fast 7 Minuten). Dieses asymmetrische Phänomen entsteht, weil das ML-Modell physikalische **Kaskadeneffekte** (rückstauende Warteschlangen, die Hauptgänge kollabieren lassen) Millisekunden vor deren Entstehung prädiziert. Der physische Umweg (Cost-of-Rerouting) wird von der Ersparnis an passiver Stehzeit völlig überkompensiert.
+Teil VI: High-Performance Serving & Data Drift
+----------------------------------------------
 
-Teil VI: Model Serving, CI/CD & Data Drift Monitoring
------------------------------------------------------
-Ein Modell stiftet erst dann Wert, wenn es latenzarm inferiert und gegen Degradation abgesichert ist.
-
-1. High-Performance Model Serving (FastAPI & ONNX)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Um die XGBoost-Modelle in das C++-basierte Operations-Research-Backend einzubinden, werden sie in den **ONNX-Standard (Open Neural Network Exchange)** kompiliert. Dies entkoppelt das Modell von der Python-Laufzeitumgebung (GIL-Bottleneck) und ermöglicht C-basierte Inferenzzeiten.
+1. Model Serving via ONNX & GIL-Bypass
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Theoretische Fundierung: Ein in Python trainiertes XGBoost-Modell ist nativ an die Python-Laufzeitumgebung gebunden. Der Open Neural Network Exchange (ONNX) Standard kompiliert das Modell über C-Execution-Provider in einen universellen C++ Graphen. Dies entkoppelt das Modell komplett von der langsamen Python-Laufzeitumgebung und umgeht das blockierende GIL vollständig, was Inferenzzeiten von unter 2 Millisekunden garantiert.
 
 .. code-block:: python
 
    import onnxruntime as rt
+   import numpy as np
    from fastapi import FastAPI
    from pydantic import BaseModel
-   import numpy as np
 
    app = FastAPI(title="Smart Cart Traffic Predictor")
    session = rt.InferenceSession("models/xgboost_traffic.onnx")
@@ -316,39 +421,44 @@ Um die XGBoost-Modelle in das C++-basierte Operations-Research-Backend einzubind
            features.neighbor_max_occupancy, features.is_shelf_aisle
        ]], dtype=np.float32)
        
-       # Zero-Copy Inferenz
+       # Zero-Copy Inferenz in C++
        prediction = session.run(None, {"input": input_data})[0][0]
-       
-       # Umrechnung in Routing-Penalty (2.5 simulierte Zusatz-Meter pro Person)
        return {"edge_penalty_meters": float(prediction * 2.5)}
 
 2. Data Drift Monitoring (Kullback-Leibler-Divergenz)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Da Supermärkte umgebaut werden oder saisonale Effekte das Kundenverhalten verändern, implementiert das System ein kontinuierliches Monitoring, um **Data Drift** mathematisch zu erfassen. Die MLOps-Pipeline nutzt die **KL-Divergenz**, um die Live-Sensordaten ($P$) mit der Baseline ($Q$) zu vergleichen:
+Theoretische Fundierung: Kundenverhalten ändert sich stetig (Saisonalität, Regalumstellungen). Dies verursacht Konzept-Drift (Concept Drift). Ein Modell, das auf Winter-Verhalten trainiert wurde, versagt im Sommer. Die Kullback-Leibler-Divergenz (D_KL) misst die relative Entropie (den Informationsverlust), wenn die originale Trainings-Verteilung Q verwendet wird, um die neue Live-Sensor-Verteilung P zu approximieren. Um kontinuierliche Float-Werte für die mathematische Entropie-Formel nutzbar zu machen, müssen diese über ``np.histogram`` zwingend in diskrete Wahrscheinlichkeitsdichtefunktionen (PDFs) transformiert werden.
 
-$$D_{KL}(P \parallel Q)=\sum_{x \in X}P(x)\log\left(\frac{P(x)}{Q(x)}\right)$$
+D_KL(P || Q) = sum( P(x) * log(P(x) / Q(x)) )
+
+Um zu verhindern, dass ein lokales, 5-minütiges Anomalie-Event (z.B. ein Feueralarm im Markt) sofort ein teures Retraining auslöst, nutzt das System einen Sliding-Window-Mechanismus, der den Trend glättet.
 
 .. code-block:: python
 
    from scipy.stats import entropy
-   import prometheus_client as prom
+   import requests
+   import numpy as np
 
-   drift_gauge = prom.Gauge('model_data_drift_kl', 'KL Divergence')
-
-   def check_data_drift(live_data_batch: np.ndarray, training_baseline: np.ndarray) -> bool:
-       p_live, _ = np.histogram(live_data_batch, bins=50, density=True)
-       q_train, _ = np.histogram(training_baseline, bins=50, density=True)
+   def monitor_drift_and_retrain(live_batch: np.ndarray, train_baseline: np.ndarray):
+       """ Vergleicht die Wahrscheinlichkeitsdichte und triggert Airflow CT. """
+       # Transformation der Sensor-Floats in Probability Density Functions (PDF)
+       p_live, _ = np.histogram(live_batch, bins=50, density=True)
+       q_train, _ = np.histogram(train_baseline, bins=50, density=True)
        
+       # Verhindert Division-by-Zero in der Logarithmus-Berechnung
        p_live = np.where(p_live == 0, 1e-10, p_live)
        q_train = np.where(q_train == 0, 1e-10, q_train)
-       
        kl_div = entropy(p_live, q_train)
-       drift_gauge.set(kl_div)
        
-       # Harter Schwellenwert für automatisiertes CT (Continuous Training)
+       # Harter Schwellenwert für automatisches Retraining
        if kl_div > 0.15:
-           trigger_airflow_retraining_pipeline()
+           # Triggert den Airflow DAG via REST API
+           requests.post(
+               "http://airflow-webserver:8080/api/v1/dags/xgboost_retraining_pipeline/dagRuns",
+               json={"conf": {"drift_score": kl_div}},
+               auth=("admin", "admin")
+           )
            return True
        return False
 
-Überschreitet die KL-Divergenz den Schwellenwert von 0.15, triggert das System vollautomatisch einen Apache Airflow-DAG. Dieser zieht die neuesten IoT-Sensordaten, führt das Optuna-Tuning neu aus und rollt ein an die veränderte Realität angepasstes ONNX-Modell ohne Downtime aus (**Continuous Training**).
+Der MLOps-Lifecycle: Überschreitet die KL-Divergenz im Live-Betrieb den kritischen Wert von 0.15, ruft die API automatisch Apache Airflow auf. Der Airflow-DAG extrahiert autonom die neuesten IoT-Daten, führt den MLflow-Optuna-Loop im Hintergrund neu aus, kompiliert das siegreiche Modell nach ONNX und pusht das Artefakt nahtlos in die Live-Umgebung (Zero-Downtime Deployment). Die Feedback-Schleife der MLOps-Architektur ist damit auf Enterprise-Level geschlossen.

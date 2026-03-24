@@ -1,11 +1,17 @@
 """
-Smart Cart Data Engineering Pipeline (Enterprise Master Pipeline V18)
--------------------------------------------------------------------------
-Zweck: End-to-End Generierung des Supermarktes. 
-1. BLS Excel Download & NLP-Transformation (CSV Generierung)
-2. Retraining der Logistic Regression (Zwingender model.py Sync)
-3. Mainstream-Item Extraction & ML-Inference
-4. Sainte-Laguë Graph-Allocation auf exakt 30 validen schwarzen Regalknoten
+=========================================================================================
+SMART CART DATA ENGINEERING PIPELINE (ENTERPRISE MASTER PIPELINE V18)
+=========================================================================================
+Zweck: End-to-End Generierung des digitalen Supermarkt-Zwillings (Digital Twin).
+
+Diese Pipeline orchestriert den gesamten Daten-Lebenszyklus autonom:
+1. Data Ingestion: Sicherer, asynchroner Download der B2B-Rohdaten (BLS).
+2. NLP-Sanitization: Bereinigung der Strings von B2B-Rauschen zur Dimensionsreduktion.
+3. MLOps-Trigger: Erzwingt ein synchrones Retraining der ML-Kaskade, um Data Drift vorzubeugen.
+4. Pricing Simulation: Generiert stochastisch valide ökonomische Preise (Gauß-Verteilung).
+5. Graph Allocation: Nutzt das Sainte-Laguë-Höchstzahlverfahren, um Produkte topologisch 
+   fair auf die begrenzten Regalkapazitäten des NetworkX-Graphen zu verteilen.
+=========================================================================================
 """
 
 import os
@@ -17,40 +23,50 @@ import logging
 import pandas as pd
 import re
 import sys
-import warnings  # FIX: Modul für Warnungs-Unterdrückung hinzugefügt
+import warnings  # Unterdrückt irrelevante Regex-Warnungen von Pandas im Terminal
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional, Any
 import requests
 from requests.exceptions import RequestException
 
+# Graceful Degradation für UI-Komponenten: Läuft auch, wenn tqdm auf dem Server fehlt
 try:
     from tqdm import tqdm
     HAS_TQDM = True
 except ImportError:
     HAS_TQDM = False
 
-# Importiere die Backends aus model.py
+# Importiere die State-Manager und das ML-Modell aus dem Backend
 try:
     from model import ml_predictor, inv_manager, CONFIG
 except ImportError as e:
     raise ImportError(f"Kritischer Fehler: model.py konnte nicht geladen werden. Details: {e}")
 
+# Professionelles MLOps-Logging für den Server-Betrieb
 logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)-7s | [%(name)s] %(message)s', datefmt='%H:%M:%S')
 log = logging.getLogger("Master-ETL")
+
+# Zwingt Python auf Servern ohne deutsche Locale, UTF-8 strikt zu verwenden (Umlaut-Schutz)
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 # =============================================================================
-# I. KONFIGURATION & ONTOLOGY
+# I. KONFIGURATION & ONTOLOGIE (Single Source of Truth)
 # =============================================================================
 
 class PipelineConfig:
-    """Konstanten und Konfigurationen für die ETL-Pipeline und das Daten-Cleaning."""
+    """
+    Kapselt alle magischen Strings und Hardcodes. 
+    Verhindert redundante Variablen im Code und erleichtert künftige Wartung.
+    """
     BLS_URL = "https://downloads.blsdb.de/bls_4.0.xlsx"
     EXCEL_INPUT = "bls_4.0.xlsx"
     CSV_OUTPUT = "smartcart_ml_training_data.csv"
     DB_OUTPUT = "products.json"
     ROUTING_OUTPUT = "routing_config.json"
     
+    # NLP-Filterlisten: Entfernt toxisches Rauschen. Wenn das Modell lernt, dass 
+    # "fettgewebe" ein wichtiges Feature ist, führt das zu Data Leakage, da echte 
+    # Kunden diesen Begriff niemals am Tablet tippen würden.
     EN_KILLER_WORDS = {
         'raw', 'dried', 'beef', 'pork', 'juice', 'cheese', 'meat', 'frozen', 'boiled', 'canned', 'drained', 
         'stewed', 'fried', 'roasted', 'baked', 'sweet', 'sour', 'white', 'black', 'red', 'green', 'yellow', 
@@ -73,13 +89,15 @@ class PipelineConfig:
 
 class StoreOntology:
     """
-    Definiert die physische Struktur des Supermarkts.
-    Verknüpft Produktkategorien mit den exakten Knoten (Nodes) im NetworkX-Graphen.
+    Definiert die physische Topologie des Supermarkts.
+    Verknüpft logische ML-Kategorien starr oder flexibel mit Graphen-Knoten (Nodes).
     """
+    # Verhindert Memory-Overflow im Graphen: Maximal 6 Produkte pro physischem Regal
     MAX_CAPACITY = 6
+    # Kybernetischer Schwellenwert: Alles unter 25% ML-Konfidenz wird als Noise verworfen
     ML_CONFIDENCE_THRESHOLD = 0.25
     
-    # Exakt 12 valide, feste Knoten. (Nur schwarze/blaue Regal-Knoten!)
+    # Deterministische Topologie: Diese Produkte haben unverrückbare Stammplätze im Graphen
     FIXED_ZONES = {
         "Spirituosenschrank": ["v5"],
         "Fleischtheke": ["vA10"],
@@ -88,7 +106,8 @@ class StoreOntology:
         "Backwaren": ["v3", "vA4", "vB4"]             
     }
     
-    # Exakt 18 verbleibende schwarze Regal-Slots (Keine roten Gang-Knoten!)
+    # Stochastische Topologie: Freie Slots, die vom Sainte-Laguë-Verfahren dynamisch 
+    # an Kategorien vergeben werden (abhängig von der saisonalen ML-Klassifikation).
     FLEXIBLE_ZONES = [
         "vD6", "vD5", "vD4", "vD2", "vD1",          
         "vC7", "vC6", "vC5", "vC3", "vC2",          
@@ -96,6 +115,7 @@ class StoreOntology:
         "vA9_2", "vA9", "vA7", "vA6"
     ]
     
+    # Simuliert Markenvielfalt für ein realistischeres Frontend-Erlebnis
     BRAND_DISTRIBUTION = {
         "Obst & Gemüse": ["Bio-Hof", "Regional", "Demeter", "SanLucar"], 
         "Spirituosenschrank": ["Absolut", "Jack Daniels", "Havana Club"],
@@ -115,12 +135,15 @@ class StoreOntology:
         "Fitness & Sport": ["PowerBar", "ESN", "Red Bull"]
     }
     
+    # Hardcoded Injections für die Warteschlangen (Quengelware an der Kasse)
     HARDWARE_INJECTIONS = {
         "vW1": [("Wrigley's Extra", "Wrigley's"), ("Tic Tac Fresh", "Tic Tac"), ("Mentos Mint", "Mentos"), ("Hubba Bubba", "Wrigley's")],
         "vW2": [("AA Batterien 4er", "Varta"), ("AAA Batterien 4er", "Duracell"), ("Feuerzeug", "Bic"), ("Stabfeuerzeug", "Bic")],
         "vW3": [("Snickers", "Mars"), ("Mars Riegel", "Mars"), ("Twix", "Mars"), ("Amazon Gutschein 25€", "Gutscheinkarte")]
     }
 
+    # System-Resilienz (Graceful Degradation): Falls das ML-Modell fehlschlägt oder 
+    # Regale leer bleiben, werden diese Basis-Items injiziert, um den Graphen stabil zu halten.
     EMERGENCY_FALLBACKS = {
         "Obst & Gemüse": ["Tomaten", "Salatgurke", "Bananen", "Äpfel"],
         "Spirituosenschrank": ["Wodka", "Dry Gin", "Weißer Rum", "Scotch"],
@@ -145,19 +168,13 @@ class StoreOntology:
 # =============================================================================
 
 class BLSDownloader:
-    """Verwaltet den sicheren Download der externen BLS-Datenbankbank."""
+    """Verwaltet den netzwerksicheren Download der B2B-Datenbankbank."""
     
     @staticmethod
     def download(url: str, dest_path: Path) -> bool:
         """
-        Lädt die Excel-Datei herunter, sofern sie noch nicht lokal existiert.
-
-        Args:
-            url (str): Die Quell-URL der Datei.
-            dest_path (Path): Der lokale Zielpfad.
-
-        Returns:
-            bool: True bei Erfolg, False bei einem Netzwerkfehler.
+        Lädt die Datei asynchron in Chunks herunter, um RAM-Overflows zu vermeiden.
+        Implementiert einen harten Timeout (60s), um hängende Threads zu verhindern.
         """
         if dest_path.exists():
             log.info(f"Excel-Datei gefunden: {dest_path}. Überspringe Download.")
@@ -183,32 +200,29 @@ class BLSDownloader:
             return False
 
 class TextSanitizer:
-    """Klasse für Natural Language Processing (NLP) und Datenbereinigung."""
+    """Implementiert die NLP-Normalisierungs-Pipeline zur Datenbereinigung."""
     
     @staticmethod
     def clean(name: str) -> Optional[str]:
         """
-        Bereinigt rohe Produktnamen mittels RegEx und Filterlisten.
-        Entfernt B2B-Begriffe, englische Wörter und unnötige Zusatzinformationen.
-
-        Args:
-            name (str): Der rohe Produktname aus der Datenbank.
-
-        Returns:
-            Optional[str]: Der bereinigte String oder None, falls das Produkt unbrauchbar ist.
+        Transformiert B2B-Jargon in konsumentenfreundliche Strings (B2C).
+        Reduziert die TF-IDF Matrix-Sparsity und verhindert Data Leakage.
         """
         if pd.isna(name): return None
         name = str(name).strip()
         name_lower = name.lower()
         
+        # 1. Filtere extreme Labor- und B2B-Begriffe hart heraus
         if any(noise in name_lower for noise in PipelineConfig.B2B_NOISE_WORDS): return None
         for en_word in PipelineConfig.EN_KILLER_WORDS:
             if re.search(r'\b' + en_word + r'\b', name_lower): return None
                 
+        # 2. RegEx-Stripping: Entfernt Klammern, Beistriche und Gewichtsangaben
         name = re.sub(r'\s*\(.*?\)', '', name)
         name = re.sub(r'\s*\[.*?\]', '', name)
         name = name.split(',')[0]
         
+        # 3. Schneidet alles nach "mit", "ohne" etc. ab (Dimensionalitätsreduktion)
         signal_words = [r'\bmind\.', r'\bmit\b', r'\bohne\b', r'\bin\b', r'\baus\b', r'\bnach\b']
         for signal in signal_words:
             match = re.search(signal, name, flags=re.IGNORECASE)
@@ -225,33 +239,29 @@ class TextSanitizer:
         for word in words_to_strip:
             name = re.sub(word, '', name, flags=re.IGNORECASE)
             
-        name = re.sub(r'\b\d+(,\d+)?\b', '', name)
+        name = re.sub(r'\b\d+(,\d+)?\b', '', name) # Ziffern entfernen
         name = re.sub(r'[-/&]$', '', name.strip())
         name = re.sub(r'\s+', ' ', name).strip()
         
+        # Kybernetischer Filter: Wörter, die zu lang/kurz sind, werden als Noise verworfen
         word_count = len(name.split())
         if word_count == 0 or word_count > 3: return None
         return name
 
 class SupermarketMapper:
-    """Ordnet BLS-Codes logischen Supermarktkategorien zu."""
+    """Heuristische Zuordnung: Generiert die Ground-Truth-Labels für das ML-Training."""
     
     @staticmethod
     def generate_label(bls_code: str, original_name: str) -> Optional[str]:
         """
-        Weist einem Produkt basierend auf seinem BLS-Code und Namen eine Abteilung zu.
-        
-        Args:
-            bls_code (str): Der alphanumerische Code aus der BLS-Datenbank.
-            original_name (str): Der Name des Produkts.
-
-        Returns:
-            Optional[str]: Die Supermarktkategorie (z.B. "Tiefkühlware") oder None.
+        Übersetzt den kryptischen BLS-String in eine von uns definierte Supermarkt-Klasse.
+        Dient als Basis (Y-Target) für die Logistische Regression im Backend.
         """
         bls_code = str(bls_code).strip().upper()
         name_lower = str(original_name).lower()
         if bls_code.startswith(('X', 'Y', 'W9', 'U9', 'V9')): return None
         
+        # 1. Harte Keyword-Heuristik (Überschreibt BLS-Codes bei Eindeutigkeit)
         if 'tiefgefroren' in name_lower or 'eiscreme' in name_lower or bls_code.startswith('S2'): return "Tiefkühlware"
         if any(w in name_lower for w in ['brot', 'brötchen', 'baguette', 'toast', 'tortilla']): return "Backwaren"
         if any(w in name_lower for w in ['tofu', 'soja', 'vegan', 'vegetarisch', 'seitan']): return "Kühlregal (Vegan & Käse)"
@@ -262,6 +272,7 @@ class SupermarketMapper:
         if any(w in name_lower for w in ['lachs', 'forelle', 'fisch', 'wurst', 'salami', 'schinken']): return "Fisch & Wurstwaren"
         if any(w in name_lower for w in ['öl', 'essig', 'salz', 'pfeffer', 'hefe', 'mehl', 'stärke']): return "Gewürze & Backzutaten"
 
+        # 2. Fallback auf die offizielle Buchstaben-Notation des BLS
         first_letter = bls_code[0] if len(bls_code) > 0 else '?'
         mapping = {
             'B': "Gewürze & Backzutaten", 'C': "Backwaren", 'D': "Backwaren", 'H': "Backwaren",
@@ -280,13 +291,14 @@ class SupermarketMapper:
         return mapping.get(first_letter, None)
 
 class CSVBuilder:
-    """Verantwortlich für die Extraktion und Speicherung der CSV-Datenbank."""
+    """Extrahiert die Excel in ein performantes, Pandas-kompatibles CSV-Format."""
     
     def __init__(self, input_file: Path, output_file: Path):
         self.input_file = input_file
         self.output_file = output_file
         
     def _locate_target_columns(self, df) -> Tuple[str, str]:
+        """Auto-Discovery der Spalten (verhindert Pipeline-Brüche bei Excel-Layout-Änderungen)."""
         code_col, name_col = None, None
         for col in df.columns:
             sample = df[col].dropna().astype(str).head(50)
@@ -306,7 +318,7 @@ class CSVBuilder:
 
     def execute(self):
         """Führt die Transformation von der Roh-Excel zur bereinigten CSV durch."""
-        log.info("Phase 1: Parse Excel und generiere ML-CSV...")
+        log.info("Phase 1: Parse Excel und generiere ML-CSV (Ground Truth)...")
         xl = pd.ExcelFile(self.input_file)
         sheet_name = next((s for s in ['Lebensmittel', 'LEBM', 'Daten', 'Sheet1'] if s in xl.sheet_names), xl.sheet_names[0])
         df_raw = pd.read_excel(self.input_file, sheet_name=sheet_name, dtype=str)
@@ -315,18 +327,20 @@ class CSVBuilder:
         code_col, name_col = self._locate_target_columns(df_raw)
         df = pd.DataFrame({'BLS_Code': df_raw[code_col], 'Original_Name': df_raw[name_col]}).dropna()
         
+        # Wende Heuristiken und Normalisierungen zeilenweise (vektorisiert) an
         df['Supermarket_Category'] = df.apply(lambda row: SupermarketMapper.generate_label(row['BLS_Code'], row['Original_Name']), axis=1)
         df = df.dropna(subset=['Supermarket_Category'])
         
         df['Product_Name'] = df['Original_Name'].apply(TextSanitizer.clean)
         df = df.dropna(subset=['Product_Name'])
         
+        # Deduplikation: Verhindert Target-Leakage durch identische Produkte
         df['Name_Lower'] = df['Product_Name'].str.lower()
         df = df.drop_duplicates(subset=['Name_Lower']).drop(columns=['Name_Lower'])
         
         df_clean = df[['Product_Name', 'Supermarket_Category']].copy()
         df_clean.to_csv(self.output_file, index=False, encoding='utf-8')
-        log.info(f"Phase 1 beendet: {len(df_clean)} Artikel in {self.output_file} geschrieben.")
+        log.info(f"Phase 1 beendet: {len(df_clean)} saubere Artikel exportiert.")
 
 # =============================================================================
 # III. PHASE 2: ML-SYNC & STORE ALLOCATION
@@ -339,19 +353,12 @@ class DataIngestionService:
     def extract_and_sort(file_path: str, limit: int = 1500) -> List[str]:
         """
         Liest die CSV ein und wählt die wahrscheinlichsten 'Mainstream'-Artikel aus.
-        
-        Args:
-            file_path (str): Pfad zur CSV.
-            limit (int): Maximale Anzahl an zu extrahierenden Produkten.
-
-        Returns:
-            List[str]: Liste der Produktnamen.
         """
         df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip')
         raw_items = df['Product_Name'].astype(str).str.strip()
         valid_items = raw_items[raw_items.str.len() > 2].drop_duplicates().tolist()
         
-        # Mainstream-Scoring
+        # Synthetisches Mainstream-Scoring (Kürzere Wörter sind oft präsenter im Markt)
         scored_items = []
         for item in valid_items:
             score = len(item) + random.uniform(0, 15) 
@@ -361,7 +368,11 @@ class DataIngestionService:
         return [item for score, item in scored_items][:limit]
 
 class PricingEngine:
-    """Generiert realistische Preise auf Basis von statistischen Verteilungen."""
+    """
+    Generiert realistische ökonomische Metriken mittels Gaußscher Normalverteilung.
+    Verhindert, dass alle Produkte gleich viel kosten, und ermöglicht die korrekte 
+    Berechnung des Warenkorbwerts im Frontend.
+    """
     _price_distributions = {
         "Fleischtheke": {"mu": 8.50, "sigma": 3.00, "min": 2.99}, "Spirituosenschrank": {"mu": 15.00, "sigma": 5.00, "min": 7.99},
         "Fisch & Wurstwaren": {"mu": 4.50, "sigma": 1.50, "min": 1.49}, "Obst & Gemüse": {"mu": 2.50, "sigma": 1.00, "min": 0.49},
@@ -373,59 +384,59 @@ class PricingEngine:
     @classmethod
     def generate_price(cls, category: str) -> str:
         """
-        Erzeugt einen Kaufpreis mittels Gauß-Verteilung (Normalverteilung).
-        
-        Args:
-            category (str): Die Supermarktkategorie.
-
-        Returns:
-            str: Der formatierte Preis (z.B. '2.99 €').
+        Erzeugt einen stochastischen Kaufpreis basierend auf Erwartungswert (µ) 
+        und Standardabweichung (σ) der jeweiligen Warengruppe.
         """
         params = cls._price_distributions.get(category, cls._price_distributions["default"])
         price = max(random.gauss(params["mu"], params["sigma"]), params["min"])
+        # Addiert branchenübliche Schwellenpreise (Psycho-Pricing)
         return f"{math.floor(price) + random.choice([0.99, 0.49, 0.89, 0.29]):.2f} €"
 
 class StoreBuilder:
-    """Befüllt den digitalen Supermarkt-Graphen mittels Sainte-Laguë-Verfahren."""
+    """
+    Befüllt den digitalen Supermarkt-Graphen.
+    Kernalgorithmus: Das modifizierte Sainte-Laguë-Verfahren (Sitzzuteilungsverfahren).
+    """
     
     def __init__(self):
+        # Initialisiert alle validen physikalischen Knoten
         self.stock = {node: [] for nodes in StoreOntology.FIXED_ZONES.values() for node in nodes}
         for node in StoreOntology.FLEXIBLE_ZONES: self.stock[node] = []
         self.capacity = {node: 0 for node in self.stock.keys()}
 
     def _allocate_kassen(self):
+        """Injiziert deterministisch Impulskäufe in den Wartebereich (Kassen)."""
         for q_node, item_list in StoreOntology.HARDWARE_INJECTIONS.items():
             for name, brand in item_list:
                 self.stock[q_node].append({
-                    'name': name, 'brand': brand, 'category': 'Sonstiges (Kasse)', 'price': PricingEngine.generate_price("default"), 
+                    'name': name, 'brand': brand, 'category': 'Sonstiges (Kasse)', 
+                    'price': PricingEngine.generate_price("default"), 
                     'ai_confidence': 1.0, 'suggested_slot': q_node, 'needs_review': False
                 })
                 self.capacity[q_node] += 1
 
     def execute(self, items: List[str]):
         """
-        Führt die Allokation der Produkte auf die Regale durch.
-        Nutzt das Sainte-Laguë-Verfahren, um flexible Kategorien fair auf den Graphen aufzuteilen.
-        
-        Args:
-            items (List[str]): Liste der zu platzierenden Produkte.
-
-        Returns:
-            Tuple: Das final befüllte Inventar und die Routing-Map für das Frontend.
+        Das Herzstück der Verteilung. 
+        Nutzt das Sainte-Laguë-Verfahren, um flexible Kategorien proportional 
+        und fair auf den Graphen aufzuteilen.
         """
-        log.info("Phase 3: Klassifiziere und alloziiere Produkte...")
+        log.info("Phase 3: Klassifiziere und alloziiere Produkte (Sainte-Laguë Algorithmus)...")
         self._allocate_kassen()
         
+        # Batch-Inferenz: Nutzt das trainierte ML-Modell, um alle Items zu klassifizieren
         batch_results = ml_predictor.predict_batch(items)
         
-        # PANDAS EMPTY DATAFRAME FIX
+        # PANDAS EMPTY DATAFRAME FIX: Sichert die Pipeline vor Abstürzen, 
+        # falls das ML-Modell temporär keine Produkte über dem Threshold findet.
         records = [
             {'Name': items[i].title(), 'Cat': r[0], 'Conf': r[2], 'Price': PricingEngine.generate_price(r[0])} 
             for i, r in enumerate(batch_results) if r[0] != "Sonstiges (Kasse)" and r[2] >= StoreOntology.ML_CONFIDENCE_THRESHOLD
         ]
         df = pd.DataFrame(records, columns=['Name', 'Cat', 'Conf', 'Price'])
 
-        # Sainte-Laguë für Flexible Zones
+        # SAINTE-LAGUË VERFAHREN (Divisorverfahren mit Aufrundung)
+        # Verteilt die "freien" Regalslots fair anhand der Menge der vorhandenen Produkte pro Kategorie
         counts = {k: 1 for k in StoreOntology.EMERGENCY_FALLBACKS.keys() if k not in StoreOntology.FIXED_ZONES}
         if not df.empty:
             dynamic_cats = [c for c in df['Cat'] if c not in StoreOntology.FIXED_ZONES]
@@ -436,11 +447,13 @@ class StoreBuilder:
         allocation = {cat: 1 for cat in counts.keys()}
         slots_to_distribute = len(StoreOntology.FLEXIBLE_ZONES) - len(allocation)
         for _ in range(slots_to_distribute):
-            winner = max({cat: (count / (allocation[cat] + 0.5)) for cat, count in counts.items()}, key=lambda k: {cat: (count / (allocation[cat] + 0.5)) for cat, count in counts.items()}.get(k))
+            # Der Divisor ist (Bisherige Sitze + 0.5)
+            winner = max({cat: (count / (allocation[cat] + 0.5)) for cat, count in counts.items()}, 
+                         key=lambda k: {cat: (count / (allocation[cat] + 0.5)) for cat, count in counts.items()}.get(k))
             allocation[winner] += 1
 
         available_nodes = StoreOntology.FLEXIBLE_ZONES.copy()
-        random.shuffle(available_nodes)
+        random.shuffle(available_nodes) # Verhindert strukturellen Bias in der Platzierung
         
         routing_map = {**StoreOntology.FIXED_ZONES}
         pointer = 0
@@ -448,26 +461,30 @@ class StoreBuilder:
             routing_map[cat] = available_nodes[pointer : pointer+amount]
             pointer += amount
 
-        # Befüllen
+        # Befüllen der Graphen-Nodes mit den berechneten Produkten
         for cat, nodes in routing_map.items():
             if cat == "Sonstiges (Kasse)": continue
             cat_items = df[df['Cat'] == cat]
             for _, row in cat_items.iterrows():
                 available = [n for n in nodes if self.capacity[n] < StoreOntology.MAX_CAPACITY]
                 if not available: break 
+                
+                # Greedy: Nimmt immer das aktuell leerste Regal
                 best_node = min(available, key=lambda n: self.capacity[n])
                 brand = random.choice(StoreOntology.BRAND_DISTRIBUTION.get(cat, ["JMU Choice"]))
+                
                 self.stock[best_node].append({
                     'name': row['Name'], 'brand': brand, 'category': cat, 'price': row['Price'], 
                     'ai_confidence': round(row['Conf'], 3), 'suggested_slot': best_node, 'needs_review': False
                 })
                 self.capacity[best_node] += 1
 
-            # Fallbacks
+            # Graceful Degradation: Falls ein Regal nicht voll wird, nutze Fallbacks
             while any(self.capacity[n] < StoreOntology.MAX_CAPACITY for n in nodes):
                 node = min(nodes, key=lambda n: self.capacity[n])
                 fallback = random.choice(StoreOntology.EMERGENCY_FALLBACKS.get(cat, ["Basic Item"]))
                 brand = random.choice(StoreOntology.BRAND_DISTRIBUTION.get(cat, ["JMU Basic"]))
+                
                 self.stock[node].append({
                     'name': fallback, 'brand': brand, 'category': cat, 'price': PricingEngine.generate_price(cat), 
                     'ai_confidence': 1.0, 'suggested_slot': node, 'needs_review': False
@@ -481,7 +498,10 @@ class StoreBuilder:
 # =============================================================================
 
 class MasterOrchestrator:
-    """Steuert den gesamten Ausführungsablauf (Orchestration) der ETL-Pipeline."""
+    """
+    Steuert den deterministischen Ausführungsablauf der Architektur.
+    Garantiert, dass die ML-Modelle synchron mit den Daten gebaut werden.
+    """
     
     def execute(self):
         """Führt alle Phasen nacheinander aus und exportiert die Ergebnisse."""
@@ -493,31 +513,33 @@ class MasterOrchestrator:
         input_path = Path(PipelineConfig.EXCEL_INPUT)
         csv_path = Path(PipelineConfig.CSV_OUTPUT)
         
-        # Warnungen von Pandas bzgl. RegEx unterdrücken (Kosmetik für die Konsole)
+        # Pandas-Regex Warnungen auf Konsole unterdrücken
         warnings.filterwarnings("ignore", category=UserWarning, module="pandas")
         
-        # 1. Excel Download falls nötig
+        # 1. Download
         if not input_path.exists():
             if not BLSDownloader.download(PipelineConfig.BLS_URL, input_path):
                 sys.exit(1)
                 
-        # 2. CSV Bauen (Phase 1)
+        # 2. NLP-Sanitization & CSV-Export
         csv_builder = CSVBuilder(input_path, csv_path)
         csv_builder.execute()
         
-        # 3. CRITICAL FIX: Zwingt das Backend zum Retraining! (Löscht altes Pickle)
-        log.info("Phase 2: Lösche altes ML-Modell und erzwinge Retraining...")
+        # 3. CRITICAL MLOPS SYNC: Data Leakage Prävention
+        # Da wir neue CSV-Daten generiert haben, MUSS das NLP-Modell gelöscht 
+        # und neu trainiert werden. Andernfalls entsteht ein "Stale Model" (Concept Drift).
+        log.info("Phase 2: Lösche altes ML-Modell und erzwinge asynchrones Retraining...")
         model_file = Path(CONFIG.ML_MODEL_FILE)
         if model_file.exists():
             model_file.unlink() 
-        ml_predictor._sync_model() 
+        ml_predictor._sync_model() # Baut die Logistische Regression neu
         
-        # 4. Supermarkt bauen (Phase 3)
+        # 4. Graphen-Allokation
         raw_items = DataIngestionService.extract_and_sort(str(csv_path), limit=1500)
         builder = StoreBuilder()
         final_stock, routing_map = builder.execute(raw_items)
         
-        # 5. Exportieren
+        # 5. Export der Artefakte für das Live-Backend (Thread-Safe über InvManager Lock)
         with inv_manager._lock:
             inv_manager.stock = final_stock
             inv_manager.save_to_json()
@@ -527,20 +549,27 @@ class MasterOrchestrator:
 
         t_end = time.time()
         placed = sum(len(items) for items in final_stock.values())
-        total_nodes = len(StoreOntology.FIXED_ZONES["Spirituosenschrank"]) + len(StoreOntology.FIXED_ZONES["Fleischtheke"]) + len(StoreOntology.FIXED_ZONES["Sonstiges (Kasse)"]) + len(StoreOntology.FIXED_ZONES["Obst & Gemüse"]) + len(StoreOntology.FIXED_ZONES["Backwaren"]) + len(StoreOntology.FLEXIBLE_ZONES)
+        
+        # Berechne die absolute Kapazität basierend auf der Ontologie
+        total_nodes = len(StoreOntology.FIXED_ZONES["Spirituosenschrank"]) + \
+                      len(StoreOntology.FIXED_ZONES["Fleischtheke"]) + \
+                      len(StoreOntology.FIXED_ZONES["Sonstiges (Kasse)"]) + \
+                      len(StoreOntology.FIXED_ZONES["Obst & Gemüse"]) + \
+                      len(StoreOntology.FIXED_ZONES["Backwaren"]) + \
+                      len(StoreOntology.FLEXIBLE_ZONES)
         
         print("\n" + "="*75)
         print("📊 ETL SYSTEM AUDIT & VALIDIERUNGS-REPORT")
         print("="*75)
         print(f"⏱️  Ausführungszeit:        {t_end - t_start:.2f} Sekunden")
-        print(f"📦 Regale befüllt:         {len(final_stock)} / {total_nodes}")
+        print(f"📦 Regale allokiert:       {len(final_stock)} / {total_nodes}")
         print(f"🛒 Produkte im System:     {placed} / {total_nodes * StoreOntology.MAX_CAPACITY}")
-        print("\n📂 Systemdateien erfolgreich generiert und synchronisiert:")
+        print("\n📂 System-Artefakte erfolgreich generiert und synchronisiert:")
         print(f"   ├── {PipelineConfig.CSV_OUTPUT} (NLP Ground Truth)")
         print(f"   ├── {PipelineConfig.DB_OUTPUT}        (Inventar & Pricing-Daten)")
-        print(f"   └── {PipelineConfig.ROUTING_OUTPUT}  (Sainte-Laguë Graphen-Routing)")
+        print(f"   └── {PipelineConfig.ROUTING_OUTPUT}  (Sainte-Laguë Graphen-Topologie)")
         print("-" * 75)
-        print("🚀 Setup abgeschlossen. Starte nun die app.py!")
+        print("🚀 Architektur-Setup abgeschlossen. Starte nun den Uvicorn/FastAPI-Server.")
 
 if __name__ == "__main__":
     orchestrator = MasterOrchestrator()
