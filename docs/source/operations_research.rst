@@ -5,321 +5,119 @@ Das mathematische Herzstück der Navigation im Smart Supermarket ist die Lösung
 
 In der Komplexitätstheorie der Informatik wird dieses Problem jedoch als NP-schwer (nondeterministic polynomial-time hard) eingestuft. Das bedeutet: Es existiert weltweit kein deterministischer Algorithmus, der dieses Problem für beliebig große Einkaufslisten in akzeptabler (polynomieller) Zeit perfekt lösen kann. 
 
-Die mathematische Realität der kombinatorischen Explosion: Bei einer kleinen Einkaufsliste von 10 Produkten gibt es bereits über 3,6 Millionen mögliche Wege (10 Fakultät). Ein moderner Backend-Server berechnet dies in Millisekunden. Stehen jedoch 40 Produkte auf der Liste, existieren mehr mögliche Routen (40 Fakultät), als es Atome im sichtbaren Universum gibt. Der naive Versuch, dies auf einem Server exakt zu berechnen, würde in einem sofortigen Out-of-Memory-Error (OOM) oder einer jahrelangen Laufzeit resultieren.
+Die mathematische Realität der kombinatorischen Explosion: Bei einer kleinen Einkaufsliste von 10 Produkten gibt es bereits über 3,6 Millionen mögliche Wege (10 Fakultät). Ein moderner Backend-Server berechnet dies in Millisekunden. Stehen jedoch 40 Produkte auf der Liste, existieren mehr mögliche Routen (40 Fakultät), als es Atome im sichtbaren Universum gibt. Der naive Versuch, dies auf einem Server exakt zu berechnen, würde in einem sofortigen Out-of-Memory-Error (OOM) resultieren.
 
-Die Backend-Architektur des JMU Smart Cart Systems erzwingt daher keinen starren "One-Size-Fits-All"-Ansatz. Stattdessen implementiert sie ein intelligentes, dynamisch skalierendes Framework. Abhängig von der Größe des Warenkorbs schaltet das System autonom zwischen absoluter mathematischer Exaktheit (für kleine Listen) und thermodynamischen sowie evolutionären Schätzverfahren (für große Listen) um.
+Die Backend-Architektur des JMU Smart Cart Systems erzwingt daher keinen starren "One-Size-Fits-All"-Ansatz. Stattdessen implementiert sie ein intelligentes, dynamisch skalierendes Framework über das **Strategy Pattern**. Abhängig von der Größe des Warenkorbs schaltet das System autonom zwischen mathematischer Exaktheit, Thermodynamik, Schwarmintelligenz und biologischen Evolutionsverfahren um.
 
 1. Architektonische Disruption: Die Demontage der akademischen Baseline
 -----------------------------------------------------------------------
-In der klassischen Fachliteratur und in universitären Vorlesungen wird das Routing-Problem auf 2D-Graphen oft durch eine feste, standardisierte Pipeline gelehrt: 
-1. Der A*-Suchalgorithmus berechnet die Distanzen zwischen den Knoten.
-2. Der Christofides-Algorithmus berechnet daraus die finale TSP-Route. 
-
-Das JMU Smart Cart System verwirft diesen akademischen Standardansatz jedoch vollständig. Im Kontext einer performanten, cyber-physischen Live-Engine muss diese architektonische Entscheidung mathematisch rigoros verteidigt werden.
+In der klassischen Fachliteratur wird das Routing oft durch den A*-Algorithmus und die Christofides-Approximation gelehrt. Im Kontext einer performanten Live-Engine mit dynamischen Verkehrsstaus wurde diese architektonische Entscheidung mathematisch rigoros revidiert.
 
 1.1 Warum A* scheitert: Die unzulässige Heuristik
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Der A*-Algorithmus ist extrem effizient, um den Weg von einem Punkt A nach einem Punkt B zu finden. Er nutzt eine räumliche Heuristik (meist die Manhattan-Distanz) als "Kompass", um nicht blind in die falsche Richtung zu suchen. 
+A* garantiert nur dann den kürzesten Weg, wenn seine Heuristik (z.B. die Luftlinie) zulässig (admissible) ist, also die wahren Kosten niemals überschätzt. Durch die Integration unseres Prädiktiven Traffic-Modells, welches Staus als Bureau of Public Roads (BPR) Zeitstrafen auf die Gänge addiert, wird diese Regel gebrochen. Ein geometrisch kurzer Weg kann durch einen Stau plötzlich massiv teurer sein als ein physikalischer Umweg. Die klassische räumliche Heuristik würde A* in die Irre führen.
 
-Das architektonische Problem: A* garantiert nur dann den kürzesten Weg, wenn seine Heuristik zulässig (admissible) ist. Der Kompass darf die wahren Kosten zum Ziel niemals überschätzen (h(n) <= d(n, target)). Durch die Integration unseres Prädiktiven Traffic-Modells (welches prognostizierte Menschen-Staus als Zeitstrafen auf die Gänge addiert) wird diese eiserne Regel gebrochen. Ein geometrisch kurzer Weg (10 Meter) kann durch einen Stau plötzlich 50 Straf-Sekunden kosten. Eine freie Umleitung (20 Meter) dauert nur 20 Sekunden. Die klassische räumliche Heuristik würde den A*-Algorithmus hier in die Falle locken und ineffiziente Wege produzieren.
-
-1.2 Der Floyd-Warshall-Fehlschluss
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Für das TSP benötigen wir zwingend eine Distanzmatrix (Clique) – wir müssen die Distanz von *jedem* Zielprodukt zu *jedem* anderen Zielprodukt kennen. Ein gängiger Fehler im Software Engineering ist es, hier blind den Floyd-Warshall-Algorithmus einzusetzen, da dieser als Standardlösung für das All-Pairs Shortest Path (APSP) Problem gilt.
-
-Der mathematische Beweis des Scheiterns: Floyd-Warshall berechnet die Pfade zwischen *allen* Knoten des Supermarkt-Graphen (V = 500). Die Laufzeitkomplexität beträgt zwingend O(V^3). Bei 500 Knoten sind das 125 Millionen Operationen, selbst wenn der Kunde nur 10 Produkte sucht. Das ist für eine Echtzeit-API absolut inakzeptabel.
-
-1.3 Unsere gewählte Baseline: Der Multi-Source Dijkstra
+1.2 Unsere gewählte Baseline: Der Multi-Source Dijkstra
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das System nutzt stattdessen den heuristikfreien Dijkstra-Algorithmus als Single-Source Shortest Path Variante. Dijkstra breitet sich im Graphen wie eine Wasserwelle aus und orientiert sich strikt an den echten Kantengewichten (inklusive Staus). Wir haben eine kleine Zielmenge K (die Produkte auf der Liste, z. B. K=15). Wir starten Dijkstra exakt 15 Mal. Die Komplexität sinkt auf O(K * (V log V + E)). Da K extrem viel kleiner als V ist, ist unser Ansatz um mehrere Größenordnungen schneller als Floyd-Warshall.
+Das System nutzt stattdessen den heuristikfreien Dijkstra-Algorithmus. Dijkstra breitet sich im Graphen wie eine Wasserwelle aus und findet die exakten Zeitkosten unter strikter Berücksichtigung der dynamischen BPR-Strafen. Für eine Zielmenge $K$ (die gesuchten Produkte) starten wir Dijkstra iterativ genau $K$-Mal. Die Komplexität sinkt dramatisch auf $O(K \cdot (V \log V + E))$. Da $K$ extrem viel kleiner als $V$ (Gesamtknoten) ist, ist dieser Ansatz hochperformant.
 
-.. code-block:: python
+1.3 Das Umweg-Paradoxon (Temporale Arbitrage)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Eine kritische Systemfrage lautet: *Leitet die KI den Kunden auf einen 50-Meter-Umweg, nur um einem winzigen Stau auszuweichen, der den Kunden eigentlich nur 5 Sekunden Wartezeit gekostet hätte? Wäre die KI dann nicht schlechter als eine "dumme" statische Baseline?*
 
-   import networkx as nx
-   from typing import List, Dict
+Die Antwort liegt in der physikalischen Einheit des Basis-Graphen. Da die Kantengewichte der Topologie nicht in Metern, sondern von Beginn an in **Sekunden (Transit Time)** kodiert sind und die BPR-Strafen der KI ebenfalls **Sekunden** ausgeben, führt der Dijkstra-Algorithmus eine exakte **Temporale Arbitrage (Kosten-Nutzen-Analyse)** durch. 
 
-   def build_distance_matrix(G_congested: nx.DiGraph, targets: List[str]) -> Dict[str, Dict[str, float]]:
-       """
-       Baut die Distanzmatrix (Clique) effizient in O(K * (V log V + E)) auf.
-       Fokussiert sich ausschließlich auf die 'time_penalty' Kantengewichte.
-       """
-       matrix = {}
-       for start_node in targets:
-           # Dijkstra expandiert heuristikfrei und findet die exakten Zeitkosten 
-           # zu ALLEN anderen Knoten des Graphen in einem einzigen Durchlauf.
-           lengths = nx.single_source_dijkstra_path_length(
-               G_congested, source=start_node, weight='time_penalty'
-           )
-           # Wir extrahieren nur die Distanzen zu unseren Ziel-Produkten
-           matrix[start_node] = {
-               end_node: lengths[end_node] for end_node in targets if end_node != start_node
-           }
-       return matrix
+Der Algorithmus minimiert das globale Integral der Zeit. Ein 50-Meter-Umweg kostet bei normaler Schrittgeschwindigkeit ca. 35 Sekunden ($t_{umweg} = 35s$). Ein direkter Gang kostet 10 Sekunden plus 5 Sekunden Stau ($t_{direkt} = 15s$). Der Dijkstra-Algorithmus vergleicht $15s < 35s$ und leitet den Kunden deterministisch **durch** den Stau. Die KI weicht einem Hindernis also niemals blind aus, sondern exakt nur dann, wenn die Zeitstrafe des Staus mathematisch größer ist als die Zeitstrafe des physischen Umwegs.
 
-1.4 Warum Christofides in der Praxis scheitert: Die Dreiecksungleichung
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Der Christofides-Algorithmus ist das berühmteste Approximationsverfahren für das TSP (garantierte Approximationsgüte von 1.5). 
-Das fatale Praxis-Problem: Er erfordert für seinen mathematischen Beweis zwingend einen ungerichteten Graphen und die Einhaltung der Dreiecksungleichung:
+1.4 Warum Christofides scheitert: Die Dreiecksungleichung
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Der Christofides-Algorithmus ist das berühmteste Approximationsverfahren für das TSP. Er erfordert für seinen mathematischen Beweis jedoch zwingend einen metrischen Raum und die Einhaltung der Dreiecksungleichung. In unserem Modell ist dieser metrische Raum durch die BPR-Penalty-Funktion zerstört: Ein extremer Stau macht den direkten Weg von A nach C oft teurer als die Summe der Umwege über B. Christofides würde hier physikalisch unmögliche "Shortcuts" (z.B. durch Regale) generieren, da der Algorithmus die Zeitstrafen geometrisch nicht korrekt abbilden kann.
 
-Distanz(A, C) <= Distanz(A, B) + Distanz(B, C)
+2. Das Symmetric Open TSP (Non-Metric)
+--------------------------------------
+Ein klassisches TSP sucht eine geschlossene Rundreise. Die Realität im Markt diktiert ein offenes Pfad-Problem: Start am Eingang, Ende an einer dynamisch berechneten Kasse. 
 
-Der direkte Weg von A nach C muss also immer kürzer oder gleich lang sein wie ein Umweg über B. In unserem Modell ist dieser metrische Raum jedoch völlig zerstört: Wir haben Einbahnstraßen vor den Kassen und asymmetrische KI-Strafen (ein Stau gilt oft nur für eine Laufrichtung). Durch diese Asymmetrie (ATSP - Asymmetric TSP) kollabiert die Dreiecksungleichung. Christofides würde direkte "Shortcuts" generieren, die physikalisch durch Regale führen oder gegen Einbahnstraßen verstoßen. Das Resultat wären invalide Geisterfahrer-Routen. 
+Da unser Basis-Graph ungerichtet ist und die Verkehrsstaus die Fluiddynamik der Menschenmassen in beide Laufrichtungen gleichermaßen blockieren, handelt es sich mathematisch um ein **Symmetric Open TSP**. Dennoch versagen Standard-Approximationen (wie Christofides), da die dynamischen Strafen das System zu einem sogenannten Non-Metric TSP machen (Verletzung der Dreiecksungleichung).
 
-Das System zwingt uns daher zu asymmetrischen Lösungsverfahren wie Held-Karp.
+Anstatt das offene Problem durch das künstliche Hinzufügen von Dummy-Nodes aufzublähen, erzwingt die Architektur eine strikte **Separation of Concerns**. Der TSP-Solver wird mit einem freien Endknoten (``end=None``) aufgerufen und optimiert ausschließlich die Raum-Geometrie der Regale. Die Auswahl der optimalen Kasse wird bewusst vom Routing entkoppelt und erst in der anschließenden System-Synthese (Post-Processing) durch das Stochastik-Modul evaluiert.
 
-2. Das Asymmetric Open TSP & Der Dummy-Node-Trick
--------------------------------------------------
-Ein klassisches TSP sucht eine geschlossene Rundreise (Start = Ziel). Die Realität im Supermarkt diktiert jedoch ein offenes Pfad-Problem: Der Kunde startet am Eingang, sammelt Produkte und endet an einer Kasse. Da die Kanten gerichtet sind, sprechen wir vom Asymmetric Hamiltonian Path Problem.
+3. Das Strategy-Pattern: Dynamische Algorithmen-Eskalation
+----------------------------------------------------------
+Um die $O(N)$-Laufzeitschranken des Servers zu schützen, lagert die Hauptfunktion ``calculate_hybrid_route`` die Logik in das abstrakte Interface ``RoutingStrategy`` aus. Das System implementiert eine vierstufige Eskalationsstrategie:
 
-Um hochoptimierte TSP-Solver nutzen zu können, wendet die Architektur einen genialen Operations-Research-Kniff an: Die Injektion eines Dummy-Nodes (Geister-Knoten).
+* **n <= 11: Held-Karp (Exakte DP).** Garantiert das absolute globale Zeit-Optimum.
+* **12 <= n <= 15: Simulated Annealing.** Thermodynamische Suche gegen lokale Minima.
+* **16 <= n <= 25: Ant Colony Optimization (ACO).** Schwarmbasierte Pfadfindung.
+* **n > 25: Genetischer Algorithmus.** Biologische Evolution für gigantische Suchräume.
 
-.. code-block:: python
+4. Exakte Dynamische Programmierung: Der Pythonic Way
+-----------------------------------------------------
+Für kleine Warenkörbe ($n \le 11$) verlangt das System absolute Exaktheit. Die Klasse ``HeldKarpDPSolver`` reduziert die Brute-Force-Laufzeit $O(N!)$ durch Dynamische Programmierung auf $O(N^2 \cdot 2^N)$. 
 
-   def inject_dummy_node(dist_matrix: dict, start_node: str, end_node: str) -> dict:
-       """ Verwandelt ein offenes Pfad-Problem in ein geschlossenes ATSP. """
-       dummy = "DUMMY_NODE"
-       dist_matrix[dummy] = {}
-       
-       for node in list(dist_matrix.keys()):
-           if node == dummy: continue
-           
-           # 1. Magische Brücke: Von der Kasse führt ein Weg (Kosten 0.0) zum Dummy.
-           dist_matrix[end_node][dummy] = 0.0
-           
-           # 2. Vom Dummy führt ein Weg (Kosten 0.0) zurück zum Start.
-           # Der Solver denkt nun, er könne eine kostenfreie Rundreise machen.
-           dist_matrix[dummy][start_node] = 0.0
-           
-           # 3. Verbotene Wege: Der Dummy darf NIEMALS mitten im Einkauf besucht werden.
-           if node != start_node: dist_matrix[dummy][node] = float('inf')
-           if node != end_node:   dist_matrix[node][dummy] = float('inf')
-           
-       return dist_matrix
+*Der Architektonische Kniff (Frozensets statt Bitmasking):* In Hardware-nahen Sprachen (C++) wird Held-Karp über 32-Bit-Integer und Bit-Shifting gelöst. In einer High-Level-Sprache wie Python führt manuelles Bit-Shifting jedoch zu Performance-Verlusten. Die Architektur nutzt daher den "Pythonic Way": **Frozensets**. Ein ``frozenset`` ist eine unveränderliche (immutable) Menge und damit im Gegensatz zu normalen Listen hashbar. 
 
-Der Ablauf: Der Solver berechnet nun ahnungslos eine geschlossene Rundreise. Da der Weg von der Kasse über den Dummy zum Eingang exakt 0.0 Sekunden kostet, legt der Solver diesen Weg zwingend an das Ende der Route. Das Backend durchtrennt die Route danach exakt am Dummy-Knoten und wirft diesen weg. Übrig bleibt der perfekte, lineare Weg vom Eingang zur Kasse.
+Dies erlaubt es dem Algorithmus, die bereits besuchten Knoten (``unvisited: frozenset``) direkt als Schlüssel in einem Dictionary (der Memoization-Tabelle) abzulegen. Der Python-Interpreter löst dies intern über hochoptimierte C-Hashmaps in $O(1)$, was den Server-RAM massiv entlastet.
 
-3. Das Strategy-Pattern (Architektonische Kapselung)
+5. Schwarmintelligenz: Ant Colony Optimization (ACO)
 ----------------------------------------------------
-Da kein einzelner Algorithmus alle Warenkorbgrößen von 5 bis 80 Produkten effizient bedienen kann, lagert die Architektur die Logik über das Strategy Pattern (ein Entwurfsmuster der Gang of Four) aus. Der Controller-Code ruft nur ein einheitliches Interface (solve) auf:
+In der Stufe bis 25 Produkte nutzt die Architektur die ``AntColonySolver`` Klasse. Dieser Algorithmus simuliert das Verhalten von Ameisen bei der Futtersuche. 
 
-.. code-block:: python
-
-   from core.interfaces import RoutingStrategy
-   from core.strategies import HeldKarpDPSolver, SimulatedAnnealingSolver, GeneticAlgorithmSolver
-
-   n = len(shopping_nodes)
-   
-   # Dynamische Zuweisung basierend auf der Listen-Größe
-   if n <= 15: 
-       # Garantiert das absolute mathematische Optimum. Limit = 15 Produkte.
-       solver: RoutingStrategy = HeldKarpDPSolver()
-   elif n <= 40: 
-       # Thermodynamische Metaheuristik für mittlere Einkäufe. Limit = 40 Produkte.
-       solver: RoutingStrategy = SimulatedAnnealingSolver()
-   else: 
-       # Biologisch inspirierte Schwarm-Evolution als Fallback für Großeinkäufe.
-       solver: RoutingStrategy = GeneticAlgorithmSolver() 
-       
-   route, compute_time = solver.solve(dist_matrix, start_node, shopping_nodes, end_node)
-
-4. Unsere Baseline: Dynamische Programmierung (Held-Karp)
----------------------------------------------------------
-Für kleine Warenkörbe (n <= 15) verlangt das System zwingend die globale Optimallösung. Die Klasse HeldKarpDPSolver reduziert die Brute-Force-Laufzeit O(N!) durch das Konzept der Dynamischen Programmierung (DP) massiv auf O(N^2 * 2^N).
-
-Verständnis-Exkurs: Anstatt den Baum der Möglichkeiten immer wieder von vorne abzugehen, zerlegt Held-Karp die Route in Teil-Routen. Hat das System den besten Weg für die ersten 5 Produkte gefunden, merkt es sich diese Kosten in einer Tabelle (Memoization). Wenn ein anderer Ast des Algorithmus später wieder bei diesen 5 Produkten ankommt, wird das Zwischenergebnis direkt aus dem RAM abgerufen.
-
-Die Herausforderung: Speichereffizienz & Backtracking
-Die Architektur nutzt Bitmasking auf Hardware-Ebene. Ein 32-Bit Integer (z. B. 0101) repräsentiert binär den Zustand: "Produkt 1 und Produkt 3 sind besucht". 
-Ein weiteres massives Problem: Der Algorithmus liefert primär nur die Kosten. Das System muss daher zwingend den "Parent-Knoten" (Vorgänger) in der Matrix speichern, um den Pfad am Ende rückwärts aufrollen zu können (Backtracking). Ohne Backtracking gäbe es keine Koordinaten für das Tablet.
-
-.. code-block:: python
-
-   def solve_held_karp(dist_matrix: list, n: int) -> list:
-       """
-       Löst das ATSP exakt und gibt den Pfad durch Backtracking zurück.
-       """
-       # memo speichert Tupel: (Minimale_Kosten, Vorgänger_Knoten_ID)
-       # 1 << n nutzt Bitshifting, um 2^N extrem schnell auf CPU-Ebene zu berechnen.
-       memo = [[(float('inf'), -1)] * n for _ in range(1 << n)]
-       memo[1][0] = (0.0, -1) # Startknoten (Bit 0 ist 1) hat Kosten 0
-       
-       # 1. DP-Tabellenaufbau (Vorwärts-Phase)
-       for mask in range(1, 1 << n):
-           for i in range(n):
-               if mask & (1 << i): # Bit-AND: Ist Knoten i besucht?
-                   for j in range(n):
-                       if not (mask & (1 << j)): # Ist Knoten j unbesucht?
-                           next_mask = mask | (1 << j) # Aktiviere das j-te Bit
-                           
-                           # Bellman-Gleichung: Kosten bis i + Distanz von i nach j
-                           new_cost = memo[mask][i][0] + dist_matrix[i][j]
-                           
-                           # Speichere das Minimum inkl. Vorgänger für Backtracking
-                           if new_cost < memo[next_mask][j][0]:
-                               memo[next_mask][j] = (new_cost, i)
-                               
-       # 2. Backtracking Phase (Rückwärts-Phase zur Pfad-Rekonstruktion)
-       last_mask = (1 << n) - 1 # Alle Bits auf 1
-       
-       # Finde den letzten Knoten der Rundreise mit den geringsten Gesamtkosten
-       last_node = min(range(1, n), key=lambda x: memo[last_mask][x][0] + dist_matrix[x][0])
-       
-       route = []
-       current_mask, current_node = last_mask, last_node
-       
-       while current_node != -1:
-           route.append(current_node)
-           prev_node = memo[current_mask][current_node][1]
-           current_mask ^= (1 << current_node) # Bit-XOR schaltet das aktuelle Bit ab
-           current_node = prev_node
-           
-       return route[::-1] # Pfad umdrehen (Start -> Ziel)
-
-Das Limit bei n=15 schützt die CPU. Bei n=20 explodiert 2^20 auf über 419 Millionen Zustände und würde den Server sofort lahmlegen.
-
-5. Thermodynamische Metaheuristik: Simulated Annealing (SA)
------------------------------------------------------------
-Für mittlere Listen (16 bis 40 Artikel) nutzt die SimulatedAnnealingSolver Klasse einen Algorithmus, der das langsame thermodynamische Abkühlen von Metallen simuliert.
-
-Das Problem lokaler Minima: Ein simpler Suchalgorithmus (Hill-Climbing) tauscht Routen-Stationen nur so lange aus, bis er keine Verbesserung mehr findet. Dabei verharrt er oft in einem lokalen Minimum (er verpasst die perfekte Route, weil er dafür kurzzeitig einen schlechteren Umweg akzeptieren müsste).
-
-Die Lösung: Simulated Annealing akzeptiert temporär auch schlechtere Routen. Bei initial hoher Temperatur (T) testet der Algorithmus wild Umwege, um den Suchraum zu erkunden. Je kühler das System wird, desto strenger akzeptiert es nur Verbesserungen. Die Wahrscheinlichkeit P für Verschlechterungen basiert auf der Metropolis-Hastings-Funktion: P = exp(-Delta E / T).
-
-Um die Route im Code zu mutieren, nutzt die Architektur die asymmetrische 2-Opt-Heuristik. Ein einfaches Umdrehen des Arrays (naiver 2-Opt via Python-Slice) würde bei Einbahnstraßen zu unendlichen Geisterfahrer-Kosten führen. Der Algorithmus berechnet stattdessen die Kosten der neu zusammengesetzten Kanten explizit neu.
-
-.. code-block:: python
-
-   import random
-   import math
-
-   def simulated_annealing(dist_matrix, initial_route, initial_temp=1000.0, cooling_rate=0.995):
-       current_route = initial_route
-       current_distance = calculate_total_dist(current_route, dist_matrix)
-       temp = initial_temp
-       
-       while temp > 1.0:
-           # 2-Opt Swap: Wähle zwei zufällige Schnittpunkte im Array
-           i, j = sorted(random.sample(range(1, len(current_route)-1), 2))
-           
-           # Generierung des neuen Zustands
-           new_route = current_route[:i] + current_route[i:j][::-1] + current_route[j:]
-           new_distance = calculate_total_dist(new_route, dist_matrix)
-           
-           delta = new_distance - current_distance
-           
-           # Akzeptanz-Bedingung: 
-           # Wenn besser (Delta < 0) ODER wenn die Metropolis-Funktion zuschlägt
-           if delta < 0 or math.exp(-delta / temp) > random.random():
-               current_route = new_route
-               current_distance = new_distance
-               
-           temp *= cooling_rate # Thermodynamisches Abkühlen
-           
-       return current_route
+Agenten ("Ameisen") durchlaufen den Graphen stochastisch und hinterlassen virtuelle Pheromone auf zeitlich effizienten Kanten. Durch die Verdunstungsrate (Evaporation) verschwinden schlechte Pfade, während sich auf dem optimalen Weg eine stabile Pheromonspur bildet. Dies erlaubt es, komplexe Stau-Situationen durch emergente Gruppenintelligenz zu umgehen.
 
 6. Evolutionäre Biologie: Der Genetische Algorithmus (GA)
 ---------------------------------------------------------
-Für extreme Großeinkäufe (n > 40) versagt Simulated Annealing, da der Suchraum gigantisch wird. Der ultimative Fallback ist die GeneticAlgorithmSolver Klasse. Sie modelliert die Darwinsche Evolution.
+Für extreme Warenkörbe ($n > 25$) ist der Genetische Algorithmus das Mittel der Wahl. Er modelliert die Darwinsche Evolution über Generationen hinweg. Ein kritischer architektonischer Aspekt ist die Vermeidung von Duplikaten während der "Paarung" von Routen (Crossover). Hierzu implementiert die Architektur den **Partially Mapped Crossover (PMX)**.
 
-Ein Genetischer Algorithmus besteht aus vier Phasen: Initialisierung, Selektion, Crossover (Paarung) und Mutation. Um das beste genetische Material nicht zu zerstören, nutzt das System Elitismus: Die besten 5% der Routen einer Generation werden unangetastet übernommen.
+Beim PMX wird ein zufälliger Gen-Abschnitt (Sub-Route) zwischen zwei Elternteilen getauscht. Die restlichen Positionen werden über eine Mapping-Tabelle so angepasst, dass jedes Produkt exakt einmal in der neuen Route vorkommt. Dies schützt die topologische Integrität der Einkaufsliste.
+
+7. Checkout-Stochastik: M/M/1/K Approximation
+----------------------------------------------
+Eine räumliche Route scheitert ohne Einbeziehung der Kassenwartezeit. Unsere Architektur verzichtet bewusst auf die rechenintensive Pollaczek-Khintchine-Formel für log-normalverteilte Servicezeiten ($M/G/1$) und approximiert die Realität stattdessen performant als **$M/M/1/K$-Warteschlangenmodell**.
+
+Die Klasse ``EnterpriseQueuingModel`` berechnet die Wartezeit unter Berücksichtigung der Ankunftsrate $\lambda$ (moduliert durch Sinus-Tageszeitkurven zur Abbildung der Rush-Hour) und einer Kapazitätsgrenze $K=10$.
 
 .. code-block:: python
 
+   import math
    import random
 
-   def genetic_algorithm(dist_matrix, nodes, pop_size=150, generations=500):
-       # 1. Initialisierung: Erschaffe 150 zufällige Routen (Chromosomen)
-       population = [generate_random_route(nodes) for _ in range(pop_size)]
-       
-       for generation in range(generations):
-           # Bewerte Fitness (1 / Gesamtdistanz). Je kürzer, desto fitter.
-           fitness_scores = [1.0 / calculate_total_dist(route, dist_matrix) for route in population]
+   class EnterpriseQueuingModel:
+       @staticmethod
+       def calculate_wait_metrics(base_lambda: float, current_hour: int, checkout_id: str) -> dict:
+           """ Approximiert die Wartezeit performant über M/M/1/K Markow-Ketten. """
+           c, mu, K = 1, 1.5, 10
            
-           new_population = []
+           # Sinus-Modulation für den Tageszeit-Faktor (Abbildung der Rush-Hour)
+           time_factor = math.sin((current_hour - 8) / 12 * math.pi) * 1.5
+           lam = max(0.2, base_lambda + time_factor)
+           rho = lam / mu
            
-           # Elitismus: Die besten 5% überleben unmutiert
-           elite_count = int(pop_size * 0.05)
-           elites = get_best_routes(population, fitness_scores, elite_count)
-           new_population.extend(elites)
-           
-           # 2. Selektion (Roulette Wheel Selection) & 3. Crossover
-           while len(new_population) < pop_size:
-               parent_a = roulette_wheel_selection(population, fitness_scores)
-               parent_b = roulette_wheel_selection(population, fitness_scores)
+           if rho == 1.0:
+               lq = (K * (K - 1)) / (2 * (K + 1))
+               pk = 1.0 / (K + 1)
+           else:
+               p0 = (1 - rho) / (1 - rho**(K + 1))
+               pk = (rho**K) * p0
+               # Erwartete Kundenanzahl Lq in der Schlange (geometrische Reihe)
+               lq = (rho / (1 - rho)) - ((K + 1) * rho**(K + 1) / (1 - rho**(K + 1)))
                
-               # Order 1 Crossover (OX1): Verhindert Duplikate bei der Fortpflanzung
-               child = order_1_crossover(parent_a, parent_b)
-               
-               # 4. Mutation: 5% Chance auf zufälligen Swap, schützt vor Inzucht
-               if random.random() < 0.05:
-                   child = mutate_swap(child)
-                   
-               new_population.append(child)
-               
-           population = new_population
+           lambda_eff = lam * (1 - pk)
+           wait_minutes = lq / lambda_eff if lambda_eff > 0 else 0.0
            
-       return get_best_routes(population, fitness_scores, 1)[0]
+           # Rückgabe inkl. leichtem stochastischem Jitter
+           return {"wait_sec": (wait_minutes * 60.0) + random.uniform(1.0, 5.0)}
 
-Das Crossover-Problem: Wenn sich zwei Eltern-Routen paaren, kann man sie nicht einfach in der Mitte durchschneiden und zusammenfügen. Das Resultat wäre eine Route, auf der Produkte doppelt vorkommen und andere fehlen (Verletzung der Permutations-Regel). Die Architektur implementiert daher zwingend den deterministischen Order 1 Crossover (OX1):
+8. System-Synthese: Das Decoupling von Raum und Zeit & Shadow-Routing
+---------------------------------------------------------------------
+Das finale Meisterstück der Architektur ist die zustandslose Synthese im Controller (``calculate_hybrid_route``). Das System entkoppelt die räumliche TSP-Routenfindung (Regale) strikt von der temporalen Stochastik (Kassenwartezeit).
 
-.. code-block:: python
+Sobald der TSP-Solver die ideale Regal-Reihenfolge mit freiem Endknoten berechnet hat, extrahiert der Orchestrator das letzte Regal der Route. Von diesem Punkt aus berechnet er für alle verfügbaren Kassen das physikalische Integral aus Laufzeit und Stochastik: 
 
-   def order_1_crossover(parent_a: list, parent_b: list) -> list:
-       """ Vererbt topologische Eigenschaften, ohne Duplikate zu erzeugen. """
-       size = len(parent_a)
-       child = [None] * size
-       
-       # Wähle ein zufälliges Sub-Array von Parent A und vererbe es exakt 
-       # an die gleiche physische Position im Kind-Array.
-       start, end = sorted(random.sample(range(size), 2))
-       child[start:end] = parent_a[start:end]
-       
-       # Fülle leere Plätze mit fehlenden Elementen von Parent B auf.
-       # Wir starten direkt NACH dem vererbten Block, um die relative 
-       # Reihenfolge (Graphen-Wegrichtung) von Parent B zu bewahren.
-       pointer = end
-       for item in parent_b:
-           if item not in child:
-               if pointer == size: pointer = 0 # Array Wrap-around
-               child[pointer] = item
-               pointer += 1
-               
-       return child
+$$ \text{Kosten} = \text{Dijkstra-Laufweg} + \text{M/M/1/K Wartezeit} + \text{Weg zum Ausgang} $$
 
-7. Checkout-Stochastik: M/M/1/K & Pre-Halftime Prädiktion
----------------------------------------------------------
-Ein rein metrisches TSP ignoriert eine der volatilsten Variablen im Supermarkt: Die Wartezeit an den Kassen. 
-Ein fundamentaler Architektur-Fehler statischer Navigationssysteme ist das späte Routing: Erfährt der TSP-Solver erst am Ende des Einkaufs, welche Schlange die kürzeste ist, fehlt ihm der topologische Manövrierraum. Der Kunde müsste abrupt umdrehen und gegen den Strom navigieren.
+Das absolute Minimum dieser Funktion bestimmt die Zielkasse, welche nahtlos an die Array-Liste des TSP-Solvers angefügt (stitched) wird. Da dieser Prozess zustandslos in exakt der Millisekunde iteriert, in der der Nutzer den Callback in der UI auslöst, fließen Echtzeit-Sensorik und Warteschlangentheorie deterministisch in die Routenplanung ein, ohne die Such-Komplexität des TSP-Solvers unnötig aufzublähen.
 
-Der Stochastik-Algorithmus (M/M/1/K):
-Die QueuingModelFacade berechnet die Wartezeit nicht durch simple Längenmessung via Kameras, sondern prädiktiv. Sie nutzt das M/M/1/K-Warteschlangenmodell (Kendall-Notation). 
-Warum M/M/1/K und nicht M/M/c? Am Flughafen bilden alle Kunden eine einzige Schlange für mehrere Schalter (M/M/c). Im Supermarkt jedoch wählt der Kunde eine dedizierte Kasse mit genau einem Kassierer (M/M/1). Die Kapazität ist räumlich limitiert (K). 
-Das Modell basiert auf Little's Law (L = lambda * W), welches besagt, dass die durchschnittliche Anzahl der Kunden (L) gleich der Ankunftsrate (lambda) multipliziert mit der durchschnittlichen Verweildauer (W) ist.
+**Der Kybernetische Fallback-Schutz (Shadow-Routing):**
+Um das System absolut "Bulletproof" gegen KI-Halluzinationen zu machen, berechnet der Orchestrator die finale Route im Hintergrund zwingend parallel im **Shadow-Mode**. Das System generiert eine Route auf dem normalen, staufreien Graphen (deterministische Baseline) und zeitgleich eine Route auf dem durch die KI mutierten Graphen. 
 
-.. code-block:: python
-
-   def predict_checkout_wait_time(lam: float, mu: float, k_capacity: int) -> float:
-       """
-       Berechnet die stochastische Wartezeit an einer dedizierten Supermarktkasse.
-       lam = Ankunftsrate (Kunden pro Minute)
-       mu = Bedienrate (Kassiervorgänge pro Minute)
-       """
-       if lam == 0: return 0.0
-       rho = lam / mu # Auslastungsgrad (Traffic Intensity)
-       
-       if rho == 1.0:
-           # Sonderfall L'Hôpital: Genau so viele Ankünfte wie Abfertigungen
-           expected_customers = k_capacity / 2
-       else:
-           # M/M/1/K Formel zur Bestimmung der erwarteten Systemlänge
-           numerator = 1 - (k_capacity + 1) * (rho ** k_capacity) + k_capacity * (rho ** (k_capacity + 1))
-           denominator = (1 - rho) * (1 - (rho ** (k_capacity + 1)))
-           expected_customers = rho * (numerator / denominator)
-           
-       # Wartezeit W = L / lambda (Abgeleitet aus Little's Law)
-       return expected_customers * (1 / mu)
-
-Der architektonische Pre-Halftime-Trigger:
-Das System lauscht asynchron auf den Warenkorbfortschritt des Nutzers. Die Vorhersage muss zwingend vor der Halbzeit (bei 40% bis 45% Fortschritt) berechnet werden. 
-
-Die Kasse mit der kürzesten prognostizierten Wartezeit wird frühzeitig als fixierter End-Knoten in den Dummy-Node-Trick injiziert. Dies garantiert, dass der TSP-Solver in der zweiten Einkaufshälfte den Graphen strategisch nutzt, um den Kunden fließend und ohne kognitive Brüche in Richtung des besten Ausgangs zu routen.
+Anschließend unterzieht der Code beide Routen einem strikten Integritäts-Check auf dem nackten Basis-Graphen: Wenn die von der KI vorgeschlagene Ausweichroute in der *reinen physischen Laufzeit* (ohne Stau-Strafen) einen vordefinierten Toleranz-Schwellenwert im Vergleich zur Baseline überschreitet (die KI den Kunden also auf einen völlig absurden Umweg schicken will), legt die System-Synthese ein Veto ein. Das Backend verwirft die KI-Route und serviert dem Tablet als Fail-Safe die Baseline-Route. Dies beweist mathematisch, dass das KI-Routing das Nutzererlebnis in Edge-Cases niemals schlechter machen kann als ein klassisches Navigationssystem.
