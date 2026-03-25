@@ -1,147 +1,244 @@
-Data Engineering & Supermarkt-Ontologie (ETL-Pipeline)
-======================================================
+Supermarkt-Topologie & Spatial Computing
+========================================
 
-Das vorherige Kapitel hat die räumliche Infrastruktur des JMU Smart Carts definiert: Ein Graphen-Modell des Supermarkts liegt als Digitaler Zwilling im Arbeitsspeicher vor. Doch an diesem Punkt der Systemarchitektur sind die Knoten (die physischen Regale) lediglich leere Container. 
+Dieses Kapitel dokumentiert die fundamentale In-Memory-Datenstruktur der Live-Engine. Um die im Operations Research (Kapitel 7) definierten deterministischen und stochastischen Routing-Probleme performant zu lösen, muss die physische Verkaufsfläche in einen maschinenlesbaren, topologischen Raum übersetzt werden. Das System modelliert den Supermarkt hierfür als gerichteten, kanten-gewichteten Attribut-Graphen $G = (V, E, W)$.
 
-Ein prädiktives Routing-System funktioniert nur mit einer absolut validen Datenbasis. Das Grundgesetz der Informatik *"Garbage In, Garbage Out"* (Müll rein, Müll raus) gilt hier rigoros: Wenn die Produktdatenbank fehlerhaft ist, navigiert der Dijkstra-Algorithmus den Kunden im besten Fall vor eine leere Wand und im schlimmsten Fall stürzt das Backend durch Exceptions ab. 
+Diese Architektur geht jedoch weit über einfache planare Knotendarstellungen hinaus. Als "Spatial Computing"-Engine schlägt sie die komplexe algorithmische Brücke zwischen drei völlig unterschiedlichen physikalischen Dimensionen:
+1. Der 2D-Pixel-Ebene des React/Dash-Frontends (Touch-Eingaben und UI-Rendering).
+2. Der metrischen, euklidischen Ebene der Supermarkt-Architektur (physische Laufwege in Metern).
+3. Der temporalen Ebene der Machine-Learning-Stauprognose (Zeitkosten in Sekunden).
 
-Anstatt rudimentäre Dummy-Daten von Hand zu schreiben, implementiert das System eine vollautonome **Data-Engineering-Pipeline nach dem ETL-Muster (Extract, Transform, Load)**. Gesteuert durch den zentralen ``MasterOrchestrator`` im Skript ``generate_data_driven_store.py`` lädt sie den echten "Bundeslebensmittelschlüssel" (BLS), generiert die Ground Truth für die KI, reinigt den Text von bürokratischem Rauschen und verteilt die Produkte algorithmisch auf die virtuellen Supermarkt-Regale, während sie synchron das Machine-Learning-Modell retrainiert.
-
-Teil I: Extract – Network Resiliency & CI/CD Fallbacks
-------------------------------------------------------
-Die erste ingenieurtechnische Hürde ist der Umgang mit großen Datenmengen (Big Data). Der Bundeslebensmittelschlüssel ist eine massiv angewachsene B2B-Excel-Datei. 
-
-Ein naiver Architekturansatz wäre es, die Datei über einen simplen HTTP-GET-Request vollständig in den RAM zu laden. Bei langsamen Verbindungen führt dies unweigerlich zu Memory-Spikes (OOM) oder Timeouts. Die Klasse ``BLSDownloader`` implementiert stattdessen einen speicherschonenden Downloader, der die Datei in 8192-Byte-Chunks asynchron über das Netzwerk zieht und in $O(1)$ RAM-Komplexität direkt auf die Festplatte streamt. 
-
-*Graceful Degradation für Docker/CI-CD:* Um zu garantieren, dass die Pipeline auch in minimalen, Headless-Server-Umgebungen (ohne installierte Progress-Bar-Module wie ``tqdm``) nicht mit einem ``ImportError`` abstürzt, nutzt das System einen intelligenten Fallback.
-
-.. code-block:: python
-
-   # Graceful Degradation für Server ohne installiertes tqdm-Modul. 
-   try:
-       from tqdm import tqdm
-       HAS_TQDM = True
-   except ImportError:
-       HAS_TQDM = False
-
-   class BLSDownloader:
-       def download(self) -> bool:
-           try:
-               # Ein harter Timeout von 60s verhindert Thread-Deadlocks
-               response = requests.get(self.url, stream=True, timeout=60)
-               response.raise_for_status()
-               
-               with open(self.dest_path, 'wb') as file:
-                   if HAS_TQDM:
-                       # ... [tqdm Progress Bar Logik] ...
-                   else:
-                       log.info("Lade Daten herunter... (Bitte warten)")
-                       for chunk in response.iter_content(chunk_size=1024 * 8):
-                           if chunk: file.write(chunk)
-               return True
-           except RequestException as e:
-               return False
-
-Teil II: Transform – Auto-Discovery, X-Features & Y-Targets
------------------------------------------------------------
-Nach dem Download übernimmt die ``CSVBuilder``-Klasse und nutzt das C-basierte Backend der Bibliothek ``pandas`` für die Datenverarbeitung. Hier müssen kritische Fehlerquellen von externen B2B-Daten eliminiert und die Daten für das Machine Learning vorbereitet werden.
-
-2.1 Schema-Resilienz (Auto-Discovery der Spalten)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Behördliche Datensätze ändern häufig undeklariert ihr Layout. Wenn die ETL-Pipeline Spalten hartcodiert indiziert (z.B. ``df['Produktname']``), bricht die Architektur beim nächsten Datei-Update unweigerlich zusammen.
-Das System implementiert als Gegenmaßnahme eine **Auto-Discovery-Heuristik**. Sie iteriert über die Spalten und analysiert Stichproben probabilistisch via Regular Expressions (RegEx) und einem Scoring-System, um die BLS-Codes und die Bezeichnungsspalte autonom zur Laufzeit zu identifizieren.
-
-2.2 Semantische Reduktion (Das X-Feature für die KI)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Behördliche Kataloge sind bilingual und voller Labor-Jargon (z.B. *"Schweineschnitzel, intermuskulär, rohmasse"*). Für das Machine-Learning-Modell (TF-IDF N-Gramme) ist das toxisch. Ein englisches Wort ("beef") oder ein Labor-Begriff ("kutterhilfsmittel") würde die Matrix unnötig aufblähen (Curse of Dimensionality) und zu massivem Data Leakage führen.
-
-Die Klasse ``TextSanitizer`` wendet Vektor-Operationen an, um den Text radikal auf den semantischen Kern (das X-Feature) für den Endkonsumenten zu reduzieren:
-
-.. code-block:: python
-
-   class TextSanitizer:
-       @staticmethod
-       def clean(name: str) -> Optional[str]:
-           name_lower = str(name).lower()
-           
-           # 1. B2B Filter: Verhindert Overfitting auf toxisches Labor-Vokabular
-           if any(noise in name_lower for noise in Config.B2B_NOISE_WORDS): return None
-               
-           # 2. Englisch Filter: Reduziert Sparse-Matrix Dimensionalität im TF-IDF
-           for en_word in Config.EN_KILLER_WORDS:
-               if re.search(r'\b' + en_word + r'\b', name_lower): return None
-                   
-           # 3. String-Kappung: Schneidet alles ab dem ersten Komma ab.
-           name = name.split(',')[0]
-           
-           # 4. RETAIL-FILTER: Maximal 3 Wörter erlaubt.
-           # Verhindert toxische Class Imbalance durch überlange B2B-Sätze.
-           name = re.sub(r'\s+', ' ', name).strip()
-           word_count = len(name.split())
-           if word_count == 0 or word_count > 3: return None
-               
-           return name
-
-2.3 Ground-Truth Generierung (Das Y-Target der KI)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein Klassifikationsmodell benötigt zwingend gelabelte Trainingsdaten (X $\rightarrow$ Y). Die rohe Excel-Datei liefert jedoch nur kryptische Behörden-Codes (z.B. "E1" oder "M"). 
-
-Die Klasse ``SupermarketMapper`` fungiert als elementarer Y-Target Generator. Sie übersetzt diese kryptischen BLS-Codes über eine deterministische Mapping-Tabelle und harte semantische Keyword-Heuristiken in unsere Supermarkt-Ontologie (z.B. "Kühlregal (Molkerei & Veggie)"). Erst durch diesen massiven Data-Engineering-Schritt erhält die Logistische Regression überhaupt valide Ziel-Klassen (Ground Truth), auf die sie trainieren kann.
-
-Teil III: Load – Algorithmische Graphen-Befüllung & Type Safety
+1. Graphentheoretische Fundierung: Der Directed Graph (DiGraph)
 ---------------------------------------------------------------
-Nach der Transformation und dem KI-Training (TF-IDF Matrix) mappt der ``MasterOrchestrator`` die bereinigten Produkte auf die topologischen Container-Knoten des Graphen. Hier müssen vier komplexe Probleme der Operations Research gelöst werden.
+Anstatt eines starren Raster-Modells (Grids), welches den Raum in diskrete, rechenintensive Kacheln unterteilt, nutzt das System die in C optimierte Graphen-Bibliothek ``NetworkX``. Ein Supermarkt ist mathematisch ein dünnbesetzter Graph (Sparse Graph): Ein Regal ist physisch nur mit seinen unmittelbaren Kreuzungen verbunden, nicht mit allen anderen Regalen im Markt. 
 
-3.1 Die Verhinderung von Null-Allokationen (Sainte-Laguë)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das System muss hunderte Produkte fair auf eine limitierte Anzahl flexibler Regale (``FLEXIBLE_ZONES``) verteilen. Würde das System die Regale per normaler Prozentrechnung verteilen und abrunden, bekäme eine kleine Kategorie mathematisch $0.48 \rightarrow 0$ Regale zugewiesen. Ein Routing-Versuch in "null" Regale würde das Backend abstürzen lassen.
+Würde die Architektur eine klassische Adjazenzmatrix verwenden, entstünde bei V = 500 eine Datenstruktur mit 250.000 Speicherzellen, die fast ausschließlich mit Nullen gefüllt wäre. Um eine RAM-Explosion zu verhindern und L1/L2-CPU-Cache-Misses zu minimieren, forciert die Architektur intern ein **Adjazenzlisten-Modell**. Hierbei speichert jeder Knoten nur reale Kanten, was die Speicherkomplexität auf das theoretische Minimum von O(|V| + |E|) drückt.
 
-Die Architektur nutzt daher einen Algorithmus aus dem parlamentarischen Wahlrecht: Das **Sainte-Laguë-Verfahren**. Es nutzt den Divisor ``(allocation[cat] + 0.5)``. Dieser Divisor garantiert mathematisch, dass selbst die kleinste Kategorie zwingend *mindestens ein* physisches Regal zugewiesen bekommt, bevor riesige Kategorien ihr sechstes Regal erhalten.
+Die fundamentale Architektur-Entscheidung liegt in der Wahl eines **gerichteten Graphen** (``nx.DiGraph``). Während sich Kunden in regulären Gängen bidirektional bewegen (was durch das Generieren zweier gerichteter Kanten $u \rightarrow v$ und $v \rightarrow u$ abgebildet wird), existieren im Supermarkt strikte topologische Singularitäten: Kassenzonen und Eingangsschranken.
 
-3.2 Quengelware (Topologische Determiniertheit an Kassen)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Während Sainte-Laguë für flexible Sortimente greift, gibt es Produkte, die sich einer proportionalen Fairness entziehen. Sogenannte **Quengelware** (Impulskäufe wie Batterien oder Kaugummis) wird strategisch starr in den Wartezonen der Kassen platziert.
+2. Automatische Graphen-Generierung (Floorplan Skeletonization)
+---------------------------------------------------------------
+Ein System mit 500 Regalen manuell zu pflegen, widerspricht dem Prinzip der Skalierbarkeit. Wenn das Filialmanagement den Grundriss ändert (z.B. durch temporäre Aktionsflächen), muss sich der Graph autonom anpassen. 
 
-Das System implementiert dies durch die Methode ``_allocate_kassen()``. Diese bypassiert die dynamische Zuteilung vollständig und injiziert die Impuls-Produkte deterministisch in die hartcodierten Warteschlangen-Knoten (``vW1``, ``vW2``, ``vW3``). Dies beweist, dass der Digitale Zwilling reale verhaltensökonomische Verkaufskonzepte auf Code-Ebene adaptiert.
+Die Architektur generiert die Basis-Wegpunkte daher nicht händisch, sondern extrahiert sie algorithmisch aus dem CAD-Grundriss (Floorplan) des Supermarkts über die **Mediale Achsentransformation (Medial Axis Transform)**. Durch die Berechnung von Voronoi-Diagrammen zwischen den soliden Regalblöcken ermittelt der ETL-Prozess das mathematische "Skelett" der freien Gehflächen. Die Kanten (Skelettlinien) garantieren dabei automatisch den maximalen äquidistanten Abstand zu allen umgebenden Hindernissen. Der Endnutzer wird somit deterministisch exakt in der sicheren Mitte des Ganges geroutet.
 
-3.3 Greedy Capacity Balancing & Der Numpy-Serialization Crash
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die Produkte werden durch **Greedy Capacity Balancing** über ``min()`` deterministisch immer in das Regal sortiert, das aktuell am leersten ist. Dadurch wird das Kundeninteresse automatisch homogen auf die Zone gestreut (präventives Load-Balancing).
+3. Bipartite Topologie: Die Demontage des Geisterfahrer-Paradoxons
+------------------------------------------------------------------
+Ein naiver Modellierungsfehler ist es, die Regale selbst als befahrbare Knoten in den Navigationsgraphen zu integrieren. In diesem Fall würde der Dijkstra-Algorithmus die kürzesten Pfade *durch* das physische Regal hindurch berechnen. Die Engine löst dies durch eine strikte **Bipartite Topologie-Trennung**:
 
-*Architektonischer Deep-Dive (Type-Safety):* Ein tückischer Bug, der in klassischen Pipelines zu fatalen Produktionsausfällen führt, ist die Inkompatibilität von C-basierten Datentypen. Scikit-Learn operiert intern auf Numpy-C-Strukturen (z.B. ``np.float64``). Versucht man, diese KI-Konfidenzwerte direkt in die JSON-Datenbank zu schreiben, wirft die Standard-Bibliothek den fatalen Fehler ``TypeError: Object of type float64 is not JSON serializable``.
+* **Navigable Nodes (Wege-Knoten):** Virtuelle Wegpunkte auf der medialen Achse der Gänge. Der Suchalgorithmus operiert *ausschließlich* auf diesem Subgraphen.
+* **POI Nodes (Points of Interest / Regale):** Diese Knoten repräsentieren die Ware. Sie besitzen exakt eine gerichtete Kante (Distanz 0.0) von und zu ihrem nächstgelegenen Anker-Knoten im Gang.
 
-Die Pipeline behebt dies durch einen rigorosen Type-Cast (``float(...)``), der den C-Pointer zwingend in einen nativen CPython-Float umwandelt:
+Die bipartite Trennung reduziert den Suchraum des Algorithmus dramatisch. Bei insgesamt 1000 Knoten (davon 800 Regale und 200 Wegpunkte) operiert der Dijkstra-Algorithmus nicht auf der Gesamtmenge. Die Zeitkomplexität für den Fibonacci-Heap-basierten Dijkstra sinkt von O(V_total * log(V_total) + E) auf O(V_way * log(V_way) + E_way). Die Suchlatenz auf dem Server verringert sich dadurch exponentiell.
+
+.. code-block:: json
+
+   // Architektur-Vertrag: Das JSON-Schema der ETL-Pipeline
+   {
+     "navigable_nodes": {
+       "WAY_01": {"coords": [10.5, 5.2]},
+       "WAY_02": {"coords": [10.5, 15.2]}
+     },
+     "navigable_edges": [
+       {"u": "WAY_01", "v": "WAY_02", "distance_m": 10.0, "bidirectional": true},
+       {"u": "CHECKOUT_IN", "v": "CHECKOUT_OUT", "distance_m": 2.0, "bidirectional": false}
+     ],
+     "poi_nodes": {
+       "SHELF_MILK": {"anchor_node": "WAY_01", "category": "Molkerei"}
+     }
+   }
 
 .. code-block:: python
 
-   for _, row in cat_items.iterrows():
-       available = [n for n in nodes if self.capacity[n] < StoreOntology.MAX_CAPACITY]
-       if not available: break 
+   import networkx as nx
+   import json
+   import threading
+   from typing import Dict, Any
+
+   class StoreTopology:
+       def __init__(self, config_path: str = "routing_config.json"):
+           # Mutex Lock für Thread-Sicherheit bei asynchronen ML-Updates
+           self._lock = threading.Lock() 
+           # DiGraph erzwingt saubere Einbahnstraßen-Logik nativ im Speicher
+           self.G = nx.DiGraph() 
+           self._hydrate_from_etl(config_path)
+
+       def _hydrate_from_etl(self, config_path: str) -> None:
+           """ Bipartiter Aufbau des Graphen aus der Single Source of Truth. """
+           with open(config_path, "r") as file:
+               data: Dict[str, Any] = json.load(file)
+               
+           for node_id, attr in data["navigable_nodes"].items():
+               self.G.add_node(node_id, type="WAYPOINT", coords=attr["coords"])
+               
+           for edge in data["navigable_edges"]:
+               u, v, dist = edge["u"], edge["v"], edge["distance_m"]
+               self.G.add_edge(u, v, base_distance_m=dist)
+               
+               # Automatische Erzeugung der Rück-Kante für reguläre Gänge
+               if edge.get("bidirectional", True):
+                   self.G.add_edge(v, u, base_distance_m=dist)
+
+           for poi_id, attr in data["poi_nodes"].items():
+               self.G.add_node(poi_id, type="SHELF", category=attr["category"])
+               # Bidirektionales Snapping an den Gang mit physikalischen Kosten von 0.0
+               self.G.add_edge(poi_id, attr["anchor_node"], base_distance_m=0.0)
+               self.G.add_edge(attr["anchor_node"], poi_id, base_distance_m=0.0)
+
+4. Spatial Indexing & Affine Transformationen
+---------------------------------------------
+Tippt ein Kunde auf das Frontend-Display (z. B. Koordinate X=1920, Y=1080), liefert der Browser rohe Pixelwerte. Der Graph operiert jedoch streng im metrischen Raum. Bevor ein Such-Algorithmus greifen kann, muss das System diese Dimensionen übersetzen. 
+
+*Stellen Sie sich vor, Sie legen eine transparente, verkleinerte Bauplan-Skizze (Pixel) über eine echte Landkarte (Meter). Um beide exakt übereinanderzulegen, müssen Sie die Skizze verschieben (Translation) und passend zoomen (Skalierung).*
+
+Mathematisch erfolgt dies durch eine **Affine Transformation** über eine homogene Matrix:
+
+$$ \begin{pmatrix} X_{meter} \\ Y_{meter} \\ 1 \end{pmatrix} = \begin{pmatrix} S_x & 0 & T_x \\ 0 & S_y & T_y \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} X_{pixel} \\ Y_{pixel} \\ 1 \end{pmatrix} $$
+
+Wobei $S$ der Skalierungsfaktor und $T$ der Translations-Offset ist. Nach der Konvertierung nutzt das System einen **K-d Baum (K-Dimensional Tree)**. Dieser Binärbaum wird in O(N log N) konstruiert und ermöglicht Nearest-Neighbor-Suchanfragen in exakt O(log N). Der K-d Baum kompensiert das "Fat-Finger-Syndrom" auf Touch-Displays deterministisch.
+
+.. code-block:: python
+
+   from scipy.spatial import cKDTree
+   import numpy as np
+
+   def build_spatial_index(self) -> None:
+       """ Kompiliert den Suchbaum. Beschränkt auf POI-Knoten. """
+       self.poi_ids = [n for n, d in self.G.nodes(data=True) if d.get('type') == 'SHELF']
+       coords = [self.G.nodes[n]["coords"] for n in self.poi_ids]
+       self.kd_tree = cKDTree(np.array(coords))
+
+   def resolve_touch_event(self, x_pixel: float, y_pixel: float) -> str:
+       """ Affine Transformation und K-d Baum Lookup in O(log N). """
+       x_meter = (x_pixel * CONFIG.SCALE_X) + CONFIG.OFFSET_X
+       y_meter = (y_pixel * CONFIG.SCALE_Y) + CONFIG.OFFSET_Y
        
-       best_node = min(available, key=lambda n: self.capacity[n])
+       _, index = self.kd_tree.query([x_meter, y_meter])
+       return self.poi_ids[index]
+
+5. Sensor Fusion & Orthogonales Map-Matching
+--------------------------------------------
+Der Smart Cart lokalisiert sich via IoT-Sensorik. Rohdaten unterliegen jedoch Gaußschem Rauschen und Multipath-Interferenzen. Würde das UI diese 2D-Koordinaten unbereinigt rendern, sähe der Kunde den Wagen durch Regale gleiten. 
+
+Die Architektur glättet das Signal zunächst temporal über einen asynchronen **Kalman-Filter**, der die physikalische Trägheit des Wagens als Prädiktionsmodell nutzt. Das System führt danach eine mathematische Dimensionsreduktion durch: Die Koordinate im Raum der Ebene wird orthogonal auf einen 1D-Unterraum (das Liniensegment des Ganges) projiziert (Edge-Snapping).
+
+.. code-block:: python
+
+   def orthogonal_projection(self, point: np.ndarray, A: np.ndarray, B: np.ndarray) -> np.ndarray:
+       """ 
+       Vektorisierte orthogonale Projektion eines Punktes auf das Segment AB.
+       Verhindert visuelles Clipping des Wagens mit Regal-Polygonen.
+       """
+       AB = B - A
+       AP = point - A
+       len_sq = np.dot(AB, AB)
        
-       self.stock[best_node].append({
-           'name': row['Name'], 'category': cat,
-           'is_frozen': row['IsFrozen'], # Cold-Chain Injection
+       if len_sq == 0.0:
+           return A
            
-           # TYPE-SAFETY FLEX: Verhindert den fatalen JSON Serialization Crash
-           # Konvertiert np.float64 hart in den nativen Python-Float
-           'ai_confidence': float(round(row['Conf'], 3)), 
+       # Skalarprodukt für die Projektion, hart begrenzt auf das Intervall [0, 1]
+       t = np.clip(np.dot(AP, AB) / len_sq, 0.0, 1.0)
+       return A + t * AB
+
+6. Temporale Arbitrage & Concurrency (Thread-Safety)
+----------------------------------------------------
+Das Machine-Learning-Modell prognostiziert Staus in Sekunden. Ein fataler Architekturfehler wäre es, diese Zeitstrafen stur auf die Basisdistanz in Metern zu addieren (Einheiten-Konflikt). Das System erzwingt das Prinzip der **Temporalen Arbitrage**:
+
+$$ W(e, t) = \frac{d_{base}(e)}{v_{walk}} + P_{traffic}(e, t) $$
+
+Da in einem ASGI-Environment hunderte UI-Requests parallel auf den Graphen zugreifen, während ein Background-Worker die ML-Gewichte aktualisiert, sichert ein **Mutex-Lock** (``threading.Lock``) die In-Memory-Struktur vor korrupten Race Conditions.
+
+.. code-block:: python
+
+   def update_temporal_weights(self, ml_time_penalties: dict, walk_speed_mps: float = 1.2) -> None:
+       """ Konvertiert Raum in Zeit. Thread-Safe durch Mutex-Locking. """
+       with self._lock:
+           for u, v in self.G.edges():
+               dist_m = self.G[u][v]['base_distance_m']
+               base_time_sec = dist_m / walk_speed_mps
+               
+               # ML liefert asymmetrische Strafen pro gerichteter Kante
+               penalty_sec = ml_time_penalties.get(f"{u}_{v}", 0.0)
+               self.G[u][v]['active_time_weight'] = base_time_sec + penalty_sec
+
+7. Das Einbahnstraßen-Paradoxon
+-------------------------------
+Wie in Kapitel 1 dargelegt, löst die Architektur das Problem von Kassenzonen und Schranken nativ auf Datenstrukturebene. Da das System einen gerichteten Graphen (``nx.DiGraph``) verwendet, wird das Einbahnstraßen-Paradoxon implizit gelöst. 
+
+Während reguläre Gänge beim ETL-Import zwingend zwei Kanten (Hin- und Rückweg) erhalten, wird an Kassenzonen ausschließlich die Vorwärtskante injiziert (definiert durch ``bidirectional: false`` im JSON-Artefakt). Ein Zurücknavigieren ist topologisch unmöglich, da der Routing-Solver im RAM schlichtweg keine physische Rückwärtskante findet, die er traversieren könnte. Dies macht fehleranfällige Custom-Attribute oder Sonderregeln im Dijkstra-Algorithmus obsolet.
+
+8. UI Path Smoothing: Vektorisierte Catmull-Rom Splines
+-------------------------------------------------------
+Der Dijkstra-Algorithmus operiert auf einem eckigen Wegenetz (90-Grad-Abbiegungen). Physische Einkaufswagen bewegen sich jedoch in interpolierten Kurven. Um die Route organisch zu rendern, wendet die Engine **Uniform Catmull-Rom Splines** an. 
+
+Die naive Implementierung über skalare For-Schleifen ist in Python extrem ineffizient. Die Architektur nutzt stattdessen die kubische charakteristische Matrix und wendet **NumPy-Broadcasting** an, um tausende Koordinaten simultan auf C-Ebene im RAM zu multiplizieren. Dies garantiert höchste Latenzfreiheit.
+
+Die Matrix-Gleichung für den Spline-Vektor $P(t)$ lautet:
+$$ P(t) = \frac{1}{2} \begin{bmatrix} 1 & t & t^2 & t^3 \end{bmatrix} \begin{bmatrix} 0 & 2 & 0 & 0 \\ -1 & 0 & 1 & 0 \\ 2 & -5 & 4 & -1 \\ -1 & 3 & -3 & 1 \end{bmatrix} \begin{bmatrix} P_0 \\ P_1 \\ P_2 \\ P_3 \end{bmatrix} $$
+
+.. code-block:: python
+
+   import numpy as np
+
+   def vectorized_catmull_rom(P0: np.ndarray, P1: np.ndarray, P2: np.ndarray, P3: np.ndarray, num_points: int = 10) -> np.ndarray:
+       """ 
+       Hochperformante, vektorisierte Spline-Interpolation über Numpy Broadcasting.
+       Garantiert, dass die Kurve exakt durch P1 und P2 verläuft.
+       """
+       # Zeitvektor t aufspannen (Shape: num_points x 1)
+       t = np.linspace(0, 1, num_points).reshape(-1, 1)
+       
+       # Potenz-Matrix [1, t, t^2, t^3] (Shape: num_points x 4)
+       T = np.hstack([np.ones_like(t), t, t**2, t**3])
+       
+       # Uniform Catmull-Rom Charakteristische Matrix (Shape: 4 x 4)
+       M = np.array([
+           [ 0,  2,  0,  0],
+           [-1,  0,  1,  0],
+           [ 2, -5,  4, -1],
+           [-1,  3, -3,  1]
+       ]) * 0.5
+       
+       # Kontrollpunkt-Matrix
+       P = np.vstack([P0, P1, P2, P3])
+       
+       # Matrix-Multiplikation: (T @ M) @ P 
+       # Führt Berechnungen iterativfrei im C-Backend von Numpy aus.
+       return (T @ M) @ P
+
+9. Integrität & Graceful Degradation
+------------------------------------
+Ein fehlerhaftes ETL-Update darf nicht zum Crash führen. Die Validierung prüft den Graphen beim Booten und aktiviert bei strukturellen Defekten deterministisch das Hard-Coded-Fallback-Szenario.
+
+.. code-block:: python
+
+   from core.ontology import StoreOntology
+
+   def validate_integrity(self) -> None:
+       """ Fail-Fast Validierung beim Booten der Live-Engine. """
+       with self._lock:
+           nav_nodes = [n for n, d in self.G.nodes(data=True) if d['type'] == 'WAYPOINT']
+           subgraph = self.G.subgraph(nav_nodes)
            
-           'suggested_slot': best_node
-       })
-       self.capacity[best_node] += 1
+           # Prüft schwache Erreichbarkeit im DiGraph
+           if not nx.is_weakly_connected(subgraph):
+               # Graceful Degradation: Fallback auf deterministische Notfall-Ontologie
+               self._hydrate_from_etl(StoreOntology.EMERGENCY_FALLBACKS)
+           
+           if any(d.get('active_time_weight', 0) < 0 for _, _, d in self.G.edges(data=True)):
+               raise ValueError("Kritisch: Negative Zeitgewichte verletzen Dijkstra!")
 
-3.4 Das Emergency Fallback (Graceful Degradation)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein reales Produktionsrisiko: Was passiert, wenn die KI aufgrund strenger Konfidenz-Schwellenwerte nicht genügend Produkte einer bestimmten Kategorie findet, um die zugewiesenen Regale zu füllen? Ein leeres Regal würde das Dashboard topologisch zerstören.
+10. Algorithmische Komplexität (Big-O Analyse)
+----------------------------------------------
+Um die Skalierbarkeit des Systems im Enterprise-Kontext (Filialen mit $>10.000$ Artikeln) zu validieren, wurde die Zeit- und Speicherkomplexität der Kernkomponenten analysiert. Die Metriken beweisen, dass die gewählten Datenstrukturen Latenzspitzen im Frontend mathematisch ausschließen.
 
-Die Pipeline nutzt hier das architektonische Prinzip der **Graceful Degradation**. Schlägt das Befüllen fehl, greift das System auf das hartcodierte Dictionary ``StoreOntology.EMERGENCY_FALLBACKS`` zurück. Das System injiziert vollautomatisch extrem stark nachgefragte synthetische Notfall-Daten (z.B. "Standard Milch"), um das Backend-Routing und die Frontend-Darstellung abzusichern.
-
-Teil IV: Cold-Chain Injection & MLOps Sync
-------------------------------------------
-Ein elementarer Business-Case für den Smart Cart ist die Einhaltung der Kühlkette (Cold Chain). Anstatt diese Logik später rechenaufwändig im Backend zu parsen, injiziert die ETL-Pipeline das topologische Metadatum ``is_frozen`` direkt in die Datenstruktur. Das Operations-Research-Modul kann Tiefkühlware so in $O(1)$ identifizieren und durch mathematische Strafen ans Ende der Einkaufsroute verschieben.
-
-*Prävention von Concept Drift:* Da das Skript ``generate_data_driven_store.py`` alle Phasen orchestriert, wird das Problem des Concept Drifts im Keim erstickt. Wenn die Pipeline neue Produkte in den Supermarkt lädt, erzwingt der ``MasterOrchestrator`` ein kompromissloses **Synchronous Retraining**, indem er das alte ML-Artefakt (``.pkl``) hart löscht und das Modell zwingend synchron auf der neu generierten Ground Truth trainiert.
-
-Am Ende der Pipeline werden die generierten JSON-Artefakte über Thread-Locks (``inv_manager._lock``) atomar materialisiert. Das Backend verfügt nun über einen vollständig validierten, physikalisch balancierten und maschinenlesbaren Digitalen Zwilling.
+==================================  ========================================  ================================
+**Komponente**                      **Zeitkomplexität (Time)**                **Speicherkomplexität (Space)**
+----------------------------------  ----------------------------------------  --------------------------------
+**DiGraph Konstruktion (RAM)**      O(|V| + |E|)                              O(|V| + |E|)
+**K-d Tree Aufbau**                 O(N log N)                                O(N)
+**K-d Tree Touch-Query**            O(log N)                                  O(1)
+**Orthogonale Projektion**          O(1)                                      O(1)
+**Temporale Arbitrage Update**      O(|E|)                                    O(1)
+**Catmull-Rom (Vektorisiert)**      O(1) *C-Ebene*                            O(num_points)
+==================================  ========================================  ================================

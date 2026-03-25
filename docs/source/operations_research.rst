@@ -19,7 +19,36 @@ A* garantiert nur dann den kürzesten Weg, wenn seine Heuristik (z.B. die Luftli
 
 1.2 Unsere gewählte Baseline: Der Multi-Source Dijkstra
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das System nutzt stattdessen den heuristikfreien Dijkstra-Algorithmus. Dijkstra breitet sich im Graphen wie eine Wasserwelle aus und findet die exakten Zeitkosten unter strikter Berücksichtigung der dynamischen BPR-Strafen. Für eine Zielmenge $K$ (die gesuchten Produkte) starten wir Dijkstra iterativ genau $K$-Mal. Die Komplexität sinkt dramatisch auf $O(K \cdot (V \log V + E))$. Da $K$ extrem viel kleiner als $V$ (Gesamtknoten) ist, ist dieser Ansatz hochperformant.
+Das System nutzt stattdessen den heuristikfreien Dijkstra-Algorithmus. Dijkstra breitet sich im Graphen wie eine Wasserwelle aus und findet die exakten Zeitkosten unter strikter Berücksichtigung der dynamischen BPR-Strafen. Für eine Zielmenge K (die gesuchten Produkte) starten wir Dijkstra iterativ genau K-Mal. Die Komplexität sinkt dramatisch auf $O(K \cdot (V \log V + E))$. Da K extrem viel kleiner als V (Gesamtknoten) ist, ist dieser Ansatz hochperformant.
+
+Der folgende Code-Beweis zeigt, wie die Architektur den riesigen Supermarkt-Graphen für den TSP-Solver in eine winzige, dichte Distanzmatrix (Clique) kondensiert:
+
+.. code-block:: python
+
+   import networkx as nx
+
+   def build_condensed_matrix(G_smart: nx.Graph, start_node: str, valid_targets: list):
+       """
+       Kondensiert den 500-Knoten Graphen in eine kompakte K-x-K Distanzmatrix.
+       Nutzt Multi-Source Dijkstra, um exakte Zeitkosten (inkl. KI-Staus) zu finden.
+       """
+       d_mat, p_mat = {}, {}
+       rel_nodes = [start_node] + valid_targets
+
+       for u in rel_nodes:
+           try:
+               # Dijkstra expandiert heuristikfrei und berücksichtigt BPR-Strafen (weight)
+               # Laufzeit: O(V log V + E) pro Produkt in der Liste
+               lengths, paths = nx.single_source_dijkstra(G_smart, u, weight='weight')
+               
+               for v in rel_nodes:
+                   if u != v and v in lengths:
+                       d_mat[(u, v)] = lengths[v]
+                       p_mat[(u, v)] = paths[v]
+           except nx.NetworkXNoPath:
+               pass # Graceful Degradation für physisch blockierte Regal-Inseln
+               
+       return d_mat, p_mat
 
 1.3 Das Umweg-Paradoxon (Temporale Arbitrage)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,7 +56,7 @@ Eine kritische Systemfrage lautet: *Leitet die KI den Kunden auf einen 50-Meter-
 
 Die Antwort liegt in der physikalischen Einheit des Basis-Graphen. Da die Kantengewichte der Topologie nicht in Metern, sondern von Beginn an in **Sekunden (Transit Time)** kodiert sind und die BPR-Strafen der KI ebenfalls **Sekunden** ausgeben, führt der Dijkstra-Algorithmus eine exakte **Temporale Arbitrage (Kosten-Nutzen-Analyse)** durch. 
 
-Der Algorithmus minimiert das globale Integral der Zeit. Ein 50-Meter-Umweg kostet bei normaler Schrittgeschwindigkeit ca. 35 Sekunden ($t_{umweg}=35s$). Ein direkter Gang kostet 10 Sekunden plus 5 Sekunden Stau ($t_{direkt}=15s$). Der Dijkstra-Algorithmus vergleicht $15s<35s$ und leitet den Kunden deterministisch **durch** den Stau. Die KI weicht einem Hindernis also niemals blind aus, sondern exakt nur dann, wenn die Zeitstrafe des Staus mathematisch größer ist als die Zeitstrafe des physischen Umwegs.
+Der Algorithmus minimiert das globale Integral der Zeit. Ein 50-Meter-Umweg kostet bei normaler Schrittgeschwindigkeit ca. 35 Sekunden (t_umweg = 35s). Ein direkter Gang kostet 10 Sekunden plus 5 Sekunden Stau (t_direkt = 15s). Der Dijkstra-Algorithmus vergleicht 15s < 35s und leitet den Kunden deterministisch **durch** den Stau. Die KI weicht einem Hindernis also niemals blind aus, sondern exakt nur dann, wenn die Zeitstrafe des Staus mathematisch größer ist als die Zeitstrafe des physischen Umwegs.
 
 1.4 Warum Christofides scheitert: Die Dreiecksungleichung
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +72,7 @@ Anstatt das offene Problem durch das künstliche Hinzufügen von Dummy-Nodes auf
 
 3. Das Strategy-Pattern: Dynamische Algorithmen-Eskalation
 ----------------------------------------------------------
-Um die $O(N)$-Laufzeitschranken des Servers zu schützen, lagert die Hauptfunktion ``calculate_hybrid_route`` die Logik in das abstrakte Interface ``RoutingStrategy`` aus. Das System implementiert eine vierstufige Eskalationsstrategie:
+Um die O(N)-Laufzeitschranken des Servers zu schützen, lagert die Hauptfunktion ``calculate_hybrid_route`` die Logik in das abstrakte Interface ``RoutingStrategy`` aus. Das System implementiert eine vierstufige Eskalationsstrategie:
 
 * **n <= 11: Held-Karp (Exakte DP).** Garantiert das absolute globale Zeit-Optimum.
 * **12 <= n <= 15: Simulated Annealing.** Thermodynamische Suche gegen lokale Minima.
@@ -68,11 +97,11 @@ Um die $O(N)$-Laufzeitschranken des Servers zu schützen, lagert die Hauptfunkti
 
 4. Exakte Dynamische Programmierung: Der Pythonic Way
 -----------------------------------------------------
-Für kleine Warenkörbe ($n \le 11$) verlangt das System absolute Exaktheit. Die Klasse ``HeldKarpDPSolver`` reduziert die Brute-Force-Laufzeit $O(N!)$ durch Dynamische Programmierung auf $O(N^2 \cdot 2^N)$. 
+Für kleine Warenkörbe (n <= 11) verlangt das System absolute Exaktheit. Die Klasse ``HeldKarpDPSolver`` reduziert die Brute-Force-Laufzeit O(N!) durch Dynamische Programmierung auf $O(N^2 \cdot 2^N)$. 
 
 *Der Architektonische Kniff (Frozensets statt Bitmasking):* In Hardware-nahen Sprachen (C++) wird Held-Karp über 32-Bit-Integer und Bit-Shifting gelöst. In einer High-Level-Sprache wie Python führt manuelles Bit-Shifting jedoch zu Performance-Verlusten. Die Architektur nutzt daher den "Pythonic Way": **Frozensets**. Ein ``frozenset`` ist eine unveränderliche (immutable) Menge und damit im Gegensatz zu normalen Listen hashbar. 
 
-Dies erlaubt es dem Algorithmus, die bereits besuchten Knoten (``unvisited: frozenset``) direkt als Schlüssel in einem Dictionary (der Memoization-Tabelle) abzulegen. Der Python-Interpreter löst dies intern über hochoptimierte C-Hashmaps in $O(1)$, was den Server-RAM massiv entlastet.
+Dies erlaubt es dem Algorithmus, die bereits besuchten Knoten (``unvisited: frozenset``) direkt als Schlüssel in einem Dictionary (der Memoization-Tabelle) abzulegen. Der Python-Interpreter löst dies intern über hochoptimierte C-Hashmaps in O(1), was den Server-RAM massiv entlastet.
 
 .. code-block:: python
 
@@ -127,7 +156,7 @@ Agenten ("Ameisen") durchlaufen den Graphen stochastisch und hinterlassen virtue
 
 6. Evolutionäre Biologie: Der Genetische Algorithmus (GA)
 ---------------------------------------------------------
-Für extreme Warenkörbe ($n > 25$) ist der Genetische Algorithmus das Mittel der Wahl. Er modelliert die Darwinsche Evolution über Generationen hinweg. Ein kritischer architektonischer Aspekt ist die Vermeidung von Duplikaten während der "Paarung" von Routen (Crossover). Hierzu implementiert die Architektur den **Partially Mapped Crossover (PMX)**.
+Für extreme Warenkörbe (n > 25) ist der Genetische Algorithmus das Mittel der Wahl. Er modelliert die Darwinsche Evolution über Generationen hinweg. Ein kritischer architektonischer Aspekt ist die Vermeidung von Duplikaten während der "Paarung" von Routen (Crossover). Hierzu implementiert die Architektur den **Partially Mapped Crossover (PMX)**.
 
 Beim PMX wird ein zufälliger Gen-Abschnitt (Sub-Route) zwischen zwei Elternteilen getauscht. Die restlichen Positionen werden über eine Mapping-Tabelle so angepasst, dass jedes Produkt exakt einmal in der neuen Route vorkommt. Dies schützt die topologische Integrität der Einkaufsliste.
 
@@ -165,9 +194,9 @@ Beim PMX wird ein zufälliger Gen-Abschnitt (Sub-Route) zwischen zwei Elternteil
 
 7. Checkout-Stochastik: M/M/1/K Approximation
 ---------------------------------------------
-Eine räumliche Route scheitert ohne Einbeziehung der Kassenwartezeit. Unsere Architektur verzichtet bewusst auf die rechenintensive Pollaczek-Khintchine-Formel für log-normalverteilte Servicezeiten ($M/G/1$) und approximiert die Realität stattdessen performant als **$M/M/1/K$-Warteschlangenmodell**.
+Eine räumliche Route scheitert ohne Einbeziehung der Kassenwartezeit. Unsere Architektur verzichtet bewusst auf die rechenintensive Pollaczek-Khintchine-Formel für log-normalverteilte Servicezeiten ($M/G/1$) und approximiert die Realität stattdessen performant als **M/M/1/K-Warteschlangenmodell**.
 
-Die Klasse ``EnterpriseQueuingModel`` berechnet die Wartezeit unter Berücksichtigung der Ankunftsrate $\lambda$ (moduliert durch Sinus-Tageszeitkurven zur Abbildung der Rush-Hour) und einer Kapazitätsgrenze $K=10$.
+Die Klasse ``EnterpriseQueuingModel`` berechnet die Wartezeit unter Berücksichtigung der Ankunftsrate $\lambda$ (moduliert durch Sinus-Tageszeitkurven zur Abbildung der Rush-Hour) und einer Kapazitätsgrenze K = 10.
 
 .. code-block:: python
 
@@ -206,7 +235,7 @@ Das finale Meisterstück der Architektur ist die zustandslose Synthese im Contro
 
 Sobald der TSP-Solver die ideale Regal-Reihenfolge mit freiem Endknoten berechnet hat, extrahiert der Orchestrator das letzte Regal der Route. Von diesem Punkt aus berechnet er für alle verfügbaren Kassen das physikalische Integral aus Laufzeit und Stochastik: 
 
-$$\text{Kosten} = \text{Dijkstra-Laufweg} + \text{M/M/1/K Wartezeit} + \text{Weg zum Ausgang}$$
+$$\text{Kosten}=\text{Dijkstra-Laufweg}+\text{M/M/1/K Wartezeit}+\text{Weg zum Ausgang}$$
 
 Das absolute Minimum dieser Funktion bestimmt die Zielkasse, welche nahtlos an die Array-Liste des TSP-Solvers angefügt (stitched) wird. Da dieser Prozess zustandslos in exakt der Millisekunde iteriert, in der der Nutzer den Callback in der UI auslöst, fließen Echtzeit-Sensorik und Warteschlangentheorie deterministisch in die Routenplanung ein, ohne die Such-Komplexität des TSP-Solvers unnötig aufzublähen.
 
