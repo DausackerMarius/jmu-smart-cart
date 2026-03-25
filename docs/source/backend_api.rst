@@ -84,15 +84,15 @@ Der Code-Beweis der Zustandslosigkeit: Das System nutzt in seinen reaktiven Cont
        # Der neue Zustand wird sofort wieder an den Browser des Nutzers zurückgegeben
        return current_cart, "Produkt hinzugefügt"
 
-Phase III: Das Architektur-Dilemma – GIL vs. Thread-Pools
----------------------------------------------------------
-Ein Webserver muss hunderte Anfragen zeitgleich verarbeiten (Concurrency). In modernen Web-Frameworks nutzt man hierfür oft asynchrone Programmierung (die Schlüsselwörter ``async`` und ``await``). Für unser spezifisches TSP-Routing-System wäre das jedoch ein katastrophaler Architekturfehler.
+Phase III: Das Architektur-Dilemma – GIL vs. Multiprocessing
+------------------------------------------------------------
+Ein Webserver muss dutzende Anfragen zeitgleich verarbeiten (Concurrency). In modernen Web-Frameworks nutzt man hierfür oft asynchrone Programmierung (die Schlüsselwörter ``async`` und ``await``) oder klassisches Multithreading. Für unser spezifisches TSP-Routing-System wäre dies jedoch ein fataler Architekturfehler.
 
-Der Grund hierfür ist tief in der C-Implementierung der Programmiersprache (CPython) verankert: Das **Global Interpreter Lock (GIL)**. Das GIL verhindert, dass zwei Threads gleichzeitig denselben Python-Bytecode ausführen. 
+Der Grund hierfür ist tief in der C-Implementierung der Programmiersprache (CPython) verankert: Das **Global Interpreter Lock (GIL)**. Das GIL verhindert auf C-Ebene, dass zwei Threads gleichzeitig denselben Python-Bytecode ausführen. 
 
-*Die Konsequenz:* Die hochkomplexe TSP-Routenberechnung (Operations Research) hat keine I/O-Wartezeiten, sondern ist reine, brutale Mathematik (CPU-Bound). Würden wir Dash/Flask asynchron zwingen, würde dieser Task den einzigen Event-Loop des Webservers komplett blockieren. Alle anderen Kunden im Supermarkt würden "einfrieren".
+*Die Konsequenz:* Multithreading skaliert in Python nur bei I/O-gebundenen Wartezeiten (z. B. Datenbankabfragen). Die hochkomplexe TSP-Routenberechnung (Operations Research) besitzt jedoch keine I/O-Latenzen, sondern ist reine, CPU-gebundene Mathematik. Würden wir Dash über Threads skalieren, würde ein Kunde, der gerade die Held-Karp-Matrix berechnet, das GIL exklusiv sperren. Alle anderen parallelen Routing-Anfragen im Supermarkt würden in einem Bottleneck blockieren und "einfrieren".
 
-*Die Lösung (Werkzeug Thread-Pools):* Plotly Dash und Flask nutzen absichtlich synchrone Callbacks. Die zugrundeliegende WSGI-Engine lagert jeden eingehenden Request eines Tablets in einen separaten Thread oder Worker-Prozess aus. Wenn Thread A gerade die schwere Held-Karp-Matrix berechnet, übernimmt Thread B völlig transparent die nächste HTTP-Anfrage. Dies garantiert maximale Latenz-Sicherheit, ohne das Betriebssystem mit asynchronem Overhead zu belasten.
+*Die Lösung (WSGI Multiprocessing):* Um das GIL bei rechenintensiven Matrizen zu umgehen, skaliert die Architektur nicht über Threads, sondern über **Multiprocessing**. Das System wird über einen hochperformanten WSGI-Server (wie Gunicorn) orchestriert, der die Dash-Applikation in strikt isolierte Betriebssystem-Worker-Prozesse forkt. Da jeder Worker-Prozess über einen eigenen CPython-Interpreter (und somit ein eigenes, separates GIL) verfügt, skaliert die CPU-gebundene Mathematik parallel über die physischen Kerne des Servers. Wenn Prozess A die Held-Karp-Matrix berechnet, übernimmt Prozess B völlig unabhängig und latenzfrei die HTTP-Anfrage des nächsten Kunden.
 
 Phase IV: Fuzzy Search & Algorithmische DDoS-Prävention
 -------------------------------------------------------
@@ -168,7 +168,7 @@ Der Controller erzeugt daher zwingend eine **Deep Copy** (``G_smart = G_base.cop
 Die physikalische Übersetzung des Vorhersage-Tensors in Kantengewichte erfolgt über die adaptierte **Bureau of Public Roads (BPR) Penalty-Funktion**. Verkehrsstaus wachsen nicht linear. Ab einer kritischen Personenmasse bricht der Verkehrsfluss exponentiell zusammen. Die Architektur nutzt daher den Exponenten 2.5 für radikale Bestrafungen.
 
 Phase VII: Graphen-Kondensation (Der Floyd-Warshall-Fehlschluss)
----------------------------------------------------------------
+----------------------------------------------------------------
 Der mutierte Graph besteht aus hunderten Knotenpunkten. Diesen riesigen Graphen direkt an den Traveling-Salesperson-Solver (TSP) zu übergeben, ist schlicht unmöglich. Der Solver benötigt als Eingabe stattdessen eine drastisch reduzierte **Distanzmatrix (Clique)**, die *ausschließlich* aus den gesuchten Ziel-Produkten besteht. 
 
 Ein klassischer Fehler im Software Engineering ist es, hier den Floyd-Warshall-Algorithmus (All-Pairs Shortest Path) einzusetzen. Dieser berechnet die Pfade zwischen *allen* Knoten des Supermarkt-Graphen mit einer festen Komplexität von O(V^3). Das wäre für eine Echtzeit-API inakzeptabel rechenintensiv.
@@ -198,7 +198,7 @@ Das System nutzt stattdessen den **Dijkstra-Algorithmus** als Multi-Source-Varia
 Die zwingende Übergabe des Parameters ``weight='weight'`` garantiert, dass Dijkstra die von der KI generierten BPR-Strafen in seine Wegfindung einbezieht.
 
 Phase VIII: Stochastik, Warteschlangentheorie & Der M/M/1/K Trade-off
---------------------------------------------------------------------
+---------------------------------------------------------------------
 Eine rein räumliche Navigation scheitert auf der "letzten Meile". Der geometrisch kürzeste Weg zur Kasse 1 ist wertlos, wenn sich dort ein massiver Rückstau bildet. Das System übergibt diese finale Entscheidung daher an ein dediziertes Warteschlangentheorie-Modul (Queueing Theory).
 
 *Die architektonische Verteidigung (M/G/1 vs. M/M/1/K):* Da die tatsächlichen Warenkorbgrößen unserer Kunden in der Realität log-normalverteilt sind, ist die Abfertigungszeit an der Kasse streng genommen "General" verteilt. Es handelt sich mathematisch um ein M/G/1 Warteschlangenmodell. Um jedoch die Latenzen im Dashboard (Echtzeit-Inferenz) minimal zu halten und die enorm rechenaufwändige Pollaczek-Khintchine-Formel zu umgehen, approximiert die Architektur das System ganz bewusst als klassisches **M/M/1/K-Modell** (Exponential-verteilte Servicezeit mit Kapazitätsgrenze K=10).
@@ -206,7 +206,7 @@ Eine rein räumliche Navigation scheitert auf der "letzten Meile". Der geometris
 Die Klasse ``EnterpriseQueuingModel`` berechnet die effektive Ankunftsrate basierend auf der aktuellen Uhrzeit (moduliert durch eine Sinus-Kurve für die Rush-Hour) und der Kassenpräferenz. Ist das Limit K=10 erreicht, greift das Loss-System (Kunden weichen stochastisch auf andere Kassen aus).
 
 Phase IX: Der Orchestrator & Das Strategy Pattern
----------------------------------------------------
+-------------------------------------------------
 Ein monolithischer Python-Code voller bedingter Anweisungen für die verschiedenen Algorithmen wäre extrem schwer wartbar. Das System lagert diese Logik elegant über das **Strategy Pattern** (ein Entwurfsmuster der "Gang of Four") in austauschbare Klassen aus.
 
 Der Controller schaltet abhängig von der Warenkorbgröße über das Strategy Pattern (OOM-Schutz) fließend die Algorithmen um: Bis 11 Produkte greift die exakte Dynamische Programmierung (Held-Karp). Danach eskaliert das System nahtlos auf thermodynamische Heuristiken (Simulated Annealing), Schwarmintelligenz (Ant Colony) oder ab 25 Produkten auf biologische Evolution (Genetic Algorithm), um den Server-RAM vor dem O(N^2 * 2^N) Limit zu schützen.
@@ -230,7 +230,7 @@ Zudem modelliert die Architektur das System als **Open TSP** (ohne erzwungenen R
        store_seq, msg = solver.solve(d_mat, start_node, store_t, None)
 
 Phase X: Wissenschaftliche Evaluierung & Big-O
------------------------------------------------
+----------------------------------------------
 In einer Bachelorarbeit muss der tatsächliche System-Nutzen theoretisch und praktisch bewiesen werden. Dies geschieht durch das parallel integrierte **A/B-Testing (Sim2Real-Gap Messung)** direkt im Dash-Frontend.
 
 Zwei Agenten werden bei jeder Routenberechnung in einem Shadow-Mode parallel simuliert: Die deterministische Baseline misst stur die physikalische Länge eines Ganges und ist de facto **stau-blind**. Das Smart-Routing nutzt die durch die KI mutierten Kanten. Der Dijkstra-Algorithmus der KI erkennt im Arbeitsspeicher, dass der kurze Gang aufgrund der BPR-Strafe zeitlich extrem lange dauern wird und wählt autonom einen freien Umweg. Die Differenz in der simulierten Laufzeit beweist den messbaren Return on Investment (ROI) der Architektur in Echtzeit.

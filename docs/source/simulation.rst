@@ -3,7 +3,7 @@ Agentenbasierte Simulation & Synthetische Datengenerierung
 
 Moderne Machine-Learning-Modelle für die prädiktive Stau-Vorhersage (Traffic Prediction, siehe ML-Architektur) erfordern zwingend eine hochdimensionale, historisierte und sauber gelabelte Datenbasis. Das Modell muss in der Trainingsphase Tausende von Stunden an Supermarkt-Betrieb analysieren, um autoregressive Muster zu erlernen. 
 
-Da im Rahmen dieser Arbeit keine realen, hochfrequenten Sensordaten zur Verfügung stehen – nicht zuletzt aufgrund der strikten DSGVO-Richtlinien (Datenschutzgrundverordnung) im Einzelhandel, die das lückenlose Kamera- oder LiDAR-Tracking von Kunden verbieten –, löst die Architektur das Kaltstart-Problem der KI durch synthetische Datengenerierung.
+Da im Rahmen dieser Arbeit keine realen, hochfrequenten Sensordaten zur Verfügung stehen – nicht zuletzt aufgrund der strikten DSGVO-Richtlinien im Einzelhandel, die das lückenlose Kamera- oder LiDAR-Tracking von Kunden verbieten –, löst die Architektur das Kaltstart-Problem der KI durch synthetische Datengenerierung.
 
 Das System erzeugt seine Ground-Truth-Daten über eine vollautonome Agentenbasierte Simulation (Agent-Based Modeling, ABM). Dieses Modul fungiert als isomorpher "Digitaler Zwilling" (Digital Twin). Es transformiert die statische Graphen-Topologie aus Kapitel 3 durch die Injektion autonomer Kunden-Agenten in ein hochdynamisches, stochastisches System. 
 
@@ -78,7 +78,7 @@ Um das Varianz-Rauschen der Realität abzubilden, zieht die Engine für jeden ne
        profile = random.choices(PROFILES, weights=[p.probability for p in PROFILES])[0]
 
        # Individuelle Geschwindigkeit via Normalverteilung (Gauß-Kurve)
-       # Hartes Clipping auf 0.4 m/s verhindert physikalisch unmögliche Graphen-Deadlocks (Stillstand)
+       # Hartes Clipping auf 0.4 m/s verhindert physikalisch unmögliche Graphen-Deadlocks
        ind_speed = max(0.4, np.random.normal(profile.speed_mean, profile.speed_std))
        num_items = max(1, np.random.poisson(profile.cart_lambda))
 
@@ -93,8 +93,6 @@ Die Fortbewegung der Agenten erfolgt in der Simulation nicht diskret durch das s
 Die Simulation adaptiert das makroskopische Lighthill-Whitham-Richards (LWR) Modell für Verkehrsfluss aus der Straßenbauplanung. Jede Kante im Graphen (ein Gang) besitzt ein Kapazitätslimit. Betreten Agenten die Kante, wird ihre individuelle Geschwindigkeit kollektiv über eine nicht-lineare Gleichung gedrosselt. Dies löst in der Simulation realistische, emergente Rückstaus aus.
 
 Gemäß dem Fundamentaldiagramm des Verkehrsflusses sorgt ein quadratischer Exponent in der Formel dafür, dass der Supermarkt-Gang bis zu einer Auslastung von ca. 60 Prozent kaum Geschwindigkeitsverlust aufweist (Free Flow). Erst ab ca. 80 Prozent Auslastung bricht der Verkehrsfluss exponentiell zusammen (Congested Flow) und zwingt die Agenten zum Kriechen.
-
-Algorithmus: v_actual = v_ind * max(v_min, 1 - (occupancy / capacity)^2)
 
 3.2 Bounded Rationality & Pre-Halftime Prädiktions-Protokoll
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,9 +143,9 @@ Die architektonische Brücke zwischen Simulation und Machine Learning ist das Da
 
 Ein Prüfer könnte hier die berechtigte Frage stellen: Wann beginnt die Simulation mit der Aufzeichnung? Da der Supermarkt zum Startzeitpunkt (Tick 0) völlig leer ist, würde ein sofortiges Harvesting sogenannte transiente Zustände aufzeichnen (einen Cold-Start-Bias). Ein ML-Modell würde dadurch fälschlicherweise lernen, dass Supermärkte grundsätzlich immer leer sind. 
 
-Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathematischen Steady-State der Markow-Kette) durch eine harte Burn-in Period von 3600 Ticks (exakt 1 Stunde). In dieser Zeit werden die Agenten im Verborgenen simuliert und berechnet, aber es wird kein einziger Datenpunkt auf die Festplatte geschrieben.
+Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathematischen Steady-State der Markow-Kette) durch eine harte Burn-in Period von 3600 Ticks (exakt 1 Stunde). In dieser Zeit werden die Agenten im Verborgenen simuliert und berechnet, aber es wird kein einziger Datenpunkt persistiert.
 
-*Die Rechtfertigung für Apache Parquet:* Um einen Out-Of-Memory (OOM) Kollaps bei mehrtägigen Simulationen zu verhindern, verbietet das System das klassische Schreiben von CSV-Dateien. Stattdessen nutzt die Architektur das Apache Parquet Format. Parquet speichert Daten nicht zeilenbasiert, sondern spaltenbasiert (columnar) und nutzt Snappy-Kompression. Dies reduziert die Dateigröße massiv und beschleunigt den I/O-Durchsatz. Die Snapshots verbleiben nicht im RAM, sondern werden periodisch (Chunking) auf die SSD gestreamt, wodurch der RAM-Verbrauch des Python-Prozesses konstant bei O(1) bleibt.
+*Die Rechtfertigung für Apache Parquet:* Um einen Out-Of-Memory (OOM) Kollaps bei mehrtägigen Simulationen zu verhindern, nutzt das System das spaltenbasierte (columnar) Apache Parquet Format mit Snappy-Kompression statt regulärer CSV-Dateien. Die Snapshots werden periodisch (Chunking) auf die SSD gestreamt, wodurch der RAM-Verbrauch des Python-Prozesses konstant bei O(1) bleibt.
 
 .. code-block:: python
 
@@ -156,7 +154,8 @@ Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathema
    import pyarrow.parquet as pq
 
    class SimulationEngine:
-       def __init__(self):
+       def __init__(self, graph):
+           self.graph = graph
            self.burn_in_ticks = 3600
            self.snapshot_buffer = []
            self.chunk_size = 10000 # Buffer-Limit für den SSD-Flush
@@ -181,10 +180,16 @@ Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathema
                edge_occupancy[agent.current_edge] += 1
 
            for (node_u, node_v), occupancy in edge_occupancy.items():
+               # O(1) Extraktion der Spatial Spillovers zum exakten Zeitpunkt t
+               out_edges = self.graph.out_edges(node_v)
+               neighbor_loads = [edge_occupancy.get((u, v), 0) for u, v in out_edges]
+               max_neighbor_load = max(neighbor_loads) if neighbor_loads else 0
+
                self.snapshot_buffer.append({
                    "timestamp": tick,
                    "edge_id": f"{node_u}_{node_v}",
-                   "occupancy": np.uint16(occupancy) # Hartes Downcasting spart 50% RAM
+                   "occupancy": np.uint16(occupancy), # Hartes Downcasting spart RAM
+                   "spatial_neighbor_max_occupancy": np.uint16(max_neighbor_load)
                })
 
            # Chunked SSD Streaming (hält den Python-RAM-Verbrauch konstant auf O(1))
@@ -202,57 +207,47 @@ Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathema
            self.parquet_writer.write_table(table)
            self.snapshot_buffer.clear() # Leert den Puffer sofort
 
-5. Feature Engineering: Topologische Translation (Spatial Spillovers)
+5. Topologische Translation: Spatial Spillovers (Feature Engineering)
 ---------------------------------------------------------------------
 Das ML-Modell (XGBoost) versteht mathematisch keine zweidimensionalen Graphen oder Netzwerke, sondern verlangt flache 1D-Tensoren (Tabellen). 
 
-Um der KI beizubringen, dass sich ein Stau von Gang A rückwärts in Gang B ausbreitet (Spatial Spillover Effekt), muss das Feature-Engineering die topologische Nachbarschaft des Graphen exakt in Tabellenspalten übersetzen. Der Code befragt dafür in jedem Schritt das NetworkX-Objekt nach den ausgehenden Kanten und extrahiert die maximale Auslastung aller direkten Nachbar-Kanten in das Pandas-DataFrame.
+Um der KI beizubringen, dass sich ein Stau von Gang A rückwärts in Gang B ausbreitet (Spatial Spillover Effekt), muss die topologische Nachbarschaft exakt in Tabellenspalten übersetzt werden. Ein klassischer Architekturfehler wäre es, dies post-hoc über langsame Pandas-Schleifen (z. B. ``iterrows()``) zu rekonstruieren. Dies wäre nicht nur ein ineffizientes Anti-Pattern, sondern birgt auch die Gefahr des Temporal Data Leakage, da der Zustand vergangener Ticks mit der Gegenwart vermischt werden könnte.
 
-.. code-block:: python
-
-   def extract_spatial_features(df: pd.DataFrame, G: nx.DiGraph) -> pd.DataFrame:
-       """ Transformiert die Graphen-Topologie in flache Machine-Learning-Features. """
-       neighbor_loads = []
-       for _, row in df.iterrows():
-           target_node = row['edge_id'].split('_')[1]
-
-           # Befragt den In-Memory-Graphen nach allen ausgehenden physischen Wegen
-           out_edges = G.out_edges(target_node, data=True)
-           loads = [data.get('occupancy', 0) for _, _, data in out_edges]
-
-           neighbor_loads.append(max(loads) if loads else 0)
-
-       df['spatial_neighbor_max_occupancy'] = neighbor_loads
-       return df
-
-Diese architektonische Transformation erlaubt es dem tabellarischen Boosting-Modell, räumliche Flaschenhälse mit O(1) Latenz vorausschauend zu antizipieren, ohne teure Graph-Neural-Networks (GNNs) einsetzen zu müssen.
+Die Engine löst dies stattdessen nativ während der ``_capture_graph_snapshot``-Phase (siehe Code in Kapitel 4). Da die Engine in diesem Mikrotick ohnehin das exakte Wissen über alle Kanten besitzt, extrahiert sie die maximale Auslastung der direkten Graphen-Nachbarn absolut zeitsynchron in O(1) Latenzzeit. Diese saubere topologische Translation erlaubt es dem tabellarischen Boosting-Modell, räumliche Flaschenhälse vorausschauend zu antizipieren, ohne teure Graph-Neural-Networks (GNNs) einsetzen zu müssen.
 
 6. Statistische Validierung des Digitalen Zwillings
 ---------------------------------------------------
 Ein Machine-Learning-Modell, das auf Müll trainiert wird, generiert Müll. Die generierten Daten der Simulation müssen daher vor dem Training statistisch rigoros gegen die Realität validiert werden.
 
-6.1 Mathematische Dualität: KS-Test auf Inter-Arrival-Times
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Theoretische Fundierung: Wenn die Anzahl der Ankünfte am Supermarkt-Eingang korrekt durch einen Poisson-Prozess modelliert wird, dann müssen die Zeiten *zwischen* den einzelnen Ankünften (die Inter-Arrival-Times) zwingend einer kontinuierlichen Exponentialverteilung folgen. Das System wendet den Kolmogorov-Smirnov-Test (KS-Test) an, um zu beweisen, dass die Pseudo-Zufallsgeneratoren der Simulation mathematisch korrekt arbeiten. Ein p-Wert größer als 0.05 beweist, dass die Daten der theoretischen Erwartung entsprechen.
+6.1 Mathematische Dualität: KS-Test im stationären Fenster
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Theoretische Fundierung: Wenn die Anzahl der Ankünfte am Supermarkt-Eingang korrekt durch einen Poisson-Prozess modelliert wird, dann müssen die Zeiten *zwischen* den einzelnen Ankünften (die Inter-Arrival-Times) zwingend einer kontinuierlichen Exponentialverteilung folgen. 
+
+Da unsere Simulation jedoch das Kundenaufkommen dynamisch über den Tag als Sinus-Kurve moduliert (Inhomogener Poisson-Prozess, siehe Kapitel 2.1), würde ein globaler Test hier unweigerlich fehlschlagen. Das System beweist die mathematische Integrität der Pseudo-Zufallsgeneratoren stattdessen durch die Isolierung eines stationären Zeitfensters (z. B. das absolute Plateau der Rush-Hour). Auf diesem Ausschnitt, in dem Lambda näherungsweise konstant ist, wird der Kolmogorov-Smirnov-Test (KS-Test) angewendet. Ein p-Wert größer als 0.05 beweist, dass die Daten der theoretischen Erwartung einer echten Exponentialverteilung entsprechen.
 
 .. code-block:: python
 
    from scipy import stats
 
-   def validate_spawner_distribution(simulated_inter_arrival_times: list, expected_lambda: float):
-       """ Führt den KS-Test gegen die kontinuierliche Exponentialverteilung durch. """
+   def validate_spawner_distribution(rush_hour_inter_arrival_times: list, peak_lambda: float):
+       """ 
+       Führt den KS-Test auf einem stationären Ausschnitt der Simulation durch,
+       um inhomogene Modulationsverzerrungen mathematisch auszuschließen. 
+       """
        ks_stat, p_value = stats.kstest(
-           simulated_inter_arrival_times, 
+           rush_hour_inter_arrival_times, 
            'expon', 
-           args=(0, 1.0 / expected_lambda)
+           args=(0, 1.0 / peak_lambda) # Skalierung = 1 / Lambda
        )
-       # Ist p > 0.05, wird H0 akzeptiert. Die Simulation ist mathematisch valide.
+       
+       # Ist p >= 0.05, wird H0 (Daten sind exakt exponentialverteilt) akzeptiert.
        if p_value < 0.05:
            raise ValueError(f"Simulation Calibration Failed! KS-Stat: {ks_stat}, p: {p_value}")
 
 6.2 Beweis der Ergodizität (Augmented Dickey-Fuller Test)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Theoretische Fundierung: Um die Wahl von 3600 Ticks für die Burn-in-Phase mathematisch zu rechtfertigen, nutzt das System den Augmented Dickey-Fuller-Test (ADF). Er beweist, dass die System-Auslastung nach dieser Phase tatsächlich stationär ist. 
+
 Die Nullhypothese (H0) des ADF-Tests lautet, dass die Zeitreihe eine Unit-Root (Einheitswurzel) besitzt. Eine Zeitreihe mit Unit-Root hat keine Tendenz zur Rückkehr zu einem langfristigen Mittelwert (Mean-Reverting), sondern driftet unkontrollierbar als Random Walk ab. Ein p-Wert von unter 0.05 verwirft H0 rigoros und beweist, dass das System seinen stabilen Rhythmus (Steady-State) gefunden hat.
 
 .. code-block:: python

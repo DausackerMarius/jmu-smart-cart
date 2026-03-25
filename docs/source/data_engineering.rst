@@ -1,25 +1,23 @@
 Data Engineering & Supermarkt-Ontologie (ETL-Pipeline)
 ======================================================
 
-Das vorherige Kapitel hat die räumliche Infrastruktur des JMU Smart Carts definiert: Ein Graphen-Modell des Supermarkts liegt als Digitaler Zwilling im Arbeitsspeicher vor. Doch an diesem Punkt der Systemarchitektur sind die Knoten (die physischen Regale) lediglich leere Container. 
+Das vorherige Kapitel definierte die räumliche Infrastruktur des JMU Smart Carts: Ein Graphen-Modell des Supermarkts dient als Digitaler Zwilling im Arbeitsspeicher. Für das dynamische Routing fungieren die Knoten (physische Regale) an diesem Punkt jedoch lediglich als leere Container. 
 
-Ein prädiktives Routing-System funktioniert nur mit einer absolut validen Datenbasis. Das Grundgesetz der Informatik *"Garbage In, Garbage Out"* (Müll rein, Müll raus) gilt hier rigoros: Wenn die Produktdatenbank fehlerhaft ist oder Produkte topologisch nicht existieren, navigiert der Dijkstra-Algorithmus den Kunden im besten Fall vor eine leere Wand und im schlimmsten Fall stürzt der Webserver ab. 
+Ein prädiktives Routing-System erfordert eine durchgehend konsistente Datenbasis. Ist die Produktdatenbank fehlerhaft oder existieren referenzierte Produkte topologisch nicht, führt dies deterministisch zu fehlerhaften Pfadberechnungen oder Laufzeitfehlern im Backend. 
 
-Anstatt rudimentäre Dummy-Daten von Hand zu schreiben (was für eine produktionsnahe Architektur nicht skalierbar wäre), implementiert das System eine autonome **Data-Engineering-Pipeline nach dem ETL-Muster (Extract, Transform, Load)**. Diese Pipeline fungiert als automatisierte Brücke zwischen der unstrukturierten Außenwelt und unserem streng typisierten Graphen.
+Um eine skalierbare, produktionsnahe Architektur zu gewährleisten, implementiert das System eine autonome Data-Engineering-Pipeline nach dem ETL-Muster (Extract, Transform, Load). Diese Pipeline dient als automatisierte Schnittstelle, die den nativen "Bundeslebensmittelschlüssel" (BLS) importiert, semantisch bereinigt, stochastisch anreichert und die resultierenden Produkte algorithmisch auf die virtuellen Supermarkt-Regale abbildet.
 
-Sie lädt den echten, zehntausende Zeilen umfassenden "Bundeslebensmittelschlüssel" (BLS), reinigt ihn von bürokratischem Rauschen, reichert ihn stochastisch an und verteilt die Produkte anschließend algorithmisch und fair auf die virtuellen Supermarkt-Regale.
+Teil I: Extract – Speichereffizienz durch Stream-Processing
+-----------------------------------------------------------
+Eine zentrale Herausforderung im Data Engineering ist das Ressourcenmanagement bei großen Datensätzen. Der Bundeslebensmittelschlüssel liegt als umfangreiche CSV-Datei vor. 
 
-Teil I: Extract – Das Pandas-Paradoxon und Speichereffizienz
-------------------------------------------------------------
-Die erste große ingenieurtechnische Hürde ist der Umgang mit großen Datenmengen (Big Data). Der Bundeslebensmittelschlüssel ist eine gewaltige CSV-Datei. 
+*Die architektonische Abwägung:* In der explorativen Datenanalyse ist es Branchenstandard, Daten über die Bibliothek ``pandas`` via ``pandas.read_csv()`` in den RAM zu laden. In einer produktiven Microservice-Architektur stellt dieses "Eager Loading" (sofortiges Laden) jedoch ein Performance-Risiko dar. Bei großen Dateien oder parallelen Instanzen führt dies zu Speicherengpässen (Memory Spikes) und potenziellen Out-of-Memory-Abstürzen (OOM). 
 
-*Die architektonische Baseline:* In der reinen Data Science ist es Branchenstandard, Daten über die Bibliothek ``pandas`` via ``pandas.read_csv()`` einzulesen. In einer produktiven, serverseitigen Microservice-Architektur ist dies jedoch ein schwerwiegender Designfehler (Anti-Pattern). Pandas ist "eager" (gierig) und lädt die gesamte Datei auf einmal in den Arbeitsspeicher. Bei sehr großen Dateien führt dies unweigerlich zu Memory-Spikes und einem **Out-of-Memory (OOM) Absturz**.
+Um die Skalierbarkeit des Backends zu garantieren, nutzt das System stattdessen hardwarenahes Stream-Processing.
 
-Um die Skalierbarkeit des Backends zu garantieren, verwirft das System den Einsatz von Pandas für den Extract-Prozess und nutzt stattdessen hardwarenahes Stream-Processing.
-
-1.1 OS-Level Chunking: Die Datei in Blöcken lesen
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das System implementiert einen speicherschonenden Downloader, der die Datei in kleinen Häppchen (Chunks) über das Netzwerk zieht. 
+1.1 OS-Level Chunking: Blockweises Herunterladen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Das System implementiert einen speicherschonenden Downloader, der die Datei in definierten Blöcken (Chunks) über das Netzwerk abruft und direkt auf die Festplatte schreibt.
 
 .. code-block:: python
 
@@ -30,28 +28,27 @@ Das System implementiert einen speicherschonenden Downloader, der die Datei in k
        @staticmethod
        def download_in_chunks(url: str, filepath: str, chunk_size: int = 8192) -> None:
            """
-           Lädt eine Big-Data-Datei häppchenweise (in Chunks) herunter.
-           Der RAM-Verbrauch bleibt konstant O(1), selbst wenn die Datei Terabytes groß ist.
+           Lädt eine Datei blockweise herunter. Der RAM-Verbrauch 
+           bleibt unabhängig von der Dateigröße konstant auf O(1).
            """
            # stream=True verhindert das sofortige Laden in den RAM
            with requests.get(url, stream=True) as response:
                response.raise_for_status() 
                
                with open(filepath, 'wb') as file:
-                   # Wir lesen exakt 8192 Bytes (8 KB) auf einmal
                    for chunk in response.iter_content(chunk_size=chunk_size):
                        if chunk: 
                            file.write(chunk)
            
-           logging.info(f"Speicherschonender Download abgeschlossen: {filepath}")
+           logging.info(f"Stream-Download abgeschlossen: {filepath}")
 
-*Die Wahl der Blockgröße:* Warum exakt 8192 Bytes? Betriebssysteme (OS) und Festplatten-Controller verarbeiten I/O-Operationen (Input/Output) physisch in Paging-Blöcken von meist 4 KB oder 8 KB. Die Wahl von 8192 Bytes sorgt für eine perfekte Synchronisation mit dem Betriebssystem, minimiert I/O-Overhead und hält den RAM-Verbrauch konstant auf **O(1)**.
+*Die Wahl der Blockgröße:* Betriebssysteme und Festplatten-Controller verarbeiten I/O-Operationen physisch in Paging-Blöcken von meist 4 KB oder 8 KB. Eine Chunk-Größe von exakt 8192 Bytes (8 KB) synchronisiert den Download optimal mit dem Betriebssystem, minimiert den I/O-Overhead und sichert die $\mathcal{O}(1)$ Speicherkomplexität.
 
 1.2 Lazy Evaluation: Das Generator-Pattern
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Nachdem die Datei sicher auf der Festplatte liegt, muss sie zeilenweise in Python eingelesen werden. Auch hier verzichtet das System auf klassische Listen-Rückgaben (``return list``), da dies den RAM sofort wieder füllen würde. Stattdessen kommt das Konzept der **Lazy Evaluation** (Verzögerte Auswertung) zum Einsatz.
+Auch beim Einlesen der lokalen Datei in Python wird auf klassische Listen-Rückgaben verzichtet, da diese den Arbeitsspeicher iterativ füllen würden. Stattdessen kommt das Konzept der verzögerten Auswertung (Lazy Evaluation) zum Einsatz. 
 
-Der Code nutzt das Python-Schlüsselwort ``yield``, um einen Generator zu erschaffen.
+Der Code nutzt das Python-Schlüsselwort ``yield``, um einen Generator zu erschaffen, der die Zeilen einzeln auswertet und den Speicher direkt wieder freigibt.
 
 .. code-block:: python
 
@@ -60,30 +57,28 @@ Der Code nutzt das Python-Schlüsselwort ``yield``, um einen Generator zu erscha
 
    def stream_bls_data(filepath: str) -> Generator[Dict[str, str], None, None]:
        """ 
-       Liest die CSV-Datei als Stream. Gibt immer nur exakt EINE Zeile in den RAM,
-       verarbeitet diese und gibt den Speicher danach sofort wieder frei.
+       Liest die CSV-Datei als Stream. Verarbeitet jeweils eine Zeile
+       und hält die Speicherkomplexität des Lesezugriffs bei O(1).
        """
        with open(filepath, mode='r', encoding='utf-8') as f:
            reader = csv.DictReader(f, delimiter=';')
            for row in reader:
-               
-               # Data Cleaning Level 1: Korrupte Zeilen ohne ID sofort verwerfen
+               # Data Cleaning Level 1: Inkonsistente Zeilen überspringen
                if not row.get('S_Bezeichnung') or not row.get('BLS_Code'):
                    continue 
                    
-               # 'yield' friert die Funktion ein und gibt exakt diese Zeile an die Pipeline.
-               # Die Speicherkomplexität bleibt bei O(1).
+               # 'yield' gibt die Zeile iterativ an die Pipeline weiter
                yield row
 
 Teil II: Transform – Semantische Reduktion und Stochastik
 ---------------------------------------------------------
-Behördliche B2B-Datensätze (wie der BLS) sind für Endkonsumenten in einer B2C-Applikation unlesbar. Ein Eintrag heißt dort nicht "Milch", sondern oft bürokratisch: *"Kuhmilch, pasteurisiert, homogenisiert, mindestens 3.5% Fett, in Verkaufsverpackung"*.
+Behördliche B2B-Datensätze sind durch komplexe Nomenklaturen geprägt (z.B. *"Kuhmilch, pasteurisiert, homogenisiert, mindestens 3.5% Fett"*), die für eine B2C-Suchfunktion ungeeignet sind.
 
-2.1 Semantische Reduktion gegen den "Fluch der Dimensionalität"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Für unsere in Kapitel 2 definierte, fehlertolerante Suchmaschine (Fuzzy Search via Damerau-Levenshtein) ist ein derart langer String toxisch. In der Mathematik der Textverarbeitung (NLP) nennt man dies den **Fluch der Dimensionalität**. Wenn der Algorithmus Suchbegriffe in einem 15-Wörter-Satz abgleichen muss, explodiert die Laufzeit der O(n*m) Matrix und generiert unzählige False-Positives.
+2.1 Reduktion der Textkomplexität
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Für die in Kapitel 2 definierte fehlertolerante Suchmaschine (Fuzzy Search via Damerau-Levenshtein) verursachen überlange Strings unnötigen Rechenaufwand. Die Laufzeit der dynamischen Programmierung steigt mit $\mathcal{O}(N \cdot M)$, was bei langen Suchbegriffen zu Latenzen und einer erhöhten Rate an False-Positives führt.
 
-Die Klasse ``TextSanitizer`` reinigt den Text radikal und reduziert ihn auf den semantischen Kern:
+Die Klasse ``TextSanitizer`` bereinigt den Text und isoliert den semantischen Kern:
 
 .. code-block:: python
 
@@ -92,38 +87,34 @@ Die Klasse ``TextSanitizer`` reinigt den Text radikal und reduziert ihn auf den 
 
    class TextSanitizer:
        def __init__(self):
-           # Stoppwörter: B2B-Begriffe, die für den Endkunden im Markt irrelevant sind
+           # B2B-Begriffe, die für den Endkunden irrelevant sind
            self.stopwords = {"schlachtkörper", "kutterhilfsmittel", "zubereitung", "roh"}
        
        def clean_product_name(self, raw_name: str) -> Optional[str]:
-           # 1. String-Kappung: Wir schneiden alles ab dem ersten Komma ab.
-           # Aus "Milch, frisch, 3.5%" wird die semantische Essenz "Milch".
+           # 1. String-Kappung: Extraktion des primären Nomens vor dem ersten Komma.
            name = raw_name.split(',')[0].strip() 
            
-           # 2. Reguläre Ausdrücke (Regex): Entfernt alle Klammerzusätze
+           # 2. Reguläre Ausdrücke: Entfernung von Klammerzusätzen
            name = re.sub(r'\s*\(.*?\)', '', name).strip()
-           
            words = name.split()
            
-           # 3. Dimensionalitäts-Filter: Wenn der Name nach der Reinigung noch immer 
-           # länger als 3 Wörter ist, ist es kein kundenfähiges Produkt. -> Verwerfen.
+           # 3. Filterung: Verwerfen von überkomplexen Bezeichnungen (> 3 Wörter)
            if len(words) == 0 or len(words) > 3:
                return None 
                
-           # 4. B2B-Filter: Enthält das Wort industrielle Stoppwörter? -> Verwerfen.
+           # 4. Filterung: Ausschluss industrieller Stoppwörter
            if any(word.lower() in self.stopwords for word in words):
                return None 
                
-           # Schön formatiert (Title Case) zurückgeben
            return name.title() 
 
 2.2 Stochastische Anreicherung (Idempotenz)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Um die Agenten in der späteren Simulation realistisch agieren zu lassen, benötigt jedes Produkt zwingend einen Preis und einen Popularitäts-Wert. Da der behördliche BLS diese ökonomischen Daten nicht liefert, muss das Backend diese "würfeln".
+Um das spätere Agentenverhalten realistisch zu simulieren, erfordert jedes Produkt Parameter für Preis und Popularität. Da der BLS diese ökonomischen Daten nicht liefert, werden sie synthetisch generiert.
 
-*Das Problem des reinen Zufalls:* Würde man einfach ``random.random()`` nutzen, würde ein Apfel bei jedem Neustart des Servers einen anderen Preis erhalten. Machine-Learning-Modelle lassen sich mit ständig mutierenden Ground-Truth-Daten nicht trainieren. Die Pipeline muss **idempotent** sein (Gleicher Input führt immer zwingend zum gleichen Output).
+*Anforderung an Determinismus:* Die Nutzung von reinem Zufall (``random.random()``) würde dazu führen, dass sich die Metriken bei jedem Systemstart ändern. Für ein konsistentes Machine-Learning-Training muss die Pipeline jedoch idempotent arbeiten (gleicher Input generiert stets gleichen Output). 
 
-*Die Lösung:* Das System nutzt einen deterministischen Seed basierend auf dem Hash-Wert des Produktnamens. Der Zufall ist somit an den Namen gekettet. Zudem werden Preise nicht wild, sondern aus einer Normalverteilung (Gauß-Kurve) gezogen, um eine ökonomisch realistische Preisverteilung im Supermarkt zu simulieren.
+Das System löst dies durch einen deterministischen Seed, der an den Hash-Wert des Produktnamens gekoppelt ist. Die Preise werden zudem aus einer Normalverteilung (Gauß-Kurve) abgeleitet, um eine realistische ökonomische Streuung zu gewährleisten.
 
 .. code-block:: python
 
@@ -136,8 +127,7 @@ Um die Agenten in der späteren Simulation realistisch agieren zu lassen, benöt
        bls_prefix = row['BLS_Code'].upper()[0]
        category = "Kühlregal" if bls_prefix in ['M', 'K'] else "Sonstiges"
        
-       # Deterministischer Zufall: Ein "Apfel" kostet bei jedem Server-Boot immer gleich viel.
-       # Dies garantiert die Idempotenz der Pipeline für ML-Training.
+       # Deterministischer Zufall garantiert die Idempotenz der Pipeline
        random.seed(hash(clean_name)) 
        
        # Ökonomische Modellierung via Gauß-Kurve
@@ -155,15 +145,13 @@ Um die Agenten in der späteren Simulation realistisch agieren zu lassen, benöt
 
 Teil III: Load – Algorithmische Graphen-Befüllung
 -------------------------------------------------
-An diesem Punkt existieren tausende saubere, angereicherte Produkte im RAM. Diese müssen nun auf die leeren Container-Knoten (Flexible Zones) des Graphen aus Kapitel 3 gemappt werden. Hier müssen zwei massive topologische Probleme gelöst werden.
+Die transformierten Produkte müssen abschließend proportional auf die verfügbaren Raumknoten des Graphen verteilt werden, was zwei topologische Anforderungen an das System stellt.
 
-3.1 Die Verhinderung von Null-Allokationen (Sainte-Laguë)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das erste Problem: Wir haben 300 Molkerei-Produkte und nur 10 Gewürz-Produkte, aber nur 15 leere Regale im Graphen. 
+3.1 Proportionale Allokation (Sainte-Laguë & Grundmandate)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Bei einer starken Diskrepanz in den Kategoriemengen (z.B. 300 Molkerei-Produkte vs. 1 Gewürz-Produkt) führt eine reine Prozentrechnung zu fehlerhaften Null-Allokationen für kleine Kategorien. 
 
-Würde das System die Regale per normaler Prozentrechnung (Dreisatz) verteilen und mit ``math.floor()`` abrunden, bekäme die Gewürz-Abteilung mathematisch $0.48 \rightarrow 0$ Regale zugewiesen. Ein Versuch, Gewürze in "null" Regale zu sortieren, wirft eine Exception und tötet den Server.
-
-Das System nutzt daher einen Algorithmus aus dem parlamentarischen Wahlrecht: Das **Sainte-Laguë-Verfahren** (Höchstzahlverfahren). Es nutzt den Divisor ``(allocations + 0.5)``. Dieser Divisor garantiert mathematisch, dass selbst die kleinste Kategorie (Minderheit) zwingend mindestens ein physisches Regal zugewiesen bekommt, bevor große Kategorien ihr fünftes oder sechstes Regal erhalten.
+Zur Sicherstellung der topologischen Erreichbarkeit nutzt der Algorithmus **Grundmandate**: Bevor die proportionale Verteilung beginnt, wird jeder identifizierten Kategorie exakt ein physisches Regal zugewiesen. Die verbleibenden Regale werden anschließend über das aus der Wahlmathematik bekannte **Sainte-Laguë-Verfahren** (Höchstzahlverfahren) fair auf die größeren Kategorien verteilt.
 
 .. code-block:: python
 
@@ -171,15 +159,20 @@ Das System nutzt daher einen Algorithmus aus dem parlamentarischen Wahlrecht: Da
 
    def allocate_shelves(total_shelves: int, category_counts: Dict[str, int]) -> Dict[str, int]:
        """ Verteilt physische Graphen-Regale fair auf Basis der Produktmengen. """
-       shelves_allocated = {cat: 0 for cat in category_counts.keys()}
+       # Grundmandate sichern die topologische Existenz jeder Kategorie
+       shelves_allocated = {cat: 1 for cat in category_counts.keys()}
+       remaining_shelves = total_shelves - len(category_counts)
        
-       for _ in range(total_shelves):
+       if remaining_shelves < 0:
+           raise ValueError("Ressourcenkonflikt: Weniger Knoten im Graph als Kategorien.")
+           
+       # Proportionale Verteilung des Rests via Sainte-Laguë
+       for _ in range(remaining_shelves):
            best_category = None
            max_quotient = -1.0
            
            for cat, amount in category_counts.items():
-               # Das Sainte-Laguë Höchstzahlverfahren. 
-               # Der +0.5 Divisor ist der mathematische Schutz vor Null-Zuweisungen.
+               # Das Höchstzahlverfahren verhindert die Benachteiligung kleiner Gruppen
                quotient = amount / (shelves_allocated[cat] + 0.5) 
                
                if quotient > max_quotient:
@@ -188,16 +181,14 @@ Das System nutzt daher einen Algorithmus aus dem parlamentarischen Wahlrecht: Da
                    
            if best_category:
                shelves_allocated[best_category] += 1
-       
+               
        return shelves_allocated
 
 3.2 Präventives Load-Balancing (Round-Robin)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Das zweite Problem: Die "Molkerei" hat nun fair 3 Regale (Knoten A, B und C) gewonnen. Wir haben 300 Milchprodukte. Ein naiver Ansatz würde die ersten 100 Produkte in Regal A pressen, bis dieses voll ist. 
+Besitzt eine Kategorie mehrere Regale (z.B. Knoten A, B und C), würde ein lineares Auffüllen (zuerst A, dann B, dann C) das Kundeninteresse im Markt ungleichmäßig bündeln und lokale Engpässe (Bottlenecks) provozieren. 
 
-*Die topologische Katastrophe:* Wenn jeder Kunde nun nach beliebiger Milch sucht, routet das System alle Kunden exakt zu Knoten A. Knoten B und C bleiben leer. Es entsteht ein gigantischer physischer Stau (Bottleneck) vor Regal A. 
-
-Die Architektur löst dieses Problem durch systematisches **Round-Robin-Routing**. Die Produkte werden wie beim Kartengeben reihum verteilt: Ein Produkt in Regal A, eines in B, eins in C, das nächste wieder in A. Dadurch wird das Kundeninteresse automatisch auf mehrere Knoten im Supermarkt gestreut. Es ist ein präventives, physikalisches Load-Balancing.
+Zur physischen Stauprävention implementiert die Architektur ein **Round-Robin-Routing**. Über einen iterativen Zyklus (``itertools.cycle``) werden die Produkte gleichmäßig über alle dedizierten Knoten der jeweiligen Kategorie gestreut.
 
 .. code-block:: python
 
@@ -205,25 +196,24 @@ Die Architektur löst dieses Problem durch systematisches **Round-Robin-Routing*
    from typing import List
 
    def assign_nodes_to_products(products: List[dict], shelf_nodes: List[str]):
-       """ Verteilt Produkte reihum auf die Knoten zur Stau-Prävention. """
+       """ Streut Produkte iterativ über die Knoten zur Stau-Prävention. """
        if not shelf_nodes:
-           raise ValueError("Kritischer Topologie-Fehler: Kategorie ohne Raum-Knoten!")
+           raise ValueError("Topologie-Fehler: Kategorie ohne Raum-Knoten.")
            
-       # itertools.cycle erschafft einen endlosen Ring-Iterator: A -> B -> C -> A -> B ...
+       # Erzeugt einen endlosen Ring-Iterator für die gleichmäßige Zuweisung
        node_cycle = itertools.cycle(shelf_nodes)
        
        for product in products:
            product['node_id'] = next(node_cycle)
 
-Teil IV: Materialisierung und Data Contract
--------------------------------------------
-Die Pipeline muss am Ende die verarbeiteten Daten persistieren. Bevor ein Produkt jedoch als Ground-Truth auf der Festplatte gespeichert wird, muss es einen letzten, unbestechlichen Check durchlaufen. 
+Teil IV: Materialisierung und Data Contract (Two-Pass-Architektur)
+------------------------------------------------------------------
+Da die Zuweisung nach Sainte-Laguë das absolute Wissen über alle Produktmengen voraussetzt, erfordert die Beibehaltung der $\mathcal{O}(1)$ Speichereffizienz eine **Two-Pass-Architektur**. Dies stellt einen bewussten Trade-off dar: Es wird ein zusätzlicher Festplatten-Lesezugriff in Kauf genommen, um den Arbeitsspeicher zu entlasten.
 
-Das Framework **Pydantic** definiert das Schema als strengen "Data Contract" (Vertrag). Jedes Produkt, das einen negativen Preis hat oder dessen Name zu kurz ist, wird vom Türsteher gnadenlos verworfen (``ValidationError``). 
+*   **Pass 1:** Der Stream iteriert die CSV-Datei zur Aggregation der absoluten Zählerstände pro Kategorie.
+*   **Pass 2:** Nach der Allokationsberechnung wird die Datei ein zweites Mal gestreamt. Die Produkte werden transformiert, einem Knoten zugewiesen und gegen das Pydantic-Schema validiert.
 
-Am Ende materialisiert die Pipeline zwei Artefakte:
-1. Eine hochperformante **JSON-Datei**. Diese dient als zustandslose, extrem schnell einlesbare Datenbank für die Live-REST-API der Tablets.
-2. Eine flache **CSV-Matrix**. Diese dient ausschließlich der Data-Science-Abteilung, da das XGBoost-Machine-Learning-Modell CSV-Feature-Matrizen für das Training bevorzugt.
+Fehlerhafte Datensätze werden im Sinne der Graceful Degradation aussortiert. Die validen Daten werden als $\mathcal{O}(1)$ Dictionary im RAM vorgehalten und abschließend sowohl als JSON (für die REST-API) als auch als CSV-Matrix (für das Machine-Learning-Training) materialisiert.
 
 .. code-block:: python
 
@@ -238,58 +228,57 @@ Am Ende materialisiert die Pipeline zwei Artefakte:
        name: str = Field(..., min_length=2)
        category: str
        node_id: str
-       price: float = Field(..., gt=0.0) # Preis MUSS zwingend größer 0 sein
+       price: float = Field(..., gt=0.0) 
        popularity: float = Field(..., ge=0.0, le=1.0) 
 
    def run_etl_pipeline(bls_url: str, raw_filepath: str, graph_nodes: List[str]) -> Dict[str, ProductModel]:
        # 1. EXTRACT
        BLSDownloader.download_in_chunks(bls_url, raw_filepath)
-       
        sanitizer = TextSanitizer()
-       transformed_products = []
-       category_counts = {}
        
-       # 2. TRANSFORM (Stream-Processing via Lazy Evaluation)
+       # 2. PASS 1: Aggregation der Metadaten (RAM bleibt O(1))
+       category_counts = {}
        for raw_row in stream_bls_data(raw_filepath):
            enriched = transform_and_enrich(raw_row, sanitizer)
            if enriched:
-               transformed_products.append(enriched)
-               # Zählt Kategorien für das spätere Sainte-Laguë Verfahren
                category_counts[enriched['category']] = category_counts.get(enriched['category'], 0) + 1
                
-       # 3. LOAD (Allokation & Round-Robin Load Balancing)
+       # 3. KNOTEN-ALLOKATION
        shelf_allocations = allocate_shelves(len(graph_nodes), category_counts)
-       
        node_iterator = iter(graph_nodes)
        category_to_nodes = {
            cat: [next(node_iterator) for _ in range(amount)] 
            for cat, amount in shelf_allocations.items()
        }
        
-       for category, nodes in category_to_nodes.items():
-           products_in_cat = [p for p in transformed_products if p['category'] == category]
-           if nodes:
-               assign_nodes_to_products(products_in_cat, nodes)
+       round_robin_cycles = {
+           cat: itertools.cycle(nodes) for cat, nodes in category_to_nodes.items() if nodes
+       }
        
-       # 4. Validierung durch den Data Contract & Aufbau des O(1) Dictionaries
+       # 4. PASS 2: Zuweisen, Validieren & Speichern (Trade-off: Erneuter Disk I/O)
        final_inventory_dict = {}
-       for prod_data in transformed_products:
+       for raw_row in stream_bls_data(raw_filepath):
+           enriched = transform_and_enrich(raw_row, sanitizer)
+           if not enriched: continue
+           
+           cat = enriched['category']
+           enriched['node_id'] = next(round_robin_cycles[cat])
+           
            try:
-               valid_product = ProductModel(**prod_data)
-               # Ein Dictionary erlaubt der Live-Engine später Suchzugriffe in O(1)
+               valid_product = ProductModel(**enriched)
                final_inventory_dict[valid_product.id] = valid_product
            except ValidationError:
-               pass # Fehlerhafte Daten fliegen lautlos aus der Pipeline
+               pass # Inkonsistente Daten werden aussortiert
                
-       # 5. MATERIALISIERUNG (Dualer Export für API und Machine Learning)
+       # 5. MATERIALISIERUNG (Export für API und ML-Training)
        with open('products_live.json', 'w', encoding='utf-8') as f:
            json_data = [p.dict() for p in final_inventory_dict.values()]
            json.dump(json_data, f, ensure_ascii=False, indent=2)
            
        with open('ml_training_features.csv', 'w', encoding='utf-8', newline='') as f:
            writer = csv.writer(f)
-           writer.writerow(['id', 'name', 'category', 'price', 'popularity'])
+           writer.writerow(['id', 'name', 'category', 'node_id', 'price', 'popularity'])
            for p in final_inventory_dict.values():
-               writer.writerow([p.id, p.name, p.category, p.price, p.popularity])
+               writer.writerow([p.id, p.name, p.category, p.node_id, p.price, p.popularity])
                
        return final_inventory_dict
