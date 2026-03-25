@@ -25,7 +25,6 @@ import gc
 import traceback
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
-from sklearn.model_selection import train_test_split
 
 INPUT_FILE = "smartcart_traffic_training_data.csv"
 MODEL_FILE = "traffic_model_xgboost.pkl"
@@ -70,20 +69,16 @@ def load_and_engineer_data():
     df['hour'] = df['timestamp_dt'].dt.hour.astype(np.int8)
     df['minute'] = df['timestamp_dt'].dt.minute.astype(np.int8)
 
-    # --- AUTOREGRESSIVE MAKRO-FEATURES ---
-    # Autoregressiv bedeutet: Die Vergangenheit beeinflusst die Zukunft.
-    # Wir berechnen den "Druck" auf die Kassen (Wartende geteilt durch offene Kassen).
+    # --- ZUSTANDSLOSE MAKRO-FEATURES (Stateless Inference) ---
+    # WISSENSCHAFTLICHER HINWEIS ZUR ARCHITEKTUR:
+    # Wir berechnen hier bewusst nur zustandslose Metriken (wie Auslastung / offene Kassen).
+    # Verzögert berechnete Features (Lag-Features wie .shift(1)) wurden aus dem Modell 
+    # entfernt, da diese im Live-System (app.py) bei einer kalten Suchanfrage nicht 
+    # verfügbar wären. Dies eliminiert den Train-Serving Skew.
+    
     df['total_queue'] = (df['k1_q'] + df['k2_q'] + df['k3_q']).astype(np.float32)
     df['open_registers'] = (1 + df['k2_open'] + df['k3_open']).astype(np.float32)
     df['queue_pressure'] = (df['total_queue'] / df['open_registers']).astype(np.float32)
-
-    # '.shift(1)' holt den Wert aus dem vorherigen 5-Minuten-Schritt. 
-    # So weiß die KI: "Wächst der Stau gerade an oder baut er sich ab?" (Momentum)
-    df['queue_pressure_lag1'] = df['queue_pressure'].shift(1).fillna(0).astype(np.float32)
-    df['total_agents_lag1'] = df['total_agents'].shift(1).fillna(0).astype(np.float32)
-
-    df['queue_momentum'] = (df['queue_pressure'] - df['queue_pressure_lag1']).astype(np.float32)
-    df['fill_rate'] = (df['total_agents'] - df['total_agents_lag1']).astype(np.float32)
 
     # ---------------------------------------------------------
     # SCHRITT 2: TOPOLOGIE SCAN
@@ -105,8 +100,7 @@ def load_and_engineer_data():
     # Wir "explodieren" unsere Daten: Aus einer Zeile pro Uhrzeit machen wir 
     # viele Zeilen pro Uhrzeit (eine Zeile für jeden einzelnen Gang im Supermarkt).
     cols_to_keep = ['timestamp_dt', 'month', 'weekday', 'hour', 'minute', 'is_holiday', 
-                    'total_agents', 'total_queue', 'open_registers', 'queue_pressure',
-                    'queue_momentum', 'fill_rate']
+                    'total_agents', 'total_queue', 'open_registers', 'queue_pressure']
 
     df_expanded = pd.DataFrame({
         col: np.repeat(df[col].values, n_edges) for col in cols_to_keep
@@ -176,12 +170,13 @@ def load_and_engineer_data():
     
     gc.collect()
 
-    # Dies ist die finale Liste der Merkmale, die unsere KI berücksichtigen darf
+    # Dies ist die finale Liste der Merkmale, die unsere KI berücksichtigen darf.
+    # WICHTIG: Identisch mit feature_pool in der app.py (Inference Engine)
     features = [
         'edge_id_enc', 'is_checkout_zone', 'is_main_aisle', 'is_shelf_aisle',
         'is_holiday', 'is_weekend', 'is_rush_hour',
         'total_agents', 'total_queue', 'open_registers', 'queue_pressure',
-        'queue_momentum', 'fill_rate', 'spillover_risk', 'shelf_density',
+        'spillover_risk', 'shelf_density',
         'hour_sin', 'hour_cos', 'day_sin', 'day_cos', 'month'
     ]
     
@@ -243,20 +238,28 @@ if __name__ == "__main__":
         df, features, target_col, encoder = load_and_engineer_data()
         
         # ---------------------------------------------------------
-        # SCHRITT 5: GROUPED RANDOM SPLIT (Kritisch für die Verteidigung!)
+        # SCHRITT 5: CHRONOLOGICAL TIME-SERIES SPLIT (Der 1,0 Fix)
         # ---------------------------------------------------------
-        print(f"[5/5] Grouped Random Split (Verhindert Data Leakage!)...")
-        # Würden wir die Tabelle einfach zufällig in Training und Test splitten, 
-        # käme es zum "Data Leakage" (Datenleck). Das Modell würde z.B. um 14:00 Uhr 
-        # den Gang A im Training sehen und Gang B um 14:00 Uhr im Testset abfragen.
-        # Da Gänge zur selben Uhrzeit stark korrelieren, würde das Modell schummeln.
-        # LÖSUNG: Wir splitten anhand der einzigartigen Zeitstempel. Ein Zeitpunkt 
-        # ist entweder komplett im Trainingsset, oder komplett im Testset.
+        print(f"[5/5] Chronological Time-Series Split (Verhindert Data Leakage!)...")
+        # WISSENSCHAFTLICHER HINWEIS (Look-ahead Bias Vermeidung):
+        # Bei Zeitreihen darf niemals ein zufälliger train_test_split verwendet werden! 
+        # Das Modell würde sonst Daten aus der Zukunft (z.B. Dezember) nutzen, 
+        # um die Vergangenheit (z.B. Oktober) vorherzusagen. 
+        # LÖSUNG: Wir sortieren die Zeitstempel streng chronologisch und schneiden 
+        # die Zeitachse hart ab (die ersten 85% für das Training, die letzten 15% 
+        # strikt für die ungesehene Zukunft/Testset).
         
-        unique_timestamps = df['timestamp_dt'].unique()
+        unique_timestamps = np.sort(df['timestamp_dt'].unique())
         
-        train_val_times, test_times = train_test_split(unique_timestamps, test_size=0.15, random_state=42)
-        train_times, val_times = train_test_split(train_val_times, test_size=0.20, random_state=42)
+        # 1. Chronologischer Split in Train/Val (85%) und Test (15%)
+        test_split_idx = int(len(unique_timestamps) * 0.85)
+        train_val_times = unique_timestamps[:test_split_idx]
+        test_times = unique_timestamps[test_split_idx:]
+        
+        # 2. Chronologischer Split in Train (80%) und Validation (20%)
+        val_split_idx = int(len(train_val_times) * 0.80)
+        train_times = train_val_times[:val_split_idx]
+        val_times = train_val_times[val_split_idx:]
         
         train_mask = df['timestamp_dt'].isin(train_times)
         val_mask = df['timestamp_dt'].isin(val_times)
@@ -266,9 +269,13 @@ if __name__ == "__main__":
         X_val_full, y_val_full = df[val_mask][features], df[val_mask][target_col]
         X_test, y_test = df[test_mask][features], df[test_mask][target_col]
         
-        # Um Zeit beim Hyperparameter-Tuning zu sparen, geben wir Optuna nur 30% der Daten
-        optuna_train_times, _ = train_test_split(train_times, train_size=0.30, random_state=42)
-        optuna_val_times, _ = train_test_split(val_times, train_size=0.30, random_state=42)
+        # Um Zeit beim Hyperparameter-Tuning zu sparen, geben wir Optuna nur die letzten 30% 
+        # der jeweiligen Zeitreihen (damit es auf den aktuellsten Trends trainiert)
+        optuna_train_idx = int(len(train_times) * 0.30)
+        optuna_val_idx = int(len(val_times) * 0.30)
+        
+        optuna_train_times = train_times[-optuna_train_idx:]
+        optuna_val_times = val_times[-optuna_val_idx:]
         
         X_train_optuna = df[df['timestamp_dt'].isin(optuna_train_times)][features]
         y_train_optuna = df[df['timestamp_dt'].isin(optuna_train_times)][target_col]
@@ -316,14 +323,15 @@ if __name__ == "__main__":
         
         print("\nTrainiere finales Modell auf aggregierten Trainingsdaten (Train + Val)...")
         # Vor dem Testen werfen wir Trainings- und Validierungsdaten zusammen. 
-        # Das Modell hat die besten Parameter bereits gefunden, jetzt profitiert es von mehr Datenmenge.
         X_train_final = pd.concat([X_train_full, X_val_full])
         y_train_final = pd.concat([y_train_full, y_val_full])
         
         final_params = study.best_params.copy()
-        final_params['n_estimators'] = optimal_trees
+        # Heuristische Anpassung: Da wir dem Modell nun 20% mehr Daten füttern, 
+        # skalieren wir die Anzahl der Entscheidungsbäume leicht nach oben, um Underfitting zu vermeiden.
+        final_params['n_estimators'] = int(optimal_trees * 1.15) 
         
-        # Das finale Modell braucht kein Early Stopping, da die perfekte Baum-Anzahl hart fixiert ist
+        # Das finale Modell braucht kein Early Stopping, da die Baum-Anzahl hart fixiert ist
         final_model = xgb.XGBRegressor(**final_params, n_jobs=-1)
         final_model.fit(X_train_final, y_train_final)
 
@@ -367,10 +375,6 @@ if __name__ == "__main__":
                 'is_log_target': True
             }, f)
             
-        # =========================================================================
-        # FIX: df[test_mask] speichert neben den ML-Features auch die Metadaten 
-        # (wie timestamp_dt, edge_id, hour) für die Evaluierungs-Grafiken!
-        # =========================================================================
         print("Speichere ungesehenes Test-Set für die Evaluierungs-Pipeline...")
         df_export = df[test_mask].copy() 
         df_export['true_target'] = y_test

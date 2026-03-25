@@ -39,6 +39,7 @@ try:
     import model
     G_base = model.G_base
     nodes_config = model.nodes_config
+    CONFIG = model.CONFIG # BUG-FIX 5: Import der System-Konstanten gegen Magic Strings
 except ImportError:
     raise ImportError("❌ model.py konnte nicht geladen werden. Topologie-Schnittstelle fehlt.")
 
@@ -226,8 +227,15 @@ def run_monte_carlo():
     G_smart_quiet = build_smart_graph(G_base, traffic_quiet)
     G_smart_rush = build_smart_graph(G_base, traffic_rush)
     
-    # Extrahiere alle gültigen Produkt-Regale (Keine Wände, keine Eingänge)
-    valid_shelves = [n for n, d in nodes_config.items() if d.get('col') in ['#000000', '#1f77b4'] and not str(n).startswith('vIn')]
+    # BUG-FIX 5 & 9: Nutzung dynamischer Konstanten statt Magic Strings.
+    # Exkludiert zudem Quengelware-Zonen (vW) vor den Kassen, da diese nicht 
+    # als physisches Einkaufsregal gewertet werden dürfen (verzerrt Metriken).
+    valid_shelves = [
+        n for n, d in nodes_config.items() 
+        if d.get('col') in [CONFIG.COLOR_BLACK, CONFIG.COLOR_BLUE] 
+        and not str(n).startswith('vIn') 
+        and not str(n).startswith('vW')
+    ]
     
     scenarios = [
         ("Entspannter Morgen", traffic_quiet, G_base, G_smart_quiet),
@@ -305,7 +313,6 @@ def run_monte_carlo():
         print(f" -> System-Risiko (Durchschnittl. Verlust):    {abs(avg_loss):.1f} Sekunden")
     print("-" * 60)
     print(f"✅ Skript beendet. Der entscheidende Business-Plot liegt in '{OUTPUT_DIR}/business_value_time_saved.png'.")
-
 
 if __name__ == "__main__":
     run_monte_carlo()

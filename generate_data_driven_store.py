@@ -8,8 +8,7 @@ Diese Pipeline orchestriert den gesamten Daten-Lebenszyklus autonom:
 1. Data Ingestion: Sicherer, asynchroner Download der B2B-Rohdaten (BLS).
 2. NLP-Sanitization: Bereinigung der Strings von B2B-Rauschen zur Dimensionsreduktion.
 3. MLOps-Trigger: Erzwingt ein synchrones Retraining der ML-Kaskade, um Data Drift vorzubeugen.
-4. Pricing Simulation: Generiert stochastisch valide ökonomische Preise (Gauß-Verteilung).
-5. Graph Allocation: Nutzt das Sainte-Laguë-Höchstzahlverfahren, um Produkte topologisch 
+4. Graph Allocation: Nutzt das Sainte-Laguë-Höchstzahlverfahren, um Produkte topologisch 
    fair auf die begrenzten Regalkapazitäten des NetworkX-Graphen zu verteilen.
 =========================================================================================
 """
@@ -367,31 +366,6 @@ class DataIngestionService:
         scored_items.sort(key=lambda x: x[0])
         return [item for score, item in scored_items][:limit]
 
-class PricingEngine:
-    """
-    Generiert realistische ökonomische Metriken mittels Gaußscher Normalverteilung.
-    Verhindert, dass alle Produkte gleich viel kosten, und ermöglicht die korrekte 
-    Berechnung des Warenkorbwerts im Frontend.
-    """
-    _price_distributions = {
-        "Fleischtheke": {"mu": 8.50, "sigma": 3.00, "min": 2.99}, "Spirituosenschrank": {"mu": 15.00, "sigma": 5.00, "min": 7.99},
-        "Fisch & Wurstwaren": {"mu": 4.50, "sigma": 1.50, "min": 1.49}, "Obst & Gemüse": {"mu": 2.50, "sigma": 1.00, "min": 0.49},
-        "Kühlregal (Vegan & Käse)": {"mu": 3.50, "sigma": 1.20, "min": 1.29}, "Bier & Wein": {"mu": 5.00, "sigma": 2.50, "min": 0.89},
-        "Drogerie & Haushalt": {"mu": 4.00, "sigma": 2.00, "min": 0.99}, "Tiefkühlware": {"mu": 3.80, "sigma": 1.50, "min": 1.59},
-        "Kaffee & Tee": {"mu": 5.50, "sigma": 2.50, "min": 1.99}, "default": {"mu": 2.50, "sigma": 1.00, "min": 0.69}
-    }
-    
-    @classmethod
-    def generate_price(cls, category: str) -> str:
-        """
-        Erzeugt einen stochastischen Kaufpreis basierend auf Erwartungswert (µ) 
-        und Standardabweichung (σ) der jeweiligen Warengruppe.
-        """
-        params = cls._price_distributions.get(category, cls._price_distributions["default"])
-        price = max(random.gauss(params["mu"], params["sigma"]), params["min"])
-        # Addiert branchenübliche Schwellenpreise (Psycho-Pricing)
-        return f"{math.floor(price) + random.choice([0.99, 0.49, 0.89, 0.29]):.2f} €"
-
 class StoreBuilder:
     """
     Befüllt den digitalen Supermarkt-Graphen.
@@ -410,7 +384,6 @@ class StoreBuilder:
             for name, brand in item_list:
                 self.stock[q_node].append({
                     'name': name, 'brand': brand, 'category': 'Sonstiges (Kasse)', 
-                    'price': PricingEngine.generate_price("default"), 
                     'ai_confidence': 1.0, 'suggested_slot': q_node, 'needs_review': False
                 })
                 self.capacity[q_node] += 1
@@ -430,10 +403,10 @@ class StoreBuilder:
         # PANDAS EMPTY DATAFRAME FIX: Sichert die Pipeline vor Abstürzen, 
         # falls das ML-Modell temporär keine Produkte über dem Threshold findet.
         records = [
-            {'Name': items[i].title(), 'Cat': r[0], 'Conf': r[2], 'Price': PricingEngine.generate_price(r[0])} 
+            {'Name': items[i].title(), 'Cat': r[0], 'Conf': r[2]} 
             for i, r in enumerate(batch_results) if r[0] != "Sonstiges (Kasse)" and r[2] >= StoreOntology.ML_CONFIDENCE_THRESHOLD
         ]
-        df = pd.DataFrame(records, columns=['Name', 'Cat', 'Conf', 'Price'])
+        df = pd.DataFrame(records, columns=['Name', 'Cat', 'Conf'])
 
         # SAINTE-LAGUË VERFAHREN (Divisorverfahren mit Aufrundung)
         # Verteilt die "freien" Regalslots fair anhand der Menge der vorhandenen Produkte pro Kategorie
@@ -474,7 +447,7 @@ class StoreBuilder:
                 brand = random.choice(StoreOntology.BRAND_DISTRIBUTION.get(cat, ["JMU Choice"]))
                 
                 self.stock[best_node].append({
-                    'name': row['Name'], 'brand': brand, 'category': cat, 'price': row['Price'], 
+                    'name': row['Name'], 'brand': brand, 'category': cat,
                     'ai_confidence': round(row['Conf'], 3), 'suggested_slot': best_node, 'needs_review': False
                 })
                 self.capacity[best_node] += 1
@@ -486,7 +459,7 @@ class StoreBuilder:
                 brand = random.choice(StoreOntology.BRAND_DISTRIBUTION.get(cat, ["JMU Basic"]))
                 
                 self.stock[node].append({
-                    'name': fallback, 'brand': brand, 'category': cat, 'price': PricingEngine.generate_price(cat), 
+                    'name': fallback, 'brand': brand, 'category': cat,
                     'ai_confidence': 1.0, 'suggested_slot': node, 'needs_review': False
                 })
                 self.capacity[node] += 1
@@ -566,7 +539,7 @@ class MasterOrchestrator:
         print(f"🛒 Produkte im System:     {placed} / {total_nodes * StoreOntology.MAX_CAPACITY}")
         print("\n📂 System-Artefakte erfolgreich generiert und synchronisiert:")
         print(f"   ├── {PipelineConfig.CSV_OUTPUT} (NLP Ground Truth)")
-        print(f"   ├── {PipelineConfig.DB_OUTPUT}        (Inventar & Pricing-Daten)")
+        print(f"   ├── {PipelineConfig.DB_OUTPUT}        (Inventar)")
         print(f"   └── {PipelineConfig.ROUTING_OUTPUT}  (Sainte-Laguë Graphen-Topologie)")
         print("-" * 75)
         print("🚀 Architektur-Setup abgeschlossen. Starte nun den Uvicorn/FastAPI-Server.")
