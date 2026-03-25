@@ -27,7 +27,7 @@ Eine kritische Systemfrage lautet: *Leitet die KI den Kunden auf einen 50-Meter-
 
 Die Antwort liegt in der physikalischen Einheit des Basis-Graphen. Da die Kantengewichte der Topologie nicht in Metern, sondern von Beginn an in **Sekunden (Transit Time)** kodiert sind und die BPR-Strafen der KI ebenfalls **Sekunden** ausgeben, führt der Dijkstra-Algorithmus eine exakte **Temporale Arbitrage (Kosten-Nutzen-Analyse)** durch. 
 
-Der Algorithmus minimiert das globale Integral der Zeit. Ein 50-Meter-Umweg kostet bei normaler Schrittgeschwindigkeit ca. 35 Sekunden ($t_{umweg} = 35s$). Ein direkter Gang kostet 10 Sekunden plus 5 Sekunden Stau ($t_{direkt} = 15s$). Der Dijkstra-Algorithmus vergleicht $15s < 35s$ und leitet den Kunden deterministisch **durch** den Stau. Die KI weicht einem Hindernis also niemals blind aus, sondern exakt nur dann, wenn die Zeitstrafe des Staus mathematisch größer ist als die Zeitstrafe des physischen Umwegs.
+Der Algorithmus minimiert das globale Integral der Zeit. Ein 50-Meter-Umweg kostet bei normaler Schrittgeschwindigkeit ca. 35 Sekunden ($t_{umweg}=35s$). Ein direkter Gang kostet 10 Sekunden plus 5 Sekunden Stau ($t_{direkt}=15s$). Der Dijkstra-Algorithmus vergleicht $15s<35s$ und leitet den Kunden deterministisch **durch** den Stau. Die KI weicht einem Hindernis also niemals blind aus, sondern exakt nur dann, wenn die Zeitstrafe des Staus mathematisch größer ist als die Zeitstrafe des physischen Umwegs.
 
 1.4 Warum Christofides scheitert: Die Dreiecksungleichung
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,6 +50,22 @@ Um die $O(N)$-Laufzeitschranken des Servers zu schützen, lagert die Hauptfunkti
 * **16 <= n <= 25: Ant Colony Optimization (ACO).** Schwarmbasierte Pfadfindung.
 * **n > 25: Genetischer Algorithmus.** Biologische Evolution für gigantische Suchräume.
 
+.. code-block:: python
+
+   # Auszug aus dem Controller (calculate_hybrid_route):
+   # Dynamische Zuweisung des Solvers zur Vermeidung von OOM-Abstürzen
+   if n_targets <= CONFIG.DP_EXACT_LIMIT:
+       solver = HeldKarpDPSolver()          # Exakt (O(N^2 * 2^N))
+   elif n_targets > 25:
+       solver = GeneticAlgorithmSolver()    # Biologische Evolution
+   elif n_targets > CONFIG.SA_THRESHOLD: 
+       solver = AntColonySolver()           # Schwarmintelligenz
+   else:
+       solver = SimulatedAnnealingSolver()  # Thermodynamik
+       
+   # Polymorpher Aufruf über das gemeinsame Interface (Open TSP mit end=None)
+   store_seq, msg = solver.solve(d_mat, start_node, store_t, None)
+
 4. Exakte Dynamische Programmierung: Der Pythonic Way
 -----------------------------------------------------
 Für kleine Warenkörbe ($n \le 11$) verlangt das System absolute Exaktheit. Die Klasse ``HeldKarpDPSolver`` reduziert die Brute-Force-Laufzeit $O(N!)$ durch Dynamische Programmierung auf $O(N^2 \cdot 2^N)$. 
@@ -58,11 +74,56 @@ Für kleine Warenkörbe ($n \le 11$) verlangt das System absolute Exaktheit. Die
 
 Dies erlaubt es dem Algorithmus, die bereits besuchten Knoten (``unvisited: frozenset``) direkt als Schlüssel in einem Dictionary (der Memoization-Tabelle) abzulegen. Der Python-Interpreter löst dies intern über hochoptimierte C-Hashmaps in $O(1)$, was den Server-RAM massiv entlastet.
 
+.. code-block:: python
+
+   class HeldKarpDPSolver(RoutingStrategy):
+       def solve(self, dist_matrix: dict, start: str, targets: List[str], end: Optional[str]):
+           memo = {} # Das Cache-Dictionary
+           
+           # Die innere Rekursionsfunktion
+           def dp(curr: str, unvisited: frozenset) -> Tuple[float, List[str]]:
+               if not unvisited:
+                   return 0.0, [] # Basisfall (Open TSP: Keine Rückkehrkosten zum Start)
+               
+               # Der Zustand (State) wird aus dem aktuellen Knoten und dem Frozenset gebildet.
+               # Da Frozensets immutable sind, dienen sie als perfekten Hash-Key.
+               state = (curr, unvisited)
+               
+               # O(1) Lookup: Wurde dieser Sub-Graph bereits berechnet?
+               if state in memo: 
+                   return memo[state]
+               
+               # ... [Berechnung des Minimums über alle unbesuchten Nachbarn] ...
+               
+               memo[state] = (min_cost, best_path)
+               return memo[state]
+               
+           # Initialer Aufruf mit einem frozenset aller Zielprodukte
+           _, path = dp(start, frozenset(targets))
+           return [start] + path, "Held-Karp Exakt-Optimum"
+
 5. Schwarmintelligenz: Ant Colony Optimization (ACO)
 ----------------------------------------------------
 In der Stufe bis 25 Produkte nutzt die Architektur die ``AntColonySolver`` Klasse. Dieser Algorithmus simuliert das Verhalten von Ameisen bei der Futtersuche. 
 
-Agenten ("Ameisen") durchlaufen den Graphen stochastisch und hinterlassen virtuelle Pheromone auf zeitlich effizienten Kanten. Durch die Verdunstungsrate (Evaporation) verschwinden schlechte Pfade, während sich auf dem optimalen Weg eine stabile Pheromonspur bildet. Dies erlaubt es, komplexe Stau-Situationen durch emergente Gruppenintelligenz zu umgehen.
+Agenten ("Ameisen") durchlaufen den Graphen stochastisch und hinterlassen virtuelle Pheromone auf zeitlich effizienten Kanten. Durch die Verdunstungsrate (Evaporation) verschwinden schlechte Pfade, während sich auf dem optimalen Weg eine stabile Pheromonspur bildet. Dies erlaubt es, komplexe Stau-Situationen durch emergente Gruppenintelligenz zu umgehen. Die mathematische Entscheidung der Ameise für das nächste Regal berechnet sich aus dem Integral von Pheromonstärke $\tau^\alpha$ und Sichtbarkeit $\eta^\beta$:
+
+.. code-block:: python
+
+   # Auszug aus der AntColonySolver Klasse:
+   # Eine Ameise steht an einem Regal (curr) und überlegt, wohin sie als nächstes geht.
+   # Die Wahrscheinlichkeit für das nächste Regal (v) wird bestimmt durch das Integral aus:
+   # Pheromonstärke (Alpha) * Sichtbarkeit/Kürzeste Distanz (Beta)
+   
+   prob = pheromones.get((curr, v), 1.0) ** CONFIG.ACO_ALPHA * ((1.0 / dist) ** CONFIG.ACO_BETA)
+   probs.append((v, prob))
+   
+   tot_p = sum(pr for _, pr in probs)
+   if tot_p > 0:
+       # Roulette-Wheel-Selection: Stochastische Auswahl basierend auf den Gewichten.
+       # Verhindert, dass Ameisen deterministisch immer den gleichen Weg laufen, 
+       # und fördert die emergente Exploration des Suchraums.
+       nxt = random.choices([v for v, _ in probs], weights=[pr/tot_p for _, pr in probs])[0] 
 
 6. Evolutionäre Biologie: Der Genetische Algorithmus (GA)
 ---------------------------------------------------------
@@ -70,8 +131,40 @@ Für extreme Warenkörbe ($n > 25$) ist der Genetische Algorithmus das Mittel de
 
 Beim PMX wird ein zufälliger Gen-Abschnitt (Sub-Route) zwischen zwei Elternteilen getauscht. Die restlichen Positionen werden über eine Mapping-Tabelle so angepasst, dass jedes Produkt exakt einmal in der neuen Route vorkommt. Dies schützt die topologische Integrität der Einkaufsliste.
 
+.. code-block:: python
+
+   # Auszug aus der GeneticAlgorithmSolver Klasse:
+   def _partially_mapped_crossover(self, parent1: List[str], parent2: List[str]) -> List[str]:
+       """
+       Spezielle Crossover-Technik für das TSP-Problem.
+       Ein normales Durchschneiden von Arrays würde dazu führen, dass Regale doppelt 
+       besucht werden oder fehlen. PMX repariert diese Duplikate intelligent.
+       """
+       size = len(parent1)
+       child = [None] * size
+       
+       # 1. Tausche einen zufälligen Gen-Block zwischen den Elternteilen aus
+       c1, c2 = sorted(random.sample(range(size), 2))
+       child[c1:c2] = parent1[c1:c2]
+       
+       # 2. Fülle den Rest mit Elementen von Elternteil 2 auf (Vermeidung von Duplikaten)
+       for i in range(c1, c2):
+           if parent2[i] not in child:
+               pos = i
+               # Mapping-Schleife: Sucht den korrekten legalen Platz im Array
+               while c1 <= pos < c2:
+                   pos = parent2.index(parent1[pos])
+               child[pos] = parent2[i]
+               
+       # 3. Restliche leere Stellen direkt übernehmen
+       for i in range(size):
+           if child[i] is None:
+               child[i] = parent2[i]
+               
+       return child
+
 7. Checkout-Stochastik: M/M/1/K Approximation
-----------------------------------------------
+---------------------------------------------
 Eine räumliche Route scheitert ohne Einbeziehung der Kassenwartezeit. Unsere Architektur verzichtet bewusst auf die rechenintensive Pollaczek-Khintchine-Formel für log-normalverteilte Servicezeiten ($M/G/1$) und approximiert die Realität stattdessen performant als **$M/M/1/K$-Warteschlangenmodell**.
 
 Die Klasse ``EnterpriseQueuingModel`` berechnet die Wartezeit unter Berücksichtigung der Ankunftsrate $\lambda$ (moduliert durch Sinus-Tageszeitkurven zur Abbildung der Rush-Hour) und einer Kapazitätsgrenze $K=10$.
@@ -113,7 +206,7 @@ Das finale Meisterstück der Architektur ist die zustandslose Synthese im Contro
 
 Sobald der TSP-Solver die ideale Regal-Reihenfolge mit freiem Endknoten berechnet hat, extrahiert der Orchestrator das letzte Regal der Route. Von diesem Punkt aus berechnet er für alle verfügbaren Kassen das physikalische Integral aus Laufzeit und Stochastik: 
 
-$$ \text{Kosten} = \text{Dijkstra-Laufweg} + \text{M/M/1/K Wartezeit} + \text{Weg zum Ausgang} $$
+$$\text{Kosten} = \text{Dijkstra-Laufweg} + \text{M/M/1/K Wartezeit} + \text{Weg zum Ausgang}$$
 
 Das absolute Minimum dieser Funktion bestimmt die Zielkasse, welche nahtlos an die Array-Liste des TSP-Solvers angefügt (stitched) wird. Da dieser Prozess zustandslos in exakt der Millisekunde iteriert, in der der Nutzer den Callback in der UI auslöst, fließen Echtzeit-Sensorik und Warteschlangentheorie deterministisch in die Routenplanung ein, ohne die Such-Komplexität des TSP-Solvers unnötig aufzublähen.
 
@@ -121,3 +214,21 @@ Das absolute Minimum dieser Funktion bestimmt die Zielkasse, welche nahtlos an d
 Um das System absolut "Bulletproof" gegen KI-Halluzinationen zu machen, berechnet der Orchestrator die finale Route im Hintergrund zwingend parallel im **Shadow-Mode**. Das System generiert eine Route auf dem normalen, staufreien Graphen (deterministische Baseline) und zeitgleich eine Route auf dem durch die KI mutierten Graphen. 
 
 Anschließend unterzieht der Code beide Routen einem strikten Integritäts-Check auf dem nackten Basis-Graphen: Wenn die von der KI vorgeschlagene Ausweichroute in der *reinen physischen Laufzeit* (ohne Stau-Strafen) einen vordefinierten Toleranz-Schwellenwert im Vergleich zur Baseline überschreitet (die KI den Kunden also auf einen völlig absurden Umweg schicken will), legt die System-Synthese ein Veto ein. Das Backend verwirft die KI-Route und serviert dem Tablet als Fail-Safe die Baseline-Route. Dies beweist mathematisch, dass das KI-Routing das Nutzererlebnis in Edge-Cases niemals schlechter machen kann als ein klassisches Navigationssystem.
+
+.. code-block:: python
+
+   # Auszug aus update_visuals (app.py):
+   # tb = Zeit der Baseline-Route (Dummer Agent)
+   # tm = Zeit der KI-Route (Smarter Agent)
+   
+   # SANITY CHECK: Der kybernetische Fallback-Schutz
+   # Ist die KI in der harten Simulation (tm) langsamer als die sture Baseline (tb)?
+   if tm > tb or (px_b == px_m and py_b == py_m):
+       
+       # Veto der System-Synthese: Verwirft die KI-Halluzination und 
+       # zwingt den Agenten deterministisch auf die Baseline zurück.
+       walk_m, queue_m = walk_b, queue_b
+       tm = tb
+       seq_m = seq_b
+       px_m, py_m = px_b, py_b
+       optimized_order = seq_b
