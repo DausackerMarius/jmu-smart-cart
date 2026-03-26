@@ -57,6 +57,7 @@ Um das Varianz-Rauschen der Realität abzubilden, zieht die Engine für jeden ne
 .. code-block:: python
 
    import random
+   import numpy as np
    from dataclasses import dataclass
 
    @dataclass
@@ -278,7 +279,11 @@ Die Pipeline erzwingt daher eine strikte chronologische Validierung (Time Series
    df['target_t_plus_5'] = df.groupby('edge_id')['occupancy'].shift(-5)
    df.dropna(inplace=True)
 
-   # 2. Chronologischer Split (blockiert Look-Ahead Leakage absolut)
+   # 2. Features (X) und Target (y) für das Modell separieren
+   y = df['target_t_plus_5']
+   X = df.drop(columns=['target_t_plus_5', 'edge_id', 'timestamp'])
+
+   # 3. Chronologischer Split (blockiert Look-Ahead Leakage absolut)
    tscv = TimeSeriesSplit(n_splits=5)
    model = xgb.XGBRegressor(n_estimators=200, max_depth=6)
 

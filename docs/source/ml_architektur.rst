@@ -17,12 +17,12 @@ Der architektonische Fallstrick: Ein naiver Lösungsansatz wäre es, ein schwerg
 
 1. Deterministisches und Heuristisches Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die rohe Eingabe wird zunächst via Regular Expressions (RegEx) normalisiert, indem Sonderzeichen entfernt und alle Buchstaben in den Lowercase-Raum transformiert werden. Das System prüft anschließend über einen Hash-Lookup (eine In-Memory Hashmap) in konstanter Zeit O(1), ob der exakte Term im Inventar existiert. Schlägt dies fehl, greift der Damerau-Levenshtein-Algorithmus.
+Die rohe Eingabe wird zunächst via Regular Expressions (RegEx) normalisiert, indem Sonderzeichen entfernt und alle Buchstaben in den Lowercase-Raum transformiert werden. Das System prüft anschließend über einen Hash-Lookup (eine In-Memory Hashmap) in konstanter Zeit $\mathcal{O}(1)$, ob der exakte Term im Inventar existiert. Schlägt dies fehl, greift der Damerau-Levenshtein-Algorithmus.
 
 Theoretische Fundierung (Levenshtein vs. Damerau): 
 Die klassische Levenshtein-Distanz misst die minimalen Operationen (Löschen, Einfügen, Ersetzen), um String A in String B zu überführen. Tippt der Kunde "Bort" statt "Brot", wertet Levenshtein dies als zwei getrennte Operationen (Lösche das 'o', füge ein neues 'o' nach dem 'r' ein). Die Damerau-Erweiterung führt die Operation der Transposition (Vertauschung benachbarter Zeichen) ein. "Bort" ist nun nur noch exakt eine Operation von "Brot" entfernt. Da Vertauschungen (das sogenannte "Fat-Finger-Syndrom") auf Touchscreens die mit Abstand häufigste Fehlerquelle darstellen, verhindert dieser mathematisch überlegene Algorithmus das unnötige Auslösen der ressourcenintensiven ML-Pipeline.
 
-Um das langsame Python-GIL zu umgehen, wird die Matrix-Traversierung der Dynamischen Programmierung (mit einer Laufzeitkomplexität von O(N * M)) zwingend über hochperformante C-Bindings (via der Bibliothek ``textdistance``) ausgeführt, da native verschachtelte For-Schleifen in Python zu extremen Performance-Einbrüchen führen würden.
+Um das langsame Python-GIL zu umgehen, wird die Matrix-Traversierung der Dynamischen Programmierung (mit einer Laufzeitkomplexität von $\mathcal{O}(N \cdot M)$) zwingend über hochperformante C-Bindings (via der Bibliothek ``textdistance``) ausgeführt, da native verschachtelte For-Schleifen in Python zu extremen Performance-Einbrüchen führen würden.
 
 .. code-block:: python
 
@@ -225,7 +225,7 @@ Theoretische Fundierung: Warum nutzen wir XGBoost (Extreme Gradient Boosting) un
 
 Zudem nutzt XGBoost die Taylor-Approximation zweiter Ordnung: Um die Loss-Funktion zu minimieren, verwendet es nicht nur den Gradienten (erste Ableitung des Fehlers, der die Richtung vorgibt), sondern zwingend auch die Hesse-Matrix (zweite Ableitung, welche die Krümmung der Verlustfunktion beschreibt) zur Konstruktion der Baum-Splits. Die Krümmung ermöglicht es dem Algorithmus, die optimale Schrittweite (Newton-Raphson-Update) zu berechnen. Dies führt zu drastisch exakteren Vorhersagen und schnellerer Konvergenz.
 
-Hyperparameter-Tuning via Optuna: Ein naiver Grid Search würde alle Parameter-Kombinationen stupide durchrechnen. Das System nutzt stattdessen den Tree-structured Parzen Estimator (TPE) Algorithmus von Optuna. TPE teilt vergangene Versuchsläufe anhand einer Fehlerschwelle in zwei Gaußsche Mischmodelle (GMMs) ein: Die "guten" und die "schlechten" Hyperparameter. Anschließend wählt der Algorithmus für den nächsten Versuch genau die Parameter, die unter der "guten" Verteilung am wahrscheinlichsten sind. Dies grenzt den Suchraum probabilistisch massiv ein.
+Hyperparameter-Tuning via Optuna: Ein naiver Grid Search würde alle Parameter-Kombinationen stupide durchrechnen. Das System nutzt stattdessen den Tree-structured Parzen Estimator (TPE) Algorithmus von Optuna. TPE teilt vergangene Versuchsläufe anhand einer Fehlerschwelle in zwei Gaußsche Mischmodelle (GMMs): Die "guten" und die "schlechten" Hyperparameter. Anschließend wählt der Algorithmus für den nächsten Versuch genau die Parameter, die unter der "guten" Verteilung am wahrscheinlichsten sind. Dies grenzt den Suchraum probabilistisch massiv ein.
 
 Der Look-Ahead Bias: Um Data Leakage (das versehentliche Einmischen von Zukunftsdaten in das Training) zu verhindern, wird die Kreuzvalidierung strikt als TimeSeriesSplit (Forward Chaining) durchgeführt. Eine klassische K-Fold Kreuzvalidierung würde Zukunftsdaten nehmen, um die Vergangenheit zu validieren – ein fataler Look-Ahead Bias, der Modelle in der Realität sofort scheitern lässt. Hier trainiert das Modell immer nur auf der Vergangenheit und testet auf der iterativen Zukunft.
 
@@ -249,7 +249,7 @@ Der Look-Ahead Bias: Um Data Leakage (das versehentliche Einmischen von Zukunfts
                'max_depth': trial.suggest_int('max_depth', 3, 9),
                'learning_rate': trial.suggest_float('learning_rate', 1e-3, 0.1, log=True),
                
-               # L1 (Lasso) / L2 (Ridge) Regularisierung bestraft Overfitting auf spezifische Graphen-Kanten
+               # L1 (Lasso) / L2 (Ridge) Regularisierung bestraft Overfitting auf spezifische Kanten
                'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 10.0),
                'n_estimators': 300
            }
@@ -411,42 +411,55 @@ Theoretische Fundierung: Ein in Python trainiertes XGBoost-Modell ist nativ an d
            features.neighbor_max_occupancy, features.is_shelf_aisle
        ]], dtype=np.float32)
        
-       # Zero-Copy Inferenz in C++
+       # Zero-Copy Inferenz in C++ gibt die exakte temporale Strafe (Zeitverzögerung in Sekunden) zurück
        prediction = session.run(None, {"input": input_data})[0][0]
-       return {"edge_penalty_meters": float(prediction * 2.5)}
+       return {"edge_penalty_seconds": float(prediction * 2.5)}
 
 2. Data Drift Monitoring (Kullback-Leibler-Divergenz)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Theoretische Fundierung: Kundenverhalten ändert sich stetig (Saisonalität, Regalumstellungen). Dies verursacht Konzept-Drift (Concept Drift). Ein Modell, das auf Winter-Verhalten trainiert wurde, versagt im Sommer. Die Kullback-Leibler-Divergenz (D_KL) misst die relative Entropie (den Informationsverlust), wenn die originale Trainings-Verteilung Q verwendet wird, um die neue Live-Sensor-Verteilung P zu approximieren. Um kontinuierliche Float-Werte für die mathematische Entropie-Formel nutzbar zu machen, müssen diese über ``np.histogram`` zwingend in diskrete Wahrscheinlichkeitsdichtefunktionen (PDFs) transformiert werden.
+Theoretische Fundierung: Kundenverhalten ändert sich stetig (Saisonalität, Regalumstellungen). Dies verursacht Konzept-Drift (Concept Drift). Ein Modell, das auf Winter-Verhalten trainiert wurde, versagt im Sommer. Die Kullback-Leibler-Divergenz ($D_{KL}$) misst die relative Entropie (den Informationsverlust), wenn die originale Trainings-Verteilung Q verwendet wird, um die neue Live-Sensor-Verteilung P zu approximieren. Um kontinuierliche Float-Werte für die mathematische Entropie-Formel nutzbar zu machen, müssen diese über ``np.histogram`` zwingend in diskrete Wahrscheinlichkeitsdichtefunktionen (PDFs) transformiert werden.
 
-Um zu verhindern, dass ein lokales, 5-minütiges Anomalie-Event (z.B. ein Feueralarm im Markt) sofort ein teures Retraining auslöst, nutzt das System einen Sliding-Window-Mechanismus, der den Trend glättet.
+Um zu verhindern, dass ein lokales, 5-minütiges Anomalie-Event (z.B. ein Feueralarm im Markt) sofort ein teures Retraining auslöst, nutzt das System einen Sliding-Window-Mechanismus, der den Trend glättet, bevor der Orchestrator aktiv wird.
 
 .. code-block:: python
 
    from scipy.stats import entropy
    import requests
    import numpy as np
+   import os
+   from collections import deque
+
+   # Zustands-Buffer für den Sliding-Window Mechanismus (z.B. die letzten 5 Messpunkte)
+   kl_history = deque(maxlen=5)
 
    def monitor_drift_and_retrain(live_batch: np.ndarray, train_baseline: np.ndarray):
-       """ Vergleicht die Wahrscheinlichkeitsdichte und triggert Airflow CT. """
+       """ Vergleicht die Wahrscheinlichkeitsdichte und triggert Airflow CT geglättet. """
        # Transformation der Sensor-Floats in Probability Density Functions (PDF)
        p_live, _ = np.histogram(live_batch, bins=50, density=True)
        q_train, _ = np.histogram(train_baseline, bins=50, density=True)
        
-       # Verhindert Division-by-Zero in der Logarithmus-Berechnung
+       # Verhindert Division-by-Zero in der Logarithmus-Berechnung der KL-Divergenz
        p_live = np.where(p_live == 0, 1e-10, p_live)
        q_train = np.where(q_train == 0, 1e-10, q_train)
-       kl_div = entropy(p_live, q_train)
        
-       # Harter Schwellenwert für automatisches Retraining
-       if kl_div > 0.15:
-           # Triggert den Airflow DAG via REST API
+       current_kl = entropy(p_live, q_train)
+       kl_history.append(current_kl)
+       
+       # Mathematische Trendglättung über das definierte Zeitfenster
+       smoothed_kl = sum(kl_history) / len(kl_history)
+       
+       # Harter Schwellenwert: Retraining nur, wenn der geglättete Trend dauerhaft kippt
+       if smoothed_kl > 0.15 and len(kl_history) == kl_history.maxlen:
+           # Triggert den Airflow DAG sicher über Umgebungsvariablen
+           airflow_user = os.environ.get("AIRFLOW_API_USER")
+           airflow_pass = os.environ.get("AIRFLOW_API_PASS")
+           
            requests.post(
                "http://airflow-webserver:8080/api/v1/dags/xgboost_retraining_pipeline/dagRuns",
-               json={"conf": {"drift_score": kl_div}},
-               auth=("admin", "admin")
+               json={"conf": {"drift_score": smoothed_kl}},
+               auth=(airflow_user, airflow_pass)
            )
            return True
        return False
 
-Der MLOps-Lifecycle: Überschreitet die KL-Divergenz im Live-Betrieb den kritischen Wert von 0.15, ruft die API automatisch Apache Airflow auf. Der Airflow-DAG extrahiert autonom die neuesten IoT-Daten, führt den MLflow-Optuna-Loop im Hintergrund neu aus, kompiliert das siegreiche Modell nach ONNX und pusht das Artefakt nahtlos in die Live-Umgebung (Zero-Downtime Deployment). Die Feedback-Schleife der MLOps-Architektur ist damit auf Enterprise-Level geschlossen.
+Der MLOps-Lifecycle: Überschreitet die geglättete KL-Divergenz im Live-Betrieb den kritischen Wert von 0.15, ruft die API automatisch Apache Airflow auf. Der Airflow-DAG extrahiert autonom die neuesten IoT-Daten, führt den MLflow-Optuna-Loop im Hintergrund neu aus, kompiliert das siegreiche Modell nach ONNX und pusht das Artefakt nahtlos in die Live-Umgebung (Zero-Downtime Deployment). Die Feedback-Schleife der MLOps-Architektur ist damit auf Enterprise-Level geschlossen.
