@@ -123,11 +123,14 @@ Da unsere Applikation als "Type-Ahead-Search" funktioniert (jeder getippte Buchs
    
    Abbildung 1: Production System Latency – Verteilung der Inferenz-Zeiten in Millisekunden (inkl. Cache-Hits).
 
-2. Robustheits-Analyse (Deep Noise Injection)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. Robustheits-Analyse (Entropie und String-Länge)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Die gravierendste informationstheoretische Schwachstelle von N-Gramm-Modellen ist die Länge des Inputs. Kurze Wörter (wie "Öl") erzeugen extrem wenige Vektor-Dimensionen für das Modell, wodurch die Entropie drastisch sinkt. Um zu beweisen, dass die Architektur auch bei fragmentierten Eingaben stabil bleibt, segmentiert der Evaluations-Code die Accuracy hart basierend auf der String-Länge. 
 
-Darüber hinaus injiziert das Skript gezielt "Deep Noise" (stochastische Transpositionen und Deletionen) in den Test-Katalog, um das echte "Fat-Finger-Syndrom" auf dem Tablet zu simulieren. Die Metriken belegen die Überlegenheit des ``char_wb``-Ansatzes: Bei Wörtern mit mehr als 5 Zeichen bleibt die Accuracy selbst bei massiv entstellten User-Inputs bei über 84% %. Das System fängt den Rauschanteil durch das exakte TF-IDF-Gewicht der verbleibenden sauberen N-Gramme ab und sichert eine Trefferquote weit über der Business-Grenze.
+Darüber hinaus injiziert das Skript gezielt "Deep Noise" (stochastische Transpositionen und Deletionen) in den Test-Katalog, um das echte "Fat-Finger-Syndrom" auf dem Tablet zu simulieren. Die resultierenden Metriken (siehe Abbildung 2) dekonstruieren die Modellgüte:
+
+* **Katalog-Input (Blau):** Repräsentiert saubere oder ausreichend lange Begriffe (> 5 Zeichen). Durch die hohe Entropie generiert das Modell genug redundante N-Gramm-Merkmale, um Einzelfehler mathematisch zu ignorieren. Die Accuracy liegt hier bei stabilen **84,2 %**.
+* **User-Input mit Deep Typos (Orange):** Markiert die informationstheoretische Belastungsgrenze. Bei sehr kurzen Wörtern führen Tippfehler zum Verlust fast aller gelernten Merkmale. Die Accuracy sinkt auf **73,9 %**, da die geringe Entropie das Modell zur probabilistischen Extrapolation zwingt. Dass selbst in diesem Worst-Case-Szenario eine Trefferquote weit über der Business-Grenze erzielt wird, belegt die Überlegenheit des ``char_wb``-Ansatzes.
 
 .. figure:: ../../eval_plots/nlp_robustness.png
    :align: center
@@ -176,15 +179,20 @@ Die durch t-SNE generierten 2D-Projektionen beweisen empirisch, dass die linguis
 
 4. End-to-End Klassifikationspräzision & Probability Calibration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein analytischer Blick auf die quantifizierte Confusion-Matrix der Evaluierung offenbart zwar ein präzises Zusammenspiel der meisten Klassen, aber auch gelegentliche False Positives zwischen stark verwandten Clustern (wie "Vegan" und "Molkerei"). Die physikalische Ursache liegt im geteilten Wortstamm (z.B. "Hafer-Milch"). Das System toleriert diesen systematischen Bias architektonisch bewusst: Vegane Ersatzprodukte werden im Markt fast immer in unmittelbarer physischer Nähe (oft im selben Kühlregal) zur klassischen Molkerei platziert. Der physische Routing-Fehler (verlorene Lauf-Meter) für den Endkunden konvergiert folglich in der Realität gegen Null.
+Ein detaillierter analytischer Blick auf die berechnete Confusion Matrix entlarvt die Stärken und die informationstheoretischen Grenzen der TF-IDF-Pipeline. 
 
 .. figure:: ../../eval_plots/nlp_confusion_matrix.png
    :align: center
    :width: 80%
    
-   Abbildung 3: NLP Confusion Matrix – Klassifikationspräzision und False-Positive-Toleranz.
+   Abbildung 3: NLP Confusion Matrix – Klassifikationspräzision und systematische Fehlerverteilung.
 
-Die Brier-Score-Evaluation des Platt-Scalings beweist zudem die Wirksamkeit der Kalibrierung: Die empirische Vorhersage-Kurve schmiegt sich nahezu perfekt an die ideale Diagonale (Reliability Diagram) an. Dies garantiert die System-Integrität: Wenn die NLP-Engine 85 % Sicherheit meldet, ist die Zuordnung empirisch zu exakt 85 % korrekt. Das Active-Learning-Modul wird somit nicht durch toxische Überkonfidenzen getäuscht.
+Die tiefblaue Diagonale der Matrix (Abbildung 3) beweist die exzellente generelle Trennschärfe des Modells: Eindeutige semantische Cluster wie "Gewürze & Backzutaten" (41 korrekte Zuweisungen), "Getränke Alkoholfrei" (40 Treffer) oder "Obst & Gemüse" (37 Treffer) werden von der KI nahezu fehlerfrei isoliert.
+
+Ein genauerer Blick abseits der Diagonale offenbart jedoch systematische Fehlklassifikationen in hybriden Randbereichen. Das signifikanteste Rauschen entsteht zwischen der Zielkategorie (Ground Truth) "Kühlregal (Vegan & Käse)" und der vorhergesagten Kategorie "Kühlregal (Molkerei)". Hier verzeichnet das Modell 18 False Positives gegenüber 22 korrekten Zuweisungen. Ein ähnlicher Bias zeigt sich beim "Trockensortiment", wo 10 Produkte fälschlicherweise in die "Molkerei" sortiert wurden.
+
+**Die architektonische Lösung:** Diese Unschärfe entsteht durch N-Gramm-Overfitting auf geteilte Wortstämme (z.B. "Hafer-*Milch*"). Ein rein unkalibriertes Machine-Learning-Modell würde solche Vorhersagen oft mit fälschlichen 90 % Konfidenz ausgeben, was den Nutzer im Supermarkt auf völlig falsche Laufwege (Routing-Fehler) schicken würde. 
+Genau hier greift die in Sektion 2 definierte **Probability Calibration** (Platt Scaling): Anstatt stur falsch zu leiten, erkennt die kalibrierte Regressionsschicht die mathematische Unsicherheit zwischen den Clustern (die Wahrscheinlichkeit sinkt unter den Schwellenwert von 75 %). Das System wirft keinen stillen Fehler, sondern feuert kontrolliert den *Active Learning Trigger* (siehe Methode ``ml_predict_with_active_learning``). Der Kunde erhält auf dem Tablet ein Dropdown-Menü und löst die semantische Ambivalenz (z.B. "Meinten Sie Kuhmilch oder Hafermilch?") mit einem einzigen Fingertipp selbst auf.
 
 Teil III: Prädiktive Stau-Modellierung (Traffic Prediction)
 -----------------------------------------------------------
@@ -197,7 +205,7 @@ Während das NLP-Modell auf einen Text-Input reaktiv klassifiziert, prädiziert 
 Durch die strikte Begrenzung auf momentane Spatio-Temporal-Interaktionen bleibt das XGBoost-Modell in der ``train_model_optuna.py`` vollständig zustandslos (stateless) und hochgradig echtzeitfähig:
 
 * **Zustandslose Makro-Metriken:** Anstatt historische Zeitreihen-Ableitungen zu bilden, erfasst die Engine den Systemdruck über rein momentane Heuristiken (z.B. den relativen Kassendruck ``queue_pressure = total_queue / open_registers``). Dies garantiert eine :math:`\mathcal{O}(1)` Memory-Footprint-Latenz ohne Puffer-Historie.
-* **Zirkadiane Rhythmik:** Das Zeit-Feature "Stunde" wird zirkadian transformiert. Würde man die Stunde roh als Integer belassen (0 bis 23), entstünde für den Algorithmus beim Sprung von 23:59 Uhr auf 00:00 Uhr eine künstliche mathematische Singularität (ein scheinbarer Sprung von 23 auf 0, obwohl nur eine Minute vergangen ist). Die trigonometrische Transformation über Sinus und Kosinus zwingt die Endpunkte der Zeit auf einen nahtlosen Kreis.
+* **Zirkadiane Rhythmik:** Das Zeit-Feature "Stunde" wird zirkadian transformiert. Würde man die Stunde roh als Integer belassen (0 bis 23), entstünde für den Algorithmus beim Sprung von 23:59 Uhr auf 00:00 Uhr eine künstliche mathematische Singularität (ein scheinbarer Sprung von 23 auf 0, obwohl nur eine minute vergangen ist). Die trigonometrische Transformation über Sinus und Kosinus zwingt die Endpunkte der Zeit auf einen nahtlosen Kreis.
 * **Spatial Spillovers:** Features wie ``spillover_risk`` (Kassendruck multipliziert mit der Booleschen Flagge für Hauptgänge) modellieren die physikalische Realität, in der überlaufende Kassen den Hauptgang blockieren, rein aus dem aktuellen Systemzustand heraus.
 
 .. code-block:: python
