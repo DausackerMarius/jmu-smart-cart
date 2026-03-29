@@ -916,7 +916,8 @@ def toggle_admin(n_open, n_login, is_open, pw):
     
     if tid == "btn-admin-login":
         # Vergleicht den Hash, um das Klartext-Passwort niemals im RAM zu kompromittieren
-        system_pw = os.environ.get("ADMIN_PW_HASH", "e19e075037d046fccbb4a17961d9a0cd")
+        # Passwort: smartcart2025
+        system_pw = os.environ.get("ADMIN_PW_HASH", "46a060f601b0f948f6c44249a5676451")
         if hashlib.md5(pw.encode('utf-8')).hexdigest() == system_pw:
             return False, True, "" 
         else:
