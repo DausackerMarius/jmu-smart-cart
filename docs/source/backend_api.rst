@@ -137,8 +137,7 @@ Ein elementarer Business-Case für digitale Supermarkt-Zwillinge ist die Einhalt
 
 Die aktuelle Iteration der Operations-Research-Engine (V1.0) operiert noch auf einer strikten euklidischen Distanzminimierung unter Einbezug temporaler Stau-Metriken. Das bedeutet, das System ist aktuell "blind" für die thermodynamischen Eigenschaften der einzelnen Produkte. Ein naiver Routing-Algorithmus würde das Eis womöglich als erstes Produkt auf die Liste setzen, woraufhin der Kunde noch 30 Minuten mit dem tauenden Eis durch den Markt läuft.
 
-*Architektonische Limitierung & Future Work:* 
-In zukünftigen Ausbaustufen muss die Produktdatenbank (``products.json``) um topologische Metadaten (z.B. ein ``is_frozen``-Flag) erweitert werden. Das Frontend könnte dies visuell durch Badges ("TK-Ware") hervorheben, während der TSP-Solver auf Backend-Ebene dieses Flag ausliest, um Kühlwaren durch harte Penalty-Gewichtungen systematisch ans Ende der Route (direkt vor die Kasse) zu sortieren. Dies verdeutlicht die Notwendigkeit einer immer engeren Verzahnung von Data Engineering, UI-Design und Operations Research für kommende Systemgenerationen.
+*Architektonische Limitierung & Future Work:* In zukünftigen Ausbaustufen muss die Produktdatenbank (``products.json``) um topologische Metadaten (z.B. ein ``is_frozen``-Flag) erweitert werden. Das Frontend könnte dies visuell durch Badges ("TK-Ware") hervorheben, während der TSP-Solver auf Backend-Ebene dieses Flag ausliest, um Kühlwaren durch harte Penalty-Gewichtungen systematisch ans Ende der Route (direkt vor die Kasse) zu sortieren. Dies verdeutlicht die Notwendigkeit einer immer engeren Verzahnung von Data Engineering, UI-Design und Operations Research für kommende Systemgenerationen.
 
 Phase VI: KI-Mutation, Graph-Isolierung & DSGVO-Konformität
 -----------------------------------------------------------
@@ -194,17 +193,11 @@ Um die Latenzen im Echtzeit-Dashboard minimal zu halten, vermeidet das System re
 Die Berechnungen basieren auf den stationären Gleichungen für Markow-Ketten. Der Auslastungsgrad ist definiert als $\rho = \frac{\lambda}{\mu}$.
 Die Wahrscheinlichkeit für ein leeres System ($P_0$) und ein volles System ($P_K$) berechnen sich bei einer Auslastung $\rho \neq 1$ als:
 
-.. math::
+$$P_0 = \frac{1 - \rho}{1 - \rho^{K+1}}$$
 
-    P_0 = \frac{1 - \rho}{1 - \rho^{K+1}}
+$$P_K = \rho^K P_0$$
 
-.. math::
-
-    P_K = \rho^K P_0
-
-.. math::
-
-    L_q = \frac{\rho}{1 - \rho} - \frac{(K + 1) \rho^{K+1}}{1 - \rho^{K+1}}
+$$L_q = \frac{\rho}{1 - \rho} - \frac{(K + 1) \rho^{K+1}}{1 - \rho^{K+1}}$$
 
 Aus der durchschnittlichen Warteschlangenlänge ($L_q$) und der effektiven Ankunftsrate ($\lambda_{eff} = \lambda(1 - P_K)$) leitet das System über das Gesetz von Little die erwartete Wartezeit ab.
 
@@ -287,30 +280,30 @@ In einer akademischen Arbeit muss die architektonische Sicherheit des Backends b
 Ein entscheidendes Detail der Informatik: Eine Hash-Map (wie sie für den Cache oder das Inventar verwendet wird) liefert zwar durchschnittlich Zugriffszeiten von $\mathcal{O}(1)$. Im **Worst-Case** jedoch (wenn der Hashing-Algorithmus massive Hash-Kollisionen erzeugt), degeneriert die Zugriffszeit zu $\mathcal{O}(N)$. Die Architektur schützt sich vor diesem Worst-Case durch das vorherige Pruning des Suchraums.
 
 .. list-table:: Algorithmische Komplexität des Backends
-   :widths: 30 45 25
-   :header-rows: 1
+    :widths: 30 45 25
+    :header-rows: 1
 
-   * - System-Komponente
-     - Verwendete Datenstruktur / Algorithmus
-     - Zeitkomplexität
-   * - **Inventar Hash-Lookup**
-     - Hash-Map / Python Dictionary
-     - Avg: $\mathcal{O}(1)$, Worst: $\mathcal{O}(N)$
-   * - **Inventar-Fuzzy-Suche**
-     - Damerau-Levenshtein (Dynamische Programmierung)
-     - $\mathcal{O}(N \cdot M)$
-   * - **KI Stau-Mutation**
-     - Bureau of Public Roads (BPR) Transformation
-     - $\mathcal{O}(E)$
-   * - **Graphen-Kondensation**
-     - Iterated Single-Source Dijkstra (Binary Heap)
-     - $\mathcal{O}(K \cdot E \log V)$
-   * - **Routen-Lösung (Klein, n<=11)**
-     - Held-Karp Algorithmus (Exakte DP)
-     - $\mathcal{O}(N^2 \cdot 2^N)$
-   * - **Routen-Lösung (Mittel, 12-25)**
-     - Simulated Annealing & Ant Colony (Heuristiken)
-     - $\mathcal{O}(\text{Iterationen})$
-   * - **Pfad-Rekonstruktion**
-     - Listen-Verkettung (Dijkstra Path Extend)
-     - $\mathcal{O}(V_{\text{pfad}})$
+    * - System-Komponente
+      - Verwendete Datenstruktur / Algorithmus
+      - Zeitkomplexität
+    * - **Inventar Hash-Lookup**
+      - Hash-Map / Python Dictionary
+      - Avg: $\mathcal{O}(1)$, Worst: $\mathcal{O}(N)$
+    * - **Inventar-Fuzzy-Suche**
+      - Damerau-Levenshtein (Dynamische Programmierung)
+      - $\mathcal{O}(N \cdot M)$
+    * - **KI Stau-Mutation**
+      - Bureau of Public Roads (BPR) Transformation
+      - $\mathcal{O}(E)$
+    * - **Graphen-Kondensation**
+      - Iterated Single-Source Dijkstra (Binary Heap)
+      - $\mathcal{O}(K \cdot E \log V)$
+    * - **Routen-Lösung (Klein, n<=11)**
+      - Held-Karp Algorithmus (Exakte DP)
+      - $\mathcal{O}(N^2 \cdot 2^N)$
+    * - **Routen-Lösung (Mittel, 12-25)**
+      - Simulated Annealing & Ant Colony (Heuristiken)
+      - $\mathcal{O}(\text{Iterationen})$
+    * - **Pfad-Rekonstruktion**
+      - Listen-Verkettung (Dijkstra Path Extend)
+      - $\mathcal{O}(V_{\text{pfad}})$
