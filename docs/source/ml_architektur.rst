@@ -128,7 +128,7 @@ Da unsere Applikation als "Type-Ahead-Search" funktioniert (jeder getippte Buchs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Die gravierendste informationstheoretische Schwachstelle von N-Gramm-Modellen ist die Länge des Inputs. Kurze Wörter (wie "Öl") erzeugen extrem wenige Vektor-Dimensionen für das Modell, wodurch die Entropie drastisch sinkt. Um zu beweisen, dass die Architektur auch bei fragmentierten Eingaben stabil bleibt, segmentiert der Evaluations-Code die Accuracy hart basierend auf der String-Länge. 
 
-Darüber hinaus injiziert das Skript gezielt "Deep Noise" (stochastische Transpositionen und Deletionen) in den Test-Katalog, um das echte "Fat-Finger-Syndrom" auf dem Tablet zu simulieren. Die Metriken belegen die Überlegenheit des ``char_wb``-Ansatzes: Bei Wörtern mit mehr als 5 Zeichen bleibt die Accuracy selbst bei massiv entstellten User-Inputs bei über 92 %. Das System fängt den Rauschanteil durch das exakte TF-IDF-Gewicht der verbleibenden sauberen N-Gramme ab und sichert eine Trefferquote weit über der Business-Grenze.
+Darüber hinaus injiziert das Skript gezielt "Deep Noise" (stochastische Transpositionen und Deletionen) in den Test-Katalog, um das echte "Fat-Finger-Syndrom" auf dem Tablet zu simulieren. Die Metriken belegen die Überlegenheit des ``char_wb``-Ansatzes: Bei Wörtern mit mehr als 5 Zeichen bleibt die Accuracy selbst bei massiv entstellten User-Inputs bei über 84% %. Das System fängt den Rauschanteil durch das exakte TF-IDF-Gewicht der verbleibenden sauberen N-Gramme ab und sichert eine Trefferquote weit über der Business-Grenze.
 
 .. figure:: ../../eval_plots/nlp_robustness.png
    :align: center
