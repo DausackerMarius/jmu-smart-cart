@@ -17,12 +17,11 @@ Der architektonische Fallstrick: Ein naiver Lösungsansatz wäre es, ein schwerg
 
 1. Deterministisches und Heuristisches Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Die rohe Eingabe wird zunächst via Regular Expressions (RegEx) normalisiert, indem Sonderzeichen entfernt und alle Buchstaben in den Lowercase-Raum transformiert werden. Das System prüft anschließend gegen ein kompiliertes Python-Set, um in garantierter konstanter Zeit $\mathcal{O}(1)$ zu evaluieren, ob der exakte Term im Inventar existiert. 
+Die rohe Eingabe wird zunächst via Regular Expressions (RegEx) normalisiert, indem Sonderzeichen entfernt und alle Buchstaben in den Lowercase-Raum transformiert werden. Das System prüft anschließend gegen ein kompiliertes Python-Set, um in garantierter konstanter Zeit :math:`\mathcal{O}(1)` zu evaluieren, ob der exakte Term im Inventar existiert. 
 
-Erst wenn dieser Exact-Match fehlschlägt, greift der Fallback. Um eine inperformante $\mathcal{O}(N)$-Schleife über das gesamte (potenziell 50.000 Artikel umfassende) Inventar zu verhindern, nutzt das System einen vorberechneten Längen-Index. Dieser ermöglicht es, den Suchraum in $\mathcal{O}(1)$ auf eine winzige Kandidatenmenge einzugrenzen (Pruning), bevor der Damerau-Levenshtein-Algorithmus angewendet wird.
+Erst wenn dieser Exact-Match fehlschlägt, greift der Fallback. Um eine inperformante :math:`\mathcal{O}(N)`-Schleife über das gesamte (potenziell 50.000 Artikel umfassende) Inventar zu verhindern, nutzt das System einen vorberechneten Längen-Index. Dieser ermöglicht es, den Suchraum in :math:`\mathcal{O}(1)` auf eine winzige Kandidatenmenge einzugrenzen (Pruning), bevor der Damerau-Levenshtein-Algorithmus angewendet wird.
 
-**Theoretische Fundierung (Levenshtein vs. Damerau):** 
-Die klassische Levenshtein-Distanz misst die minimalen Operationen (Löschen, Einfügen, Ersetzen), um String A in String B zu überführen. Tippt der Kunde "Bort" statt "Brot", wertet Levenshtein dies als zwei getrennte Operationen (Lösche das 'o', füge ein neues 'o' nach dem 'r' ein). Die Damerau-Erweiterung führt die Operation der Transposition (Vertauschung benachbarter Zeichen) ein. "Bort" ist nun nur noch exakt eine Operation von "Brot" entfernt. Da Vertauschungen (das sogenannte "Fat-Finger-Syndrom") auf Touchscreens die mit Abstand häufigste Fehlerquelle darstellen, verhindert dieser mathematisch überlegene Algorithmus das unnötige Auslösen der ressourcenintensiven ML-Pipeline.
+**Theoretische Fundierung (Levenshtein vs. Damerau):** Die klassische Levenshtein-Distanz misst die minimalen Operationen (Löschen, Einfügen, Ersetzen), um String A in String B zu überführen. Tippt der Kunde "Bort" statt "Brot", wertet Levenshtein dies als zwei getrennte Operationen (Lösche das 'o', füge ein neues 'o' nach dem 'r' ein). Die Damerau-Erweiterung führt die Operation der Transposition (Vertauschung benachbarter Zeichen). "Bort" ist nun nur noch exakt eine Operation von "Brot" entfernt. Da Vertauschungen (das sogenannte "Fat-Finger-Syndrom") auf Touchscreens die mit Abstand häufigste Fehlerquelle darstellen, verhindert dieser mathematisch überlegene Algorithmus das unnötige Auslösen der ressourcenintensiven ML-Pipeline.
 
 .. code-block:: python
 
@@ -197,7 +196,7 @@ Während das NLP-Modell auf einen Text-Input reaktiv klassifiziert, prädiziert 
 
 Durch die strikte Begrenzung auf momentane Spatio-Temporal-Interaktionen bleibt das XGBoost-Modell in der ``train_model_optuna.py`` vollständig zustandslos (stateless) und hochgradig echtzeitfähig:
 
-* **Zustandslose Makro-Metriken:** Anstatt historische Zeitreihen-Ableitungen zu bilden, erfasst die Engine den Systemdruck über rein momentane Heuristiken (z.B. den relativen Kassendruck ``queue_pressure = total_queue / open_registers``). Dies garantiert eine $\mathcal{O}(1)$ Memory-Footprint-Latenz ohne Puffer-Historie.
+* **Zustandslose Makro-Metriken:** Anstatt historische Zeitreihen-Ableitungen zu bilden, erfasst die Engine den Systemdruck über rein momentane Heuristiken (z.B. den relativen Kassendruck ``queue_pressure = total_queue / open_registers``). Dies garantiert eine :math:`\mathcal{O}(1)` Memory-Footprint-Latenz ohne Puffer-Historie.
 * **Zirkadiane Rhythmik:** Das Zeit-Feature "Stunde" wird zirkadian transformiert. Würde man die Stunde roh als Integer belassen (0 bis 23), entstünde für den Algorithmus beim Sprung von 23:59 Uhr auf 00:00 Uhr eine künstliche mathematische Singularität (ein scheinbarer Sprung von 23 auf 0, obwohl nur eine Minute vergangen ist). Die trigonometrische Transformation über Sinus und Kosinus zwingt die Endpunkte der Zeit auf einen nahtlosen Kreis.
 * **Spatial Spillovers:** Features wie ``spillover_risk`` (Kassendruck multipliziert mit der Booleschen Flagge für Hauptgänge) modellieren die physikalische Realität, in der überlaufende Kassen den Hauptgang blockieren, rein aus dem aktuellen Systemzustand heraus.
 
@@ -365,7 +364,7 @@ Um den echten Delta-Lift (die Zeitersparnis als Return on Investment) der KI zu 
         })
         return results, p_value
 
-**Analytische Dekonstruktion:** Der p-Wert des durchgeführten Welch-Tests liegt bei p < 0.001. Damit wird die Nullhypothese rigoros verworfen; die Zeitersparnis ist statistisch hochsignifikant. Die Metriken offenbaren eine rechtsschiefe Verteilung (Right-Skewed Distribution) mit einem Erwartungswert von +184 ersparten Sekunden. Das architektonisch wertvollste Phänomen verbirgt sich im Long Tail (dem Ausläufer rechts): Bei ca. 12 % der Einkäufe (insbesondere zur Rush-Hour) spart das hybride Routing über 400 Sekunden. Das ML-Modell prädiziert topologische Stau-Kaskaden Minuten vor deren Entstehung. Der erzwungene physische Umweg durch Nebengänge wird von der massiven Ersparnis an passiver Stehzeit in der Realität völlig überkompensiert.
+**Analytische Dekonstruktion:** Der p-Wert des durchgeführten Welch-Tests liegt bei :math:`p < 0.001`. Damit wird die Nullhypothese rigoros verworfen; die Zeitersparnis ist statistisch hochsignifikant. Die Metriken offenbaren eine rechtsschiefe Verteilung (Right-Skewed Distribution) mit einem Erwartungswert von +184 ersparten Sekunden. Das architektonisch wertvollste Phänomen verbirgt sich im Long Tail (dem Ausläufer rechts): Bei ca. 12 % der Einkäufe (insbesondere zur Rush-Hour) spart das hybride Routing über 400 Sekunden. Das ML-Modell prädiziert topologische Stau-Kaskaden Minuten vor deren Entstehung. Der erzwungene physische Umweg durch Nebengänge wird von der massiven Ersparnis an passiver Stehzeit in der Realität völlig überkompensiert.
 
 .. figure:: ../../eval_plots/business_value_time_saved.png
    :align: center

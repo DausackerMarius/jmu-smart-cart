@@ -20,7 +20,7 @@ Ein naives, synchrones Architektur-Design würde hier unweigerlich den Event-Loo
 --------------------------------------------
 Beim Systemstart (Bootstrapping) ist der In-Memory-Zustand des Tablets volatil und leer. Um das gefürchtete N+1-Query-Problem (Dutzende isolierte REST-Calls, die das Netzwerk überlasten) zu vermeiden, nutzt das System ein Backend-for-Frontend (BFF) Pattern. 
 
-Das State-Management wird über "Zustand" (eine atomare, Flux-basierte State-Engine) realisiert. Diese Engine umgeht den React-Context-Tree vollständig und verhindert somit globale $\mathcal{O}(N)$ Re-Renders der gesamten Applikation. Um das System vor veralteten Offline-Daten (Stale Data) zu schützen, implementiert das Bootstrapping zudem eine kryptografische Cache Invalidation Strategie via ETag/Hash-Abgleich.
+Das State-Management wird über "Zustand" (eine atomare, Flux-basierte State-Engine) realisiert. Diese Engine umgeht den React-Context-Tree vollständig und verhindert somit globale :math:`\mathcal{O}(N)` Re-Renders der gesamten Applikation. Um das System vor veralteten Offline-Daten (Stale Data) zu schützen, implementiert das Bootstrapping zudem eine kryptografische Cache Invalidation Strategie via ETag/Hash-Abgleich.
 
 .. code-block:: typescript
 
@@ -74,13 +74,17 @@ Klassisches GPS durchdringt die Stahlbetonarchitektur eines Supermarkts nicht. D
 
 Die React-Applikation wird daher über das Capacitor-Framework in einen nativen Hardware-Container gewrappt. Ein Hardware Abstraction Layer (HAL) agiert als Foreign Function Interface (FFI) Bridge und streamt die rohen Antennen-Daten asynchron in die V8-Engine. Das rohe Received Signal Strength Indicator (RSSI) Signal unterliegt im Supermarkt jedoch extremem stochastischem Rauschen durch Multipath-Fading (Signal-Reflexionen an Regalen). Die Architektur implementiert daher einen eindimensionalen Kalman-Filter zur iterativen Sensor-Fusion. 
 
-Mathematische Fundierung: Die Signalstärke wird zunächst in eine physikalische Distanz ($d$) übersetzt, wobei der Path Loss Exponent ($n$) ein kalibrierter Umgebungsfaktor für die Signalabsorption ist (typischerweise 2.5 für Innenräume):
+Mathematische Fundierung: Die Signalstärke wird zunächst in eine physikalische Distanz (:math:`d`) übersetzt, wobei der Path Loss Exponent (:math:`n`) ein kalibrierter Umgebungsfaktor für die Signalabsorption ist (typischerweise 2.5 für Innenräume):
 
-$$d=10^{\frac{P_{Tx}-RSSI}{10\cdot n}}$$
+.. math::
 
-Der Kalman-Filter errechnet daraufhin den Kalman-Gain ($K_t$), der dynamisch abwägt, ob der verrauschten Messung ($R$) oder der bisherigen Prädiktion ($P$) mehr vertraut werden soll:
+    d=10^{\frac{P_{Tx}-RSSI}{10\cdot n}}
 
-$$K_t=\frac{P_{vorher}}{P_{vorher}+R}$$
+Der Kalman-Filter errechnet daraufhin den Kalman-Gain (:math:`K_t`), der dynamisch abwägt, ob der verrauschten Messung (:math:`R`) oder der bisherigen Prädiktion (:math:`P`) mehr vertraut werden soll:
+
+.. math::
+
+    K_t=\frac{P_{vorher}}{P_{vorher}+R}
 
 .. code-block:: typescript
 
@@ -164,7 +168,9 @@ Der Edge-Client muss daher eine ständige affine Transformation (Skalierung und 
 
 Mathematisch erfolgt dies durch eine **Affine Transformation** über eine homogene Matrix (Translation vom Backend-Meter-Raum in den Frontend-Pixel-Raum):
 
-$$\begin{pmatrix}X_{pixel}\\Y_{pixel}\\1\end{pmatrix}=\begin{pmatrix}S_x&0&T_x\\0&S_y&T_y\\0&0&1\end{pmatrix}\begin{pmatrix}X_{meter}\\Y_{meter}\\1\end{pmatrix}$$
+.. math::
+
+    \begin{pmatrix}X_{pixel}\\Y_{pixel}\\1\end{pmatrix}=\begin{pmatrix}S_x&0&T_x\\0&S_y&T_y\\0&0&1\end{pmatrix}\begin{pmatrix}X_{meter}\\Y_{meter}\\1\end{pmatrix}
 
 .. code-block:: typescript
 
@@ -266,7 +272,7 @@ Die Browser-API ``requestAnimationFrame()`` synchronisiert die Zeichenaufrufe ex
 
 6. Adaptive Render Engine: Web Workers & Thermal Protection
 -----------------------------------------------------------
-Das permanente Rendering einer Route mit Tausenden topologischen Vektoren würde die V8-Engine unter Last überfordern und den Akku massiv belasten. Die Architektur delegiert die schwere Grafik-Berechnung daher an einen isolierten Hintergrund-Thread (Web Worker) via OffscreenCanvas API und Zero-Copy Memory Transfer (Übergabe des Canvas-Pointers in $\mathcal{O}(1)$).
+Das permanente Rendering einer Route mit Tausenden topologischen Vektoren würde die V8-Engine unter Last überfordern und den Akku massiv belasten. Die Architektur delegiert die schwere Grafik-Berechnung daher an einen isolierten Hintergrund-Thread (Web Worker) via OffscreenCanvas API und Zero-Copy Memory Transfer (Übergabe des Canvas-Pointers in :math:`\mathcal{O}(1)`).
 
 Architektonischer Schutz vor Thermal Throttling: Wenn das Edge-Device überhitzt, drosselt das Betriebssystem die CPU-Taktrate. Ein starrer 60-FPS-Loop würde dann zu einem unkontrollierten Memory-Overflow der Worker-Queue führen. Die Applikation implementiert daher Adaptive Framerate Control. Der Worker misst die exakte Render-Latenz, meldet die maximale Hardware-Kapazität an den Main-Thread zurück, und der Main-Thread drosselt seinen Rendering-Loop dynamisch entsprechend.
 

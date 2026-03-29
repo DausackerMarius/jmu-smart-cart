@@ -3,7 +3,7 @@ Data Engineering & Supermarkt-Ontologie (ETL-Pipeline)
 
 Das vorherige Kapitel definierte die räumliche Infrastruktur des JMU Smart Carts: Ein Graphen-Modell des Supermarkts dient als Digitaler Zwilling im Arbeitsspeicher. Für das dynamische Routing fungieren die Knoten (physische Regale) an diesem Punkt jedoch lediglich als leere Container. 
 
-Ein prädiktives Routing-System erfordert eine durchgehend konsistente Datenbasis. Ist die Produktdatenbank fehlerhaft oder existieren referenzierte Produkte topologisch nicht, führt dies deterministisch zu fehlerhaften Pfadberechnungen oder Laufzeitfehlern im Backend. 
+Ein prädiktive Routing-System erfordert eine durchgehend konsistente Datenbasis. Ist die Produktdatenbank fehlerhaft oder existieren referenzierte Produkte topologisch nicht, führt dies deterministisch zu fehlerhaften Pfadberechnungen oder Laufzeitfehlern im Backend. 
 
 Um eine skalierbare, produktionsnahe Architektur zu gewährleisten, implementiert das System eine autonome Data-Engineering-Pipeline nach dem ETL-Muster (Extract, Transform, Load). Diese Pipeline dient als automatisierte Schnittstelle, die den nativen "Bundeslebensmittelschlüssel" (BLS) importiert, semantisch bereinigt, stochastisch anreichert und die resultierenden Produkte algorithmisch auf die virtuellen Supermarkt-Regale abbildet.
 
@@ -42,7 +42,7 @@ Das System implementiert einen speicherschonenden Downloader, der die Datei in d
             
             logging.info(f"Stream-Download abgeschlossen: {filepath}")
 
-*Die Wahl der Blockgröße:* Betriebssysteme und Festplatten-Controller verarbeiten I/O-Operationen physisch in Paging-Blöcken von meist 4 KB oder 8 KB. Eine Chunk-Größe von exakt 8192 Bytes (8 KB) synchronisiert den Download optimal mit dem Betriebssystem, minimiert den I/O-Overhead und sichert die $\mathcal{O}(1)$ Speicherkomplexität.
+*Die Wahl der Blockgröße:* Betriebssysteme und Festplatten-Controller verarbeiten I/O-Operationen physisch in Paging-Blöcken von meist 4 KB oder 8 KB. Eine Chunk-Größe von exakt 8192 Bytes (8 KB) synchronisiert den Download optimal mit dem Betriebssystem, minimiert den I/O-Overhead und sichert die :math:`\mathcal{O}(1)` Speicherkomplexität.
 
 1.2 Lazy Evaluation: Das Generator-Pattern
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ Behördliche B2B-Datensätze sind durch komplexe Nomenklaturen geprägt (z.B. *"
 
 2.1 Reduktion der Textkomplexität
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Für die in Kapitel 2 definierte fehlertolerante Suchmaschine (Fuzzy Search via Damerau-Levenshtein) verursachen überlange Strings unnötigen Rechenaufwand. Die Laufzeit der dynamischen Programmierung steigt mit $\mathcal{O}(N \cdot M)$, was bei langen Suchbegriffen zu Latenzen und einer erhöhten Rate an False-Positives führt.
+Für die in Kapitel 2 definierte fehlertolerante Suchmaschine (Fuzzy Search via Damerau-Levenshtein) verursachen überlange Strings unnötigen Rechenaufwand. Die Laufzeit der dynamischen Programmierung steigt mit :math:`\mathcal{O}(N \cdot M)`, was bei langen Suchbegriffen zu Latenzen und einer erhöhten Rate an False-Positives führt.
 
 Die Klasse ``TextSanitizer`` bereinigt den Text und isoliert den semantischen Kern:
 
@@ -184,8 +184,8 @@ Zur Sicherstellung der topologischen Erreichbarkeit nutzt der Algorithmus **Grun
                 
         return shelves_allocated
 
-3.2 Präventives Load-Balancing (Round-Robin)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3.2 Präventive Load-Balancing (Round-Robin)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Besitzt eine Kategorie mehrere Regale (z.B. Knoten A, B und C), würde ein lineares Auffüllen (zuerst A, dann B, dann C) das Kundeninteresse im Markt ungleichmäßig bündeln und lokale Engpässe (Bottlenecks) provozieren. 
 
 Zur physischen Stauprävention implementiert die Architektur ein **Round-Robin-Routing**. Über einen iterativen Zyklus (``itertools.cycle``) werden die Produkte gleichmäßig über alle dedizierten Knoten der jeweiligen Kategorie gestreut.
@@ -208,12 +208,12 @@ Zur physischen Stauprävention implementiert die Architektur ein **Round-Robin-R
 
 Teil IV: Materialisierung und Data Contract (Two-Pass-Architektur)
 ------------------------------------------------------------------
-Da die Zuweisung nach Sainte-Laguë das absolute Wissen über alle Produktmengen voraussetzt, erfordert die Beibehaltung der $\mathcal{O}(1)$ Speichereffizienz eine **Two-Pass-Architektur**. Dies stellt einen bewussten Trade-off dar: Es wird ein zusätzlicher Festplatten-Lesezugriff in Kauf genommen, um den Arbeitsspeicher zu entlasten.
+Da die Zuweisung nach Sainte-Laguë das absolute Wissen über alle Produktmengen voraussetzt, erfordert die Beibehaltung der :math:`\mathcal{O}(1)` Speichereffizienz eine **Two-Pass-Architektur**. Dies stellt einen bewussten Trade-off dar: Es wird ein zusätzlicher Festplatten-Lesezugriff in Kauf genommen, um den Arbeitsspeicher zu entlasten.
 
-*   **Pass 1:** Der Stream iteriert die CSV-Datei zur Aggregation der absoluten Zählerstände pro Kategorie.
-*   **Pass 2:** Nach der Allokationsberechnung wird die Datei ein zweites Mal gestreamt. Die Produkte werden transformiert, einem Knoten zugewiesen und gegen das Pydantic-Schema validiert.
+* **Pass 1:** Der Stream iteriert die CSV-Datei zur Aggregation der absoluten Zählerstände pro Kategorie.
+* **Pass 2:** Nach der Allokationsberechnung wird die Datei ein zweites Mal gestreamt. Die Produkte werden transformiert, einem Knoten zugewiesen und gegen das Pydantic-Schema validiert.
 
-Fehlerhafte Datensätze werden im Sinne der Graceful Degradation aussortiert. Die validen Daten werden als $\mathcal{O}(1)$ Dictionary im RAM vorgehalten und abschließend sowohl als JSON (für die REST-API) als auch als CSV-Matrix (für das Machine-Learning-Training) materialisiert.
+Fehlerhafte Datensätze werden im Sinne der Graceful Degradation aussortiert. Die validen Daten werden als :math:`\mathcal{O}(1)` Dictionary im RAM vorgehalten und abschließend sowohl als JSON (für die REST-API) als auch als CSV-Matrix (für das Machine-Learning-Training) materialisiert.
 
 .. code-block:: python
 

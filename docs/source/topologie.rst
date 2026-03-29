@@ -1,7 +1,7 @@
 Supermarkt-Topologie & Spatial Computing
 ========================================
 
-Dieses Kapitel dokumentiert die fundamentale In-Memory-Datenstruktur der Live-Engine. Um die im Operations Research (Kapitel 7) definierten deterministischen und stochastischen Routing-Probleme performant zu lösen, muss die physische Verkaufsfläche in einen maschinenlesbaren, topologischen Raum übersetzt werden. Das System modelliert den Supermarkt hierfür als gerichteten, kanten-gewichteten Attribut-Graphen $G = (V, E, W)$.
+Dieses Kapitel dokumentiert die fundamentale In-Memory-Datenstruktur der Live-Engine. Um die im Operations Research (Kapitel 7) definierten deterministischen und stochastischen Routing-Probleme performant zu lösen, muss die physische Verkaufsfläche in einen maschinenlesbaren, topologischen Raum übersetzt werden. Das System modelliert den Supermarkt hierfür als gerichteten, kanten-gewichteten Attribut-Graphen :math:`G = (V, E, W)`.
 
 Diese Architektur geht jedoch weit über einfache planare Knotendarstellungen hinaus. Als "Spatial Computing"-Engine schlägt sie die komplexe algorithmische Brücke zwischen drei völlig unterschiedlichen physikalischen Dimensionen:
 1. Der 2D-Pixel-Ebene des React/Dash-Frontends (Touch-Eingaben und UI-Rendering).
@@ -12,9 +12,9 @@ Diese Architektur geht jedoch weit über einfache planare Knotendarstellungen hi
 ---------------------------------------------------------------
 Anstatt eines starren Raster-Modells (Grids), welches den Raum in diskrete, rechenintensive Kacheln unterteilt, nutzt das System die in C optimierte Graphen-Bibliothek ``NetworkX``. Ein Supermarkt ist mathematisch ein dünnbesetzter Graph (Sparse Graph): Ein Regal ist physisch nur mit seinen unmittelbaren Kreuzungen verbunden, nicht mit allen anderen Regalen im Markt. 
 
-Würde die Architektur eine klassische Adjazenzmatrix verwenden, entstünde bei $|V| = 500$ eine Datenstruktur mit 250.000 Speicherzellen, die fast ausschließlich mit Nullen gefüllt wäre. Um eine RAM-Explosion zu verhindern und L1/L2-CPU-Cache-Misses zu minimieren, forciert die Architektur intern ein **Adjazenzlisten-Modell**. Hierbei speichert jeder Knoten nur reale Kanten, was die Speicherkomplexität auf das theoretische Minimum von $\mathcal{O}(|V| + |E|)$ drückt.
+Würde die Architektur eine klassische Adjazenzmatrix verwenden, entstünde bei :math:`|V| = 500` eine Datenstruktur mit 250.000 Speicherzellen, die fast ausschließlich mit Nullen gefüllt wäre. Um eine RAM-Explosion zu verhindern und L1/L2-CPU-Cache-Misses zu minimieren, forciert die Architektur intern ein **Adjazenzlisten-Modell**. Hierbei speichert jeder Knoten nur reale Kanten, was die Speicherkomplexität auf das theoretische Minimum von :math:`\mathcal{O}(|V| + |E|)` drückt.
 
-Die fundamentale Architektur-Entscheidung liegt in der Wahl eines **gerichteten Graphen** (``nx.DiGraph``). Während sich Kunden in regulären Gängen bidirektional bewegen (was durch das Generieren zweier gerichteter Kanten $u \rightarrow v$ und $v \rightarrow u$ abgebildet wird), existieren im Supermarkt strikte topologische Singularitäten: Kassenzonen und Eingangsschranken.
+Die fundamentale Architektur-Entscheidung liegt in der Wahl eines **gerichteten Graphen** (``nx.DiGraph``). Während sich Kunden in regulären Gängen bidirektional bewegen (was durch das Generieren zweier gerichteter Kanten :math:`u \rightarrow v` und :math:`v \rightarrow u` abgebildet wird), existieren im Supermarkt strikte topologische Singularitäten: Kassenzonen und Eingangsschranken.
 
 2. Automatische Graphen-Generierung (Floorplan Skeletonization)
 ---------------------------------------------------------------
@@ -29,7 +29,7 @@ Ein naiver Modellierungsfehler ist es, die Regale selbst als befahrbare Knoten i
 * **Navigable Nodes (Wege-Knoten):** Virtuelle Wegpunkte auf der medialen Achse der Gänge. Der Suchalgorithmus operiert *ausschließlich* auf diesem Subgraphen.
 * **POI Nodes (Points of Interest / Regale):** Diese Knoten repräsentieren die Ware. Sie besitzen exakt eine gerichtete Kante (Distanz 0.0) von und zu ihrem nächstgelegenen Anker-Knoten im Gang.
 
-Die bipartite Trennung reduziert den Suchraum des Algorithmus dramatisch. Bei insgesamt 1000 Knoten (davon 800 Regale und 200 Wegpunkte) operiert der Dijkstra-Algorithmus nicht auf der Gesamtmenge. Die Zeitkomplexität für den Fibonacci-Heap-basierten Dijkstra sinkt von $\mathcal{O}(|V_{\text{total}}| \log |V_{\text{total}}| + |E|)$ auf $\mathcal{O}(|V_{\text{way}}| \log |V_{\text{way}}| + |E_{\text{way}}|)$. Die Suchlatenz auf dem Server verringert sich dadurch exponentiell.
+Die bipartite Trennung reduziert den Suchraum des Algorithmus dramatisch. Bei insgesamt 1000 Knoten (davon 800 Regale und 200 Wegpunkte) operiert der Dijkstra-Algorithmus nicht auf der Gesamtmenge. Die Zeitkomplexität für den Fibonacci-Heap-basierten Dijkstra sinkt von :math:`\mathcal{O}(|V_{\text{total}}| \log |V_{\text{total}}| + |E|)` auf :math:`\mathcal{O}(|V_{\text{way}}| \log |V_{\text{way}}| + |E_{\text{way}}|)`. Die Suchlatenz auf dem Server verringert sich dadurch exponentiell.
 
 .. code-block:: json
 
@@ -93,9 +93,11 @@ Tippt ein Kunde auf das Frontend-Display (z. B. Koordinate X=1920, Y=1080), lief
 
 Mathematisch erfolgt dies durch eine **Affine Transformation** über eine homogene Matrix:
 
-$$\begin{pmatrix} X_{meter} \\ Y_{meter} \\ 1 \end{pmatrix} = \begin{pmatrix} S_x & 0 & T_x \\ 0 & S_y & T_y \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} X_{pixel} \\ Y_{pixel} \\ 1 \end{pmatrix}$$
+.. math::
 
-Wobei $S$ der Skalierungsfaktor und $T$ der Translations-Offset ist. Nach der Konvertierung nutzt das System einen **K-d Baum (K-Dimensional Tree)**. Dieser Binärbaum wird in $\mathcal{O}(|V_{POI}| \log |V_{POI}|)$ konstruiert und ermöglicht Nearest-Neighbor-Suchanfragen in exakt $\mathcal{O}(\log |V_{POI}|)$. Der K-d Baum kompensiert das "Fat-Finger-Syndrom" auf Touch-Displays deterministisch.
+    \begin{pmatrix} X_{meter} \\ Y_{meter} \\ 1 \end{pmatrix} = \begin{pmatrix} S_x & 0 & T_x \\ 0 & S_y & T_y \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} X_{pixel} \\ Y_{pixel} \\ 1 \end{pmatrix}
+
+Wobei :math:`S` der Skalierungsfaktor und :math:`T` der Translations-Offset ist. Nach der Konvertierung nutzt das System einen **K-d Baum (K-Dimensional Tree)**. Dieser Binärbaum wird in :math:`\mathcal{O}(|V_{POI}| \log |V_{POI}|)` konstruiert und ermöglicht Nearest-Neighbor-Suchanfragen in exakt :math:`\mathcal{O}(\log |V_{POI}|)`. Der K-d Baum kompensiert das "Fat-Finger-Syndrom" auf Touch-Displays deterministisch.
 
 .. code-block:: python
 
@@ -144,7 +146,9 @@ Die Architektur führt daher eine mathematische Dimensionsreduktion durch: Die K
 ----------------------------------------------------
 Das Machine-Learning-Modell prognostiziert Staus in Sekunden. Ein fataler Architekturfehler wäre es, diese Zeitstrafen stur auf die Basisdistanz in Metern zu addieren (Einheiten-Konflikt). Das System erzwingt das Prinzip der **Temporalen Arbitrage**:
 
-$$W(e,t) = \frac{d_{base}(e)}{v_{walk}} + P_{traffic}(e,t)$$
+.. math::
+
+    W(e,t) = \frac{d_{base}(e)}{v_{walk}} + P_{traffic}(e,t)
 
 Da in einem ASGI/WSGI-Environment hunderte UI-Requests parallel auf den Graphen zugreifen, während ein Background-Worker die ML-Gewichte aktualisiert, sichert ein **Mutex-Lock** (``threading.Lock``) die In-Memory-Struktur vor korrupten Race Conditions.
 
@@ -173,9 +177,11 @@ Der Dijkstra-Algorithmus operiert auf einem eckigen Wegenetz (90-Grad-Abbiegunge
 
 Die naive Implementierung über skalare For-Schleifen ist in Python extrem ineffizient. Die Architektur nutzt stattdessen die kubische charakteristische Matrix und wendet **NumPy-Broadcasting** an, um tausende Koordinaten simultan auf C-Ebene im RAM zu multiplizieren. Dies garantiert höchste Latenzfreiheit.
 
-Die Matrix-Gleichung für den Spline-Vektor $P(t)$ lautet:
+Die Matrix-Gleichung für den Spline-Vektor :math:`P(t)` lautet:
 
-$$P(t) = \frac{1}{2} \begin{bmatrix} 1 & t & t^2 & t^3 \end{bmatrix} \begin{bmatrix} 0 & 2 & 0 & 0 \\ -1 & 0 & 1 & 0 \\ 2 & -5 & 4 & -1 \\ -1 & 3 & -3 & 1 \end{bmatrix} \begin{bmatrix} P_0 \\ P_1 \\ P_2 \\ P_3 \end{bmatrix}$$
+.. math::
+
+    P(t) = \frac{1}{2} \begin{bmatrix} 1 & t & t^2 & t^3 \end{bmatrix} \begin{bmatrix} 0 & 2 & 0 & 0 \\ -1 & 0 & 1 & 0 \\ 2 & -5 & 4 & -1 \\ -1 & 3 & -3 & 1 \end{bmatrix} \begin{bmatrix} P_0 \\ P_1 \\ P_2 \\ P_3 \end{bmatrix}
 
 .. code-block:: python
 
@@ -231,30 +237,30 @@ Ein fehlerhaftes ETL-Update darf nicht zum Crash führen. Die Validierung prüft
 
 10. Algorithmische Komplexität (Big-O Analyse)
 ----------------------------------------------
-Um die Skalierbarkeit des Systems im Enterprise-Kontext (Filialen mit $>10.000$ Artikeln) zu validieren, wurde die Zeit- und Speicherkomplexität der Kernkomponenten analysiert. Die Metriken beweisen, dass die gewählten Datenstrukturen Latenzspitzen im Frontend mathematisch ausschließen.
+Um die Skalierbarkeit des Systems im Enterprise-Kontext (Filialen mit :math:`>10.000` Artikeln) zu validieren, wurde die Zeit- und Speicherkomplexität der Kernkomponenten analysiert. Die Metriken beweisen, dass die gewählten Datenstrukturen Latenzspitzen im Frontend mathematisch ausschließen.
 
 .. list-table:: Algorithmische Komplexität der Topologie-Engine
-   :widths: 40 30 30
-   :header-rows: 1
+    :widths: 40 30 30
+    :header-rows: 1
 
-   * - Komponente
-     - Zeitkomplexität (Time)
-     - Speicherkomplexität (Space)
-   * - **DiGraph Konstruktion (RAM)**
-     - $\mathcal{O}(|V| + |E|)$
-     - $\mathcal{O}(|V| + |E|)$
-   * - **K-d Tree Aufbau**
-     - $\mathcal{O}(|V_{POI}| \log |V_{POI}|)$
-     - $\mathcal{O}(|V_{POI}|)$
-   * - **K-d Tree Touch-Query**
-     - $\mathcal{O}(\log |V_{POI}|)$
-     - $\mathcal{O}(1)$
-   * - **Orthogonale Projektion**
-     - $\mathcal{O}(1)$
-     - $\mathcal{O}(1)$
-   * - **Temporale Arbitrage Update**
-     - $\mathcal{O}(|E|)$
-     - $\mathcal{O}(1)$
-   * - **Catmull-Rom (Vektorisiert)**
-     - $\mathcal{O}(\text{num\_points})$
-     - $\mathcal{O}(\text{num\_points})$
+    * - Komponente
+      - Zeitkomplexität (Time)
+      - Speicherkomplexität (Space)
+    * - **DiGraph Konstruktion (RAM)**
+      - :math:`\mathcal{O}(|V| + |E|)`
+      - :math:`\mathcal{O}(|V| + |E|)`
+    * - **K-d Tree Aufbau**
+      - :math:`\mathcal{O}(|V_{POI}| \log |V_{POI}|)`
+      - :math:`\mathcal{O}(|V_{POI}|)`
+    * - **K-d Tree Touch-Query**
+      - :math:`\mathcal{O}(\log |V_{POI}|)`
+      - :math:`\mathcal{O}(1)`
+    * - **Orthogonale Projektion**
+      - :math:`\mathcal{O}(1)`
+      - :math:`\mathcal{O}(1)`
+    * - **Temporale Arbitrage Update**
+      - :math:`\mathcal{O}(|E|)`
+      - :math:`\mathcal{O}(1)`
+    * - **Catmull-Rom (Vektorisiert)**
+      - :math:`\mathcal{O}(\text{num\_points})`
+      - :math:`\mathcal{O}(\text{num\_points})`

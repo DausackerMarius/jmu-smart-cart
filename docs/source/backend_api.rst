@@ -65,7 +65,7 @@ Ein Backend für einen gut besuchten Supermarkt muss dutzende smarte Einkaufswag
 
 Für Fachfremde lässt sich dies mit einem Restaurantbesuch vergleichen: Anstatt dass sich der Kellner (Server) im Kopf merkt, was Tisch 4 bestellt hat (Session), liegt der Bestellzettel physisch auf dem Tisch (Tablet). Bei jeder Rückfrage reicht der Gast dem Kellner den kompletten Zettel. Der Kellner arbeitet ihn ab und gibt ihn sofort zurück. Der Kellner benötigt so null Gedächtnis und kann hunderte Tische simultan fehlerfrei bedienen.
 
-Der Code-Beweis der Zustandslosigkeit: Das System nutzt in seinen reaktiven Controllern zwingend die ``State``-Klasse von Dash. Anstatt den Warenkorb aus dem Server-RAM zu lesen, empfängt das Backend bei jedem Request den kompletten Warenkorb direkt vom Browser des Tablets. Der Server berechnet die Route in durchschnittlich $\mathcal{O}(1)$ in Bezug auf den globalen State und "vergisst" den Kunden danach sofort wieder. Dies macht die Applikation horizontal unendlich skalierbar.
+Der Code-Beweis der Zustandslosigkeit: Das System nutzt in seinen reaktiven Controllern zwingend die ``State``-Klasse von Dash. Anstatt den Warenkorb aus dem Server-RAM zu lesen, empfängt das Backend bei jedem Request den kompletten Warenkorb direkt vom Browser des Tablets. Der Server berechnet die Route in durchschnittlich :math:`\mathcal{O}(1)` in Bezug auf den globalen State und "vergisst" den Kunden danach sofort wieder. Dies macht die Applikation horizontal unendlich skalierbar.
 
 .. code-block:: python
 
@@ -153,9 +153,9 @@ Phase VII: Graphen-Kondensation (Der Floyd-Warshall-Fehlschluss)
 ----------------------------------------------------------------
 Der Graph besteht aus hunderten Knotenpunkten. Diesen riesigen Suchraum direkt an den Traveling-Salesperson-Solver (TSP) zu übergeben, ist schlicht unmöglich. Der Solver benötigt als Eingabe stattdessen eine drastisch reduzierte **Distanzmatrix (Clique)**, die *ausschließlich* aus den gesuchten Ziel-Produkten besteht. 
 
-Ein klassischer Fehler im Software Engineering ist es, hier den Floyd-Warshall-Algorithmus (All-Pairs Shortest Path) zur einmaligen Vorberechnung (Precomputation) einzusetzen, um Pfade danach in $\mathcal{O}(1)$ abzufragen. Das ist hier jedoch mathematisch unmöglich: Da die dynamischen KI-Stau-Mutationen (siehe Phase VI) die Kantenkosten je nach Uhrzeit und Auslastung stetig verändern, verbietet sich eine statische Vorberechnung der gesamten Matrix. 
+Ein klassischer Fehler im Software Engineering ist es, hier den Floyd-Warshall-Algorithmus (All-Pairs Shortest Path) zur einmaligen Vorberechnung (Precomputation) einzusetzen, um Pfade danach in :math:`\mathcal{O}(1)` abzufragen. Das ist hier jedoch mathematisch unmöglich: Da die dynamischen KI-Stau-Mutationen (siehe Phase VI) die Kantenkosten je nach Uhrzeit und Auslastung stetig verändern, verbietet sich eine statische Vorberechnung der gesamten Matrix. 
 
-Das System nutzt stattdessen den heuristikfreien **Dijkstra-Algorithmus** direkt innerhalb der Haupt-Orchestrierung (``calculate_hybrid_route``). Entgegen eines echten Multi-Source-Dijkstras (welcher alle Startpunkte simultan evaluiert), operiert die Engine hier als **Iterated Single-Source Dijkstra**. Der Code beweist, dass Dijkstra in einer iterativen Schleife exakt nur für die Menge der gesuchten Produkte (K) ausgeführt wird. Durch die Nutzung des internen Binary Heaps von NetworkX sinkt die Komplexität dramatisch auf $\mathcal{O}(K \cdot E \log V)$. 
+Das System nutzt stattdessen den heuristikfreien **Dijkstra-Algorithmus** direkt innerhalb der Haupt-Orchestrierung (``calculate_hybrid_route``). Entgegen eines echten Multi-Source-Dijkstras (welcher alle Startpunkte simultan evaluiert), operiert die Engine hier als **Iterated Single-Source Dijkstra**. Der Code beweist, dass Dijkstra in einer iterativen Schleife exakt nur für die Menge der gesuchten Produkte (K) ausgeführt wird. Durch die Nutzung des internen Binary Heaps von NetworkX sinkt die Komplexität dramatisch auf :math:`\mathcal{O}(K \cdot E \log V)`. 
 
 .. code-block:: python
 
@@ -190,16 +190,22 @@ Eine rein räumliche Navigation scheitert auf der "letzten Meile". Der geometris
 
 Um die Latenzen im Echtzeit-Dashboard minimal zu halten, vermeidet das System rechenintensive M/G/1-Gleichungen. Die Architektur modelliert die Supermarktkassen stattdessen ganz bewusst als performantes **M/M/1/K Warteschlangenmodell** (Verlustsystem). Hierbei wird mathematisch approximiert, dass die Ankünfte poissonverteilt (Markov-Eigenschaft, M) und die Abfertigungszeiten exponentiell (M) sind, mit *einem* Server (1) und einer strikt begrenzten Systemkapazität (K=10). Ist die Schlange maximal gefüllt (Loss-System), weichen Kunden auf andere Gänge aus.
 
-Die Berechnungen basieren auf den stationären Gleichungen für Markow-Ketten. Der Auslastungsgrad ist definiert als $\rho = \frac{\lambda}{\mu}$.
-Die Wahrscheinlichkeit für ein leeres System ($P_0$) und ein volles System ($P_K$) berechnen sich bei einer Auslastung $\rho \neq 1$ als:
+Die Berechnungen basieren auf den stationären Gleichungen für Markow-Ketten. Der Auslastungsgrad ist definiert als :math:`\rho = \frac{\lambda}{\mu}`.
+Die Wahrscheinlichkeit für ein leeres System (:math:`P_0`) und ein volles System (:math:`P_K`) berechnen sich bei einer Auslastung :math:`\rho \neq 1` als:
 
-$$P_0 = \frac{1 - \rho}{1 - \rho^{K+1}}$$
+.. math::
 
-$$P_K = \rho^K P_0$$
+    P_0 = \frac{1 - \rho}{1 - \rho^{K+1}}
 
-$$L_q = \frac{\rho}{1 - \rho} - \frac{(K + 1) \rho^{K+1}}{1 - \rho^{K+1}}$$
+.. math::
 
-Aus der durchschnittlichen Warteschlangenlänge ($L_q$) und der effektiven Ankunftsrate ($\lambda_{eff} = \lambda(1 - P_K)$) leitet das System über das Gesetz von Little die erwartete Wartezeit ab.
+    P_K = \rho^K P_0
+
+.. math::
+
+    L_q = \frac{\rho}{1 - \rho} - \frac{(K + 1) \rho^{K+1}}{1 - \rho^{K+1}}
+
+Aus der durchschnittlichen Warteschlangenlänge (:math:`L_q`) und der effektiven Ankunftsrate (:math:`\lambda_{eff} = \lambda(1 - P_K)`) leitet das System über das Gesetz von Little die erwartete Wartezeit ab.
 
 Um eine reibungslose Navigation zu garantieren, wird die finale Zuweisung der optimalen Kasse zwingend vor der Halbzeit des Einkaufs (Pre-Halftime) berechnet. Wartet das System zu lange mit der Kassenzuweisung, fehlt dem Routing-Algorithmus auf den letzten Metern der topologische Manövrierraum für eine effiziente Umleitung.
 
@@ -277,7 +283,7 @@ Phase X: Wissenschaftliche Evaluierung & Big-O
 ----------------------------------------------
 In einer akademischen Arbeit muss die architektonische Sicherheit des Backends bewiesen werden. Die folgende Laufzeitmatrix beweist, dass das hochkomplexe MVC-Backend innerhalb strenger Laufzeitschranken operiert. 
 
-Ein entscheidendes Detail der Informatik: Eine Hash-Map (wie sie für den Cache oder das Inventar verwendet wird) liefert zwar durchschnittlich Zugriffszeiten von $\mathcal{O}(1)$. Im **Worst-Case** jedoch (wenn der Hashing-Algorithmus massive Hash-Kollisionen erzeugt), degeneriert die Zugriffszeit zu $\mathcal{O}(N)$. Die Architektur schützt sich vor diesem Worst-Case durch das vorherige Pruning des Suchraums.
+Ein entscheidendes Detail der Informatik: Eine Hash-Map (wie sie für den Cache oder das Inventar verwendet wird) liefert zwar durchschnittlich Zugriffszeiten von :math:`\mathcal{O}(1)`. Im **Worst-Case** jedoch (wenn der Hashing-Algorithmus massive Hash-Kollisionen erzeugt), degeneriert die Zugriffszeit zu :math:`\mathcal{O}(N)`. Die Architektur schützt sich vor diesem Worst-Case durch das vorherige Pruning des Suchraums.
 
 .. list-table:: Algorithmische Komplexität des Backends
     :widths: 30 45 25
@@ -288,22 +294,22 @@ Ein entscheidendes Detail der Informatik: Eine Hash-Map (wie sie für den Cache 
       - Zeitkomplexität
     * - **Inventar Hash-Lookup**
       - Hash-Map / Python Dictionary
-      - Avg: $\mathcal{O}(1)$, Worst: $\mathcal{O}(N)$
+      - Avg: :math:`\mathcal{O}(1)`, Worst: :math:`\mathcal{O}(N)`
     * - **Inventar-Fuzzy-Suche**
       - Damerau-Levenshtein (Dynamische Programmierung)
-      - $\mathcal{O}(N \cdot M)$
+      - :math:`\mathcal{O}(N \cdot M)`
     * - **KI Stau-Mutation**
       - Bureau of Public Roads (BPR) Transformation
-      - $\mathcal{O}(E)$
+      - :math:`\mathcal{O}(E)`
     * - **Graphen-Kondensation**
       - Iterated Single-Source Dijkstra (Binary Heap)
-      - $\mathcal{O}(K \cdot E \log V)$
+      - :math:`\mathcal{O}(K \cdot E \log V)`
     * - **Routen-Lösung (Klein, n<=11)**
       - Held-Karp Algorithmus (Exakte DP)
-      - $\mathcal{O}(N^2 \cdot 2^N)$
+      - :math:`\mathcal{O}(N^2 \cdot 2^N)`
     * - **Routen-Lösung (Mittel, 12-25)**
       - Simulated Annealing & Ant Colony (Heuristiken)
-      - $\mathcal{O}(\text{Iterationen})$
+      - :math:`\mathcal{O}(\text{Iterationen})`
     * - **Pfad-Rekonstruktion**
       - Listen-Verkettung (Dijkstra Path Extend)
-      - $\mathcal{O}(V_{\text{pfad}})$
+      - :math:`\mathcal{O}(V_{\text{pfad}})`

@@ -18,7 +18,7 @@ Ein DES-Ansatz springt asynchron in der Zeitlinie von Event zu Event (Beispiel: 
 Die architektonische Entscheidung gegen DES:
 Obwohl DES extrem recheneffizient und CPU-schonend ist, führt es im Kontext des maschinellen Lernens zu einem fatalen methodischen Problem. Prädiktive Zeitreihen-Modelle (wie XGBoost mit Autoregressive Lags) erfordern zwingend streng synchronisierte Snapshots im Zustandsraum in äquidistanten Intervallen (z.B. exakt jede Minute). DES würde diese Zeitabstände verzerren. Eine nachträgliche mathematische Interpolation der Daten würde das mikro-temporale Rauschen glätten, die Markow-Eigenschaft der Zeitreihe verletzen und die Ground-Truth für das spätere Training völlig unbrauchbar machen.
 
-Die Architektur implementiert stattdessen zwingend eine zeitdiskrete Physics-Engine (Tick-based ABM). Die Systemzeit wird in atomaren Zeitschritten von Delta t = 1 Sekunde quantisiert. In jedem einzelnen Tick der Main-Loop wird die physikalische Position aller Agenten evaluiert und aktualisiert. Dies kostet mehr CPU-Ressourcen, garantiert aber eine fehlerfreie, synchrone Tensor-Ausrichtung für das spätere Feature-Engineering.
+Die Architektur implementiert stattdessen zwingend eine zeitdiskrete Physics-Engine (Tick-based ABM). Die Systemzeit wird in atomaren Zeitschritten von :math:`\Delta t = 1` Sekunde quantisiert. In jedem einzelnen Tick der Main-Loop wird die physikalische Position aller Agenten evaluiert und aktualisiert. Dies kostet mehr CPU-Ressourcen, garantiert aber eine fehlerfreie, synchrone Tensor-Ausrichtung für das spätere Feature-Engineering.
 
 2. Stochastische Ankunftsprozesse & Demografische Profile
 ---------------------------------------------------------
@@ -26,11 +26,13 @@ Die Instanziierung (das Spawning) neuer Kunden-Agenten am Eingang darf nicht uni
 
 2.1 Das Makro-Timing (Inhomogener Poisson-Prozess)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Ein normaler (homogener) Poisson-Prozess geht von einer konstanten Ankunftsrate aus. Das System nutzt stattdessen einen Inhomogenen Poisson-Prozess, bei dem die Ankunftsrate Lambda (die erwarteten Kunden pro Sekunde) eine kontinuierliche Funktion der Tageszeit ist. Sie wird durch trigonometrische Funktionen (Sinus-Wellen) moduliert, um deterministische Peaks (wie die abendliche Rush-Hour um 17:00 Uhr) auf Basis eines stochastischen Grundrauschens zu erzwingen. 
+Ein normaler (homogener) Poisson-Prozess geht von einer konstanten Ankunftsrate aus. Das System nutzt stattdessen einen Inhomogenen Poisson-Prozess, bei dem die Ankunftsrate :math:`\lambda` (die erwarteten Kunden pro Sekunde) eine kontinuierliche Funktion der Tageszeit ist. Sie wird durch trigonometrische Funktionen (Sinus-Wellen) moduliert, um deterministische Peaks (wie die abendliche Rush-Hour um 17:00 Uhr) auf Basis eines stochastischen Grundrauschens zu erzwingen. 
 
-Die Formel für die Wahrscheinlichkeit von k Ankünften in einem Zeitintervall lautet dabei:
+Die Formel für die Wahrscheinlichkeit von :math:`k` Ankünften in einem Zeitintervall lautet dabei:
 
-$$P(k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
+.. math::
+
+    P(k) = \frac{\lambda^k e^{-\lambda}}{k!}
 
 Während der folgende Code-Block als konzeptionelle Basis eine trigonometrische Näherung implementiert, nutzt die Architektur im produktiven Einsatz reale Kassen-Historien (Kassenbons). Diese werden über eine Kernel Density Estimation (KDE) oder B-Splines gefittet, um die Lambda-Kurve datengesteuert abzubilden und unnatürliche Abrisse ("Knicke") der Ankunftsrate außerhalb der Stoßzeiten zu verhindern.
 
@@ -115,7 +117,7 @@ Betreten Agenten die Kante, wird ihre individuelle Geschwindigkeit kollektiv üb
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Ein kritischer Architektur-Aspekt der Simulation ist die Vermeidung des "Henne-Ei-Problems" der künstlichen Intelligenz. Das Ziel dieses Digitalen Zwillings ist es, chaotische Trainingsdaten (Staus) für das spätere Machine-Learning-Modell zu generieren. Wenn die simulierten Agenten bereits das perfekte prädiktive Routing-System aus unserem Live-Backend nutzen würden, gäbe es im Simulator keine Staus, aus denen die KI lernen könnte.
 
-Die Agenten operieren in der Simulation daher zwingend **myopic (kurzsichtig)**. Um ein rein roboterhaftes Verhalten zu verhindern, nutzen sie das Konzept der Bounded Rationality: Sie trödeln gelegentlich stochastisch und besitzen absolut kein globales Wissen über prädiktive Kassen-Wartezeiten. Sie absolvieren stur ihre Einkaufsroute. Das System ist architektonisch so konzipiert, dass die Agenten das zwingende Pre-Halftime Prädiktions-Protokoll anwenden. Sie entscheiden sich erst auf dem allerletzten Meter für die Kasse, die in exakt diesem Moment physisch am kürzesten aussieht (Greedy Choice). Genau dieses lokal-optimale, aber global irrationale Verhalten der Masse erzeugt den emergenten Stau, den unser prädiktives Backend in der Live-Umgebung später auflösen soll.
+Die Agenten operieren in der Simulation daher zwingend **myopic (kurzsichtig)**. Um ein rein roboterhaftes Verhalten zu verhindern, nutzen sie das Konzept der Bounded Rationality: Sie trödeln gelegentlich stochastisch und besitzen absolut kein globales Wissen über prädiktive Kassen-Wartezeiten. Sie absolvieren stur ihre Einkaufsroute. Das System ist architektonisch so konzipiert, dass die Agenten das zwingende Pre-Halftime Prädiktions-Protokoll anwenden. Sie entscheiden sich erst auf dem allerletzten Meter für die Kasse, die in exakt diesem Moment physisch am kürzesten aussieht (Greedy Choice). Genau dieses lokal-optimale, aber global irrationale Verhalten der Masse erzeugt den emergenten Stau, den unser prädiktive Backend in der Live-Umgebung später auflösen soll.
 
 .. code-block:: python
 
@@ -161,7 +163,7 @@ Ein Prüfer könnte hier die berechtigte Frage stellen: Wann beginnt die Simulat
 
 Die Architektur erzwingt stattdessen das Erreichen der Ergodizität (den mathematischen Steady-State der Markow-Kette) durch eine harte Burn-in Period von 3600 Ticks. Diese Stunde dient als Aufwärmrunde für das System (vergleichbar mit einem Motor, der Betriebstemperatur erreichen muss, bevor valide Messungen vorgenommen werden). In dieser Zeit werden die Agenten im Verborgenen simuliert, es wird jedoch kein Datenpunkt persistiert.
 
-*Die Rechtfertigung für Apache Parquet:* Um einen Out-Of-Memory (OOM) Kollaps bei mehrtägigen Simulationen zu verhindern, nutzt das System das spaltenbasierte (columnar) Apache Parquet Format mit Snappy-Kompression statt regulärer CSV-Dateien. Die Snapshots werden periodisch (Chunking) auf die SSD gestreamt, wodurch der RAM-Verbrauch des Python-Prozesses konstant bei $\mathcal{O}(1)$ bleibt.
+*Die Rechtfertigung für Apache Parquet:* Um einen Out-Of-Memory (OOM) Kollaps bei mehrtägigen Simulationen zu verhindern, nutzt das System das spaltenbasierte (columnar) Apache Parquet Format mit Snappy-Kompression statt regulärer CSV-Dateien. Die Snapshots werden periodisch (Chunking) auf die SSD gestreamt, wodurch der RAM-Verbrauch des Python-Prozesses konstant bei :math:`\mathcal{O}(1)` bleibt.
 
 .. code-block:: python
 
@@ -229,7 +231,7 @@ Das ML-Modell versteht mathematisch keine zweidimensionalen Graphen oder Netzwer
 
 Um der KI beizubringen, dass sich ein Stau von Gang A rückwärts in Gang B ausbreitet (Spatial Spillover Effekt), muss die topologische Nachbarschaft exakt in Tabellenspalten übersetzt werden. Ein klassischer Architekturfehler wäre es, dies post-hoc über langsame Pandas-Schleifen zu rekonstruieren. Dies birgt die Gefahr des Temporal Data Leakage, da der Zustand vergangener Ticks mit der Gegenwart vermischt werden könnte.
 
-Die Engine löst dies nativ während der ``_capture_graph_snapshot``-Phase. Da sie ohnehin das exakte Wissen über alle Kanten besitzt, extrahiert sie die maximale Auslastung der direkten Graphen-Nachbarn absolut zeitsynchron in $\mathcal{O}(1)$ Latenzzeit. Diese Translation erlaubt es baumbasierten Modellen (wie XGBoost), räumliche Flaschenhälse vorausschauend zu antizipieren, ohne auf teure und schwer erklärbare Architekturen wie Graph Neural Networks (GNNs) oder LSTMs ausweichen zu müssen. XGBoost generalisiert auf tabellarischen Raum-Zeit-Daten robuster und bietet über TreeSHAP eine lückenlose Erklärbarkeit, was für die Akzeptanz im Enterprise-Umfeld unabdingbar ist.
+Die Engine löst dies nativ während der ``_capture_graph_snapshot``-Phase. Da sie ohnehin das exakte Wissen über alle Kanten besitzt, extrahiert sie die maximale Auslastung der direkten Graphen-Nachbarn absolut zeitsynchron in :math:`\mathcal{O}(1)` Latenzzeit. Diese Translation erlaubt es baumbasierten Modellen (wie XGBoost), räumliche Flaschenhälse vorausschauend zu antizipieren, ohne auf teure und schwer erklärbare Architekturen wie Graph Neural Networks (GNNs) oder LSTMs ausweichen zu müssen. XGBoost generalisiert auf tabellarischen Raum-Zeit-Daten robuster und bietet über TreeSHAP eine lückenlose Erklärbarkeit, was für die Akzeptanz im Enterprise-Umfeld unabdingbar ist.
 
 6. Statistische Validierung des Digitalen Zwillings
 ---------------------------------------------------
@@ -265,7 +267,7 @@ Da unsere Simulation jedoch das Kundenaufkommen dynamisch über den Tag als Kurv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Theoretische Fundierung: Um die Wahl von 3600 Ticks für die Burn-in-Phase mathematisch zu rechtfertigen, nutzt das System den Augmented Dickey-Fuller-Test (ADF). Er evaluiert mathematisch, ob die System-Auslastung nach dieser Phase tatsächlich stationär ist. 
 
-Die Nullhypothese ($H_0$) des ADF-Tests lautet, dass die Zeitreihe eine Unit-Root (Einheitswurzel) besitzt. Eine Zeitreihe mit Unit-Root hat keine Tendenz zur Rückkehr zu einem langfristigen Mittelwert (Mean-Reverting), sondern driftet unkontrollierbar als Random Walk ab. Ein p-Wert von unter 0.05 verwirft $H_0$ rigoros und liefert starke statistische Evidenz, dass das System seinen stabilen Rhythmus (Steady-State) gefunden hat.
+Die Nullhypothese (:math:`H_0`) des ADF-Tests lautet, dass die Zeitreihe eine Unit-Root (Einheitswurzel) besitzt. Eine Zeitreihe mit Unit-Root hat keine Tendenz zur Rückkehr zu einem langfristigen Mittelwert (Mean-Reverting), sondern driftet unkontrollierbar als Random Walk ab. Ein p-Wert von unter 0.05 verwirft :math:`H_0` rigoros und liefert starke statistische Evidenz, dass das System seinen stabilen Rhythmus (Steady-State) gefunden hat.
 
 .. code-block:: python
 

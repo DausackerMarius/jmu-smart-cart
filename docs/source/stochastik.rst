@@ -29,15 +29,15 @@ Das JMU Smart Cart System implementiert daher das wesentlich realitätsnähere *
 * **M (Arrivals):** Markov-Ankunftsprozess (Zufälliges Eintreffen der Kunden, abgeleitet aus den IoT-Daten).
 * **M (Service):** Markov-Bedienzeit (Durchschnittliche Abfertigungsgeschwindigkeit).
 * **1 (Servers):** Ein Kassierer pro Terminal.
-* **K (Capacity):** Die strikt begrenzte Systemkapazität (z. B. $K=10$ Kunden). 
+* **K (Capacity):** Die strikt begrenzte Systemkapazität (z. B. :math:`K=10` Kunden). 
 
 Ist die Schlange an einer Kasse maximal gefüllt, greift die Stochastik des Loss-Systems: Der ankommende Kunde wird abgewiesen (Loss) und der Routing-Algorithmus schwenkt automatisch auf die nächstbeste Kasse um.
 
 3. Prädiktive Wartezeit & Systemstabilität
 ------------------------------------------
-Die Berechnungen der Wartezeit basieren auf den stationären Gleichungen für Markow-Ketten. Der Auslastungsgrad (Traffic Intensity) ist definiert als $\rho = \frac{\lambda}{\mu}$. 
+Die Berechnungen der Wartezeit basieren auf den stationären Gleichungen für Markow-Ketten. Der Auslastungsgrad (Traffic Intensity) ist definiert als :math:`\rho = \frac{\lambda}{\mu}`. 
 
-Das System berechnet die Wahrscheinlichkeit für ein leeres System ($P_0$) und ein komplett volles System ($P_K$). Aus der daraus resultierenden durchschnittlichen Warteschlangenlänge ($L_q$) und der effektiven Ankunftsrate leitet das Backend über das Gesetz von Little die präzise zu erwartende Wartezeit ab.
+Das System berechnet die Wahrscheinlichkeit für ein leeres System (:math:`P_0`) und ein komplett volles System (:math:`P_K`). Aus der daraus resultierenden durchschnittlichen Warteschlangenlänge (:math:`L_q`) und der effektiven Ankunftsrate leitet das Backend über das Gesetz von Little die präzise zu erwartende Wartezeit ab.
 
 .. code-block:: python
 
@@ -108,11 +108,13 @@ Das System approximiert diesen strukturellen Kollaps eines Kassen-Knotens über 
 ---------------------------------------------------
 An diesem Punkt fließen Graphentheorie (die physischen Laufwege aus Kapitel 3) und Stochastik (die Wartezeit) zusammen. Die Logik wird durch das Facade Design Pattern gekapselt.
 
-Die Klasse ``CheckoutOptimizationFacade`` nutzt die folgende psychologische Zielfunktion $Z$:
+Die Klasse ``CheckoutOptimizationFacade`` nutzt die folgende psychologische Zielfunktion :math:`Z`:
 
-$$Z = (\alpha \cdot t_{walk}) + (\beta \cdot t_{wait\_penalized})$$
+.. math::
 
-Menschen empfinden aktives Laufen als viel weniger quälend als passives Stehen in einer Schlange. Daher wird die reine physische Laufzeit ($t_{walk}$) mit dem Faktor $\alpha = 1.0$ normal gewichtet, während die erwartete Stehzeit an der Kasse ($t_{wait\_penalized}$) mit dem Faktor $\beta = 1.8$ überproportional bestraft wird. Das System schickt den Kunden im Zweifel lieber 20 Meter weiter, um ihm 1 Minute statisches Warten zu ersparen.
+    Z = (\alpha \cdot t_{walk}) + (\beta \cdot t_{wait\_penalized})
+
+Menschen empfinden aktives Laufen als viel weniger quälend als passives Stehen in einer Schlange. Daher wird die reine physische Laufzeit (:math:`t_{walk}`) mit dem Faktor :math:`\alpha = 1.0` normal gewichtet, während die erwartete Stehzeit an der Kasse (:math:`t_{wait\_penalized}`) mit dem Faktor :math:`\beta = 1.8` überproportional bestraft wird. Das System schickt den Kunden im Zweifel lieber 20 Meter weiter, um ihm 1 Minute statisches Warten zu ersparen.
 
 .. code-block:: python
 
