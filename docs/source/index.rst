@@ -18,3 +18,4 @@ Diese Dokumentation umfasst die gesamte End-to-End Pipeline: Von der Datenbescha
    stochastik
    frontend
    fazit
+   anleitung

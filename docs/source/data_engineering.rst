@@ -21,26 +21,26 @@ Das System implementiert einen speicherschonenden Downloader, der die Datei in d
 
 .. code-block:: python
 
-   import requests
-   import logging
+    import requests
+    import logging
 
-   class BLSDownloader:
-       @staticmethod
-       def download_in_chunks(url: str, filepath: str, chunk_size: int = 8192) -> None:
-           """
-           Lädt eine Datei blockweise herunter. Der RAM-Verbrauch 
-           bleibt unabhängig von der Dateigröße konstant auf O(1).
-           """
-           # stream=True verhindert das sofortige Laden in den RAM
-           with requests.get(url, stream=True) as response:
-               response.raise_for_status() 
-               
-               with open(filepath, 'wb') as file:
-                   for chunk in response.iter_content(chunk_size=chunk_size):
-                       if chunk: 
-                           file.write(chunk)
-           
-           logging.info(f"Stream-Download abgeschlossen: {filepath}")
+    class BLSDownloader:
+        @staticmethod
+        def download_in_chunks(url: str, filepath: str, chunk_size: int = 8192) -> None:
+            """
+            Lädt eine Datei blockweise herunter. Der RAM-Verbrauch 
+            bleibt unabhängig von der Dateigröße konstant auf O(1).
+            """
+            # stream=True verhindert das sofortige Laden in den RAM
+            with requests.get(url, stream=True) as response:
+                response.raise_for_status() 
+                
+                with open(filepath, 'wb') as file:
+                    for chunk in response.iter_content(chunk_size=chunk_size):
+                        if chunk: 
+                            file.write(chunk)
+            
+            logging.info(f"Stream-Download abgeschlossen: {filepath}")
 
 *Die Wahl der Blockgröße:* Betriebssysteme und Festplatten-Controller verarbeiten I/O-Operationen physisch in Paging-Blöcken von meist 4 KB oder 8 KB. Eine Chunk-Größe von exakt 8192 Bytes (8 KB) synchronisiert den Download optimal mit dem Betriebssystem, minimiert den I/O-Overhead und sichert die $\mathcal{O}(1)$ Speicherkomplexität.
 
@@ -52,23 +52,23 @@ Der Code nutzt das Python-Schlüsselwort ``yield``, um einen Generator zu erscha
 
 .. code-block:: python
 
-   import csv
-   from typing import Generator, Dict
+    import csv
+    from typing import Generator, Dict
 
-   def stream_bls_data(filepath: str) -> Generator[Dict[str, str], None, None]:
-       """ 
-       Liest die CSV-Datei als Stream. Verarbeitet jeweils eine Zeile
-       und hält die Speicherkomplexität des Lesezugriffs bei O(1).
-       """
-       with open(filepath, mode='r', encoding='utf-8') as f:
-           reader = csv.DictReader(f, delimiter=';')
-           for row in reader:
-               # Data Cleaning Level 1: Inkonsistente Zeilen überspringen
-               if not row.get('S_Bezeichnung') or not row.get('BLS_Code'):
-                   continue 
-                   
-               # 'yield' gibt die Zeile iterativ an die Pipeline weiter
-               yield row
+    def stream_bls_data(filepath: str) -> Generator[Dict[str, str], None, None]:
+        """ 
+        Liest die CSV-Datei als Stream. Verarbeitet jeweils eine Zeile
+        und hält die Speicherkomplexität des Lesezugriffs bei O(1).
+        """
+        with open(filepath, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter=';')
+            for row in reader:
+                # Data Cleaning Level 1: Inkonsistente Zeilen überspringen
+                if not row.get('S_Bezeichnung') or not row.get('BLS_Code'):
+                    continue 
+                    
+                # 'yield' gibt die Zeile iterativ an die Pipeline weiter
+                yield row
 
 Teil II: Transform – Semantische Reduktion und Stochastik
 ---------------------------------------------------------
@@ -82,31 +82,31 @@ Die Klasse ``TextSanitizer`` bereinigt den Text und isoliert den semantischen Ke
 
 .. code-block:: python
 
-   import re
-   from typing import Optional
+    import re
+    from typing import Optional
 
-   class TextSanitizer:
-       def __init__(self):
-           # B2B-Begriffe, die für den Endkunden irrelevant sind
-           self.stopwords = {"schlachtkörper", "kutterhilfsmittel", "zubereitung", "roh"}
-       
-       def clean_product_name(self, raw_name: str) -> Optional[str]:
-           # 1. String-Kappung: Extraktion des primären Nomens vor dem ersten Komma.
-           name = raw_name.split(',')[0].strip() 
-           
-           # 2. Reguläre Ausdrücke: Entfernung von Klammerzusätzen
-           name = re.sub(r'\s*\(.*?\)', '', name).strip()
-           words = name.split()
-           
-           # 3. Filterung: Verwerfen von überkomplexen Bezeichnungen (> 3 Wörter)
-           if len(words) == 0 or len(words) > 3:
-               return None 
-               
-           # 4. Filterung: Ausschluss industrieller Stoppwörter
-           if any(word.lower() in self.stopwords for word in words):
-               return None 
-               
-           return name.title() 
+    class TextSanitizer:
+        def __init__(self):
+            # B2B-Begriffe, die für den Endkunden irrelevant sind
+            self.stopwords = {"schlachtkörper", "kutterhilfsmittel", "zubereitung", "roh"}
+        
+        def clean_product_name(self, raw_name: str) -> Optional[str]:
+            # 1. String-Kappung: Extraktion des primären Nomens vor dem ersten Komma.
+            name = raw_name.split(',')[0].strip() 
+            
+            # 2. Reguläre Ausdrücke: Entfernung von Klammerzusätzen
+            name = re.sub(r'\s*\(.*?\)', '', name).strip()
+            words = name.split()
+            
+            # 3. Filterung: Verwerfen von überkomplexen Bezeichnungen (> 3 Wörter)
+            if len(words) == 0 or len(words) > 3:
+                return None 
+                
+            # 4. Filterung: Ausschluss industrieller Stoppwörter
+            if any(word.lower() in self.stopwords for word in words):
+                return None 
+                
+            return name.title() 
 
 2.2 Stochastische Anreicherung (Idempotenz)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,30 +118,30 @@ Das System löst dies durch einen deterministischen Seed, der an den Hash-Wert d
 
 .. code-block:: python
 
-   import random
+    import random
 
-   def transform_and_enrich(row: dict, sanitizer: TextSanitizer) -> Optional[dict]:
-       clean_name = sanitizer.clean_product_name(row['S_Bezeichnung'])
-       if not clean_name: return None
-       
-       bls_prefix = row['BLS_Code'].upper()[0]
-       category = "Kühlregal" if bls_prefix in ['M', 'K'] else "Sonstiges"
-       
-       # Deterministischer Zufall garantiert die Idempotenz der Pipeline
-       random.seed(hash(clean_name)) 
-       
-       # Ökonomische Modellierung via Gauß-Kurve
-       mu, sigma = (1.80, 0.80) if category == "Kühlregal" else (3.50, 1.50)
-       price = round(max(random.gauss(mu, sigma), 0.19), 2)
-       popularity = round(random.uniform(0.1, 0.9), 2)
-       
-       return {
-           "id": row['BLS_Code'],
-           "name": clean_name,
-           "category": category,
-           "price": price,
-           "popularity": popularity
-       }
+    def transform_and_enrich(row: dict, sanitizer: TextSanitizer) -> Optional[dict]:
+        clean_name = sanitizer.clean_product_name(row['S_Bezeichnung'])
+        if not clean_name: return None
+        
+        bls_prefix = row['BLS_Code'].upper()[0]
+        category = "Kühlregal" if bls_prefix in ['M', 'K'] else "Sonstiges"
+        
+        # Deterministischer Zufall garantiert die Idempotenz der Pipeline
+        random.seed(hash(clean_name)) 
+        
+        # Ökonomische Modellierung via Gauß-Kurve
+        mu, sigma = (1.80, 0.80) if category == "Kühlregal" else (3.50, 1.50)
+        price = round(max(random.gauss(mu, sigma), 0.19), 2)
+        popularity = round(random.uniform(0.1, 0.9), 2)
+        
+        return {
+            "id": row['BLS_Code'],
+            "name": clean_name,
+            "category": category,
+            "price": price,
+            "popularity": popularity
+        }
 
 Teil III: Load – Algorithmische Graphen-Befüllung
 -------------------------------------------------
@@ -155,34 +155,34 @@ Zur Sicherstellung der topologischen Erreichbarkeit nutzt der Algorithmus **Grun
 
 .. code-block:: python
 
-   from typing import Dict
+    from typing import Dict
 
-   def allocate_shelves(total_shelves: int, category_counts: Dict[str, int]) -> Dict[str, int]:
-       """ Verteilt physische Graphen-Regale fair auf Basis der Produktmengen. """
-       # Grundmandate sichern die topologische Existenz jeder Kategorie
-       shelves_allocated = {cat: 1 for cat in category_counts.keys()}
-       remaining_shelves = total_shelves - len(category_counts)
-       
-       if remaining_shelves < 0:
-           raise ValueError("Ressourcenkonflikt: Weniger Knoten im Graph als Kategorien.")
-           
-       # Proportionale Verteilung des Rests via Sainte-Laguë
-       for _ in range(remaining_shelves):
-           best_category = None
-           max_quotient = -1.0
-           
-           for cat, amount in category_counts.items():
-               # Das Höchstzahlverfahren verhindert die Benachteiligung kleiner Gruppen
-               quotient = amount / (shelves_allocated[cat] + 0.5) 
-               
-               if quotient > max_quotient:
-                   max_quotient = quotient
-                   best_category = cat
-                   
-           if best_category:
-               shelves_allocated[best_category] += 1
-               
-       return shelves_allocated
+    def allocate_shelves(total_shelves: int, category_counts: Dict[str, int]) -> Dict[str, int]:
+        """ Verteilt physische Graphen-Regale fair auf Basis der Produktmengen. """
+        # Grundmandate sichern die topologische Existenz jeder Kategorie
+        shelves_allocated = {cat: 1 for cat in category_counts.keys()}
+        remaining_shelves = total_shelves - len(category_counts)
+        
+        if remaining_shelves < 0:
+            raise ValueError("Ressourcenkonflikt: Weniger Knoten im Graph als Kategorien.")
+            
+        # Proportionale Verteilung des Rests via Sainte-Laguë
+        for _ in range(remaining_shelves):
+            best_category = None
+            max_quotient = -1.0
+            
+            for cat, amount in category_counts.items():
+                # Das Höchstzahlverfahren verhindert die Benachteiligung kleiner Gruppen
+                quotient = amount / (shelves_allocated[cat] + 0.5) 
+                
+                if quotient > max_quotient:
+                    max_quotient = quotient
+                    best_category = cat
+                    
+            if best_category:
+                shelves_allocated[best_category] += 1
+                
+        return shelves_allocated
 
 3.2 Präventives Load-Balancing (Round-Robin)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -192,19 +192,19 @@ Zur physischen Stauprävention implementiert die Architektur ein **Round-Robin-R
 
 .. code-block:: python
 
-   import itertools
-   from typing import List
+    import itertools
+    from typing import List
 
-   def assign_nodes_to_products(products: List[dict], shelf_nodes: List[str]):
-       """ Streut Produkte iterativ über die Knoten zur Stau-Prävention. """
-       if not shelf_nodes:
-           raise ValueError("Topologie-Fehler: Kategorie ohne Raum-Knoten.")
-           
-       # Erzeugt einen endlosen Ring-Iterator für die gleichmäßige Zuweisung
-       node_cycle = itertools.cycle(shelf_nodes)
-       
-       for product in products:
-           product['node_id'] = next(node_cycle)
+    def assign_nodes_to_products(products: List[dict], shelf_nodes: List[str]):
+        """ Streut Produkte iterativ über die Knoten zur Stau-Prävention. """
+        if not shelf_nodes:
+            raise ValueError("Topologie-Fehler: Kategorie ohne Raum-Knoten.")
+            
+        # Erzeugt einen endlosen Ring-Iterator für die gleichmäßige Zuweisung
+        node_cycle = itertools.cycle(shelf_nodes)
+        
+        for product in products:
+            product['node_id'] = next(node_cycle)
 
 Teil IV: Materialisierung und Data Contract (Two-Pass-Architektur)
 ------------------------------------------------------------------
@@ -217,68 +217,68 @@ Fehlerhafte Datensätze werden im Sinne der Graceful Degradation aussortiert. Di
 
 .. code-block:: python
 
-   import json
-   import csv
-   from pydantic import BaseModel, Field, ValidationError
-   from typing import List, Dict
+    import json
+    import csv
+    from pydantic import BaseModel, Field, ValidationError
+    from typing import List, Dict
 
-   class ProductModel(BaseModel):
-       """ Der Data Contract: Strikte Typisierung zur Laufzeit. """
-       id: str
-       name: str = Field(..., min_length=2)
-       category: str
-       node_id: str
-       price: float = Field(..., gt=0.0) 
-       popularity: float = Field(..., ge=0.0, le=1.0) 
+    class ProductModel(BaseModel):
+        """ Der Data Contract: Strikte Typisierung zur Laufzeit. """
+        id: str
+        name: str = Field(..., min_length=2)
+        category: str
+        node_id: str
+        price: float = Field(..., gt=0.0) 
+        popularity: float = Field(..., ge=0.0, le=1.0) 
 
-   def run_etl_pipeline(bls_url: str, raw_filepath: str, graph_nodes: List[str]) -> Dict[str, ProductModel]:
-       # 1. EXTRACT
-       BLSDownloader.download_in_chunks(bls_url, raw_filepath)
-       sanitizer = TextSanitizer()
-       
-       # 2. PASS 1: Aggregation der Metadaten (RAM bleibt O(1))
-       category_counts = {}
-       for raw_row in stream_bls_data(raw_filepath):
-           enriched = transform_and_enrich(raw_row, sanitizer)
-           if enriched:
-               category_counts[enriched['category']] = category_counts.get(enriched['category'], 0) + 1
-               
-       # 3. KNOTEN-ALLOKATION
-       shelf_allocations = allocate_shelves(len(graph_nodes), category_counts)
-       node_iterator = iter(graph_nodes)
-       category_to_nodes = {
-           cat: [next(node_iterator) for _ in range(amount)] 
-           for cat, amount in shelf_allocations.items()
-       }
-       
-       round_robin_cycles = {
-           cat: itertools.cycle(nodes) for cat, nodes in category_to_nodes.items() if nodes
-       }
-       
-       # 4. PASS 2: Zuweisen, Validieren & Speichern (Trade-off: Erneuter Disk I/O)
-       final_inventory_dict = {}
-       for raw_row in stream_bls_data(raw_filepath):
-           enriched = transform_and_enrich(raw_row, sanitizer)
-           if not enriched: continue
-           
-           cat = enriched['category']
-           enriched['node_id'] = next(round_robin_cycles[cat])
-           
-           try:
-               valid_product = ProductModel(**enriched)
-               final_inventory_dict[valid_product.id] = valid_product
-           except ValidationError:
-               pass # Inkonsistente Daten werden aussortiert
-               
-       # 5. MATERIALISIERUNG (Export für API und ML-Training)
-       with open('products_live.json', 'w', encoding='utf-8') as f:
-           json_data = [p.dict() for p in final_inventory_dict.values()]
-           json.dump(json_data, f, ensure_ascii=False, indent=2)
-           
-       with open('ml_training_features.csv', 'w', encoding='utf-8', newline='') as f:
-           writer = csv.writer(f)
-           writer.writerow(['id', 'name', 'category', 'node_id', 'price', 'popularity'])
-           for p in final_inventory_dict.values():
-               writer.writerow([p.id, p.name, p.category, p.node_id, p.price, p.popularity])
-               
-       return final_inventory_dict
+    def run_etl_pipeline(bls_url: str, raw_filepath: str, graph_nodes: List[str]) -> Dict[str, ProductModel]:
+        # 1. EXTRACT
+        BLSDownloader.download_in_chunks(bls_url, raw_filepath)
+        sanitizer = TextSanitizer()
+        
+        # 2. PASS 1: Aggregation der Metadaten (RAM bleibt O(1))
+        category_counts = {}
+        for raw_row in stream_bls_data(raw_filepath):
+            enriched = transform_and_enrich(raw_row, sanitizer)
+            if enriched:
+                category_counts[enriched['category']] = category_counts.get(enriched['category'], 0) + 1
+                
+        # 3. KNOTEN-ALLOKATION
+        shelf_allocations = allocate_shelves(len(graph_nodes), category_counts)
+        node_iterator = iter(graph_nodes)
+        category_to_nodes = {
+            cat: [next(node_iterator) for _ in range(amount)] 
+            for cat, amount in shelf_allocations.items()
+        }
+        
+        round_robin_cycles = {
+            cat: itertools.cycle(nodes) for cat, nodes in category_to_nodes.items() if nodes
+        }
+        
+        # 4. PASS 2: Zuweisen, Validieren & Speichern (Trade-off: Erneuter Disk I/O)
+        final_inventory_dict = {}
+        for raw_row in stream_bls_data(raw_filepath):
+            enriched = transform_and_enrich(raw_row, sanitizer)
+            if not enriched: continue
+            
+            cat = enriched['category']
+            enriched['node_id'] = next(round_robin_cycles[cat])
+            
+            try:
+                valid_product = ProductModel(**enriched)
+                final_inventory_dict[valid_product.id] = valid_product
+            except ValidationError:
+                pass # Inkonsistente Daten werden aussortiert
+                
+        # 5. MATERIALISIERUNG (Export für API und ML-Training)
+        with open('products_live.json', 'w', encoding='utf-8') as f:
+            json_data = [p.dict() for p in final_inventory_dict.values()]
+            json.dump(json_data, f, ensure_ascii=False, indent=2)
+            
+        with open('ml_training_features.csv', 'w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['id', 'name', 'category', 'node_id', 'price', 'popularity'])
+            for p in final_inventory_dict.values():
+                writer.writerow([p.id, p.name, p.category, p.node_id, p.price, p.popularity])
+                
+        return final_inventory_dict
