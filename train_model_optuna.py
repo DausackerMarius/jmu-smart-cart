@@ -48,6 +48,10 @@ def load_and_engineer_data():
     # 5 Minuten kein Log geschrieben wurde, würde das Modell stolpern. 
     # Wir erzwingen hier einen lückenlosen 5-Minuten-Takt (Resampling).
     df = df.set_index('timestamp_dt')
+    
+    # FIX: Entferne doppelte Zeitstempel (behalte den aktuellsten), um den reindex-Crash zu verhindern!
+    df = df[~df.index.duplicated(keep='last')]
+    
     full_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq='5min')
     df = df.reindex(full_range)
 
