@@ -25,12 +25,3 @@ In GitHub Codespaces erscheint nun unten rechts ein Pop-up. Klicke auf "Open in 
 
 Klicke auf die Produkte in deiner Liste, um das Einscannen am Regal zu simulieren. Zwingend vor der Halbzeit des Einkaufs greift das integrierte Warteschlangenmodell ein und weist dir die Kasse mit der geringsten Wartezeit zu. Für die Filialleitung existiert zudem ein verstecktes Admin-Dashboard: Klicke dreimal schnell in die äußerste obere linke Ecke des Grundrisses und gib die PIN ein, um die Live-Telemetrie einzusehen.
 
-## Wissenschaftliche Dokumentation
-
-Die tiefergehende architektonische Dokumentation (Sphinx) liegt im Verzeichnis "docs" bereit. Du kannst sie kompilieren und direkt über einen lokalen Webserver betrachten, indem du diese Befehle ausführst:
-
-    cd docs
-    make html
-    python -m http.server 8000 --directory _build/html
-
-Öffne anschließend einfach den angezeigten Port 8000 im Browser (in Codespaces über den "Ports"-Reiter abrufbar), um die formatierte Dokumentation inklusive aller Architektur-Plots zu lesen.
